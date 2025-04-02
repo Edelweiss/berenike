@@ -1,0 +1,41 @@
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
+
+###> symfony/phpunit-bridge ###
+.phpunit
+.phpunit.result.cache
+/phpunit.xml
+###< symfony/phpunit-bridge ###
+
+.DS_Store
+
+# LEGACY
+/web/bundles/
+/app/bootstrap*
+/app/cache/*
+/app/logs/*
+/vendor/
+/app/config/parameters.ini
+/.project
+/.settings
+*.php~
+/src/Papyrillio/BeehiveBundle/Resources/data/idno.log
+/src/Papyrillio/BeehiveBundle/Resources/data/idno.sh
+/src/Papyrillio/BeehiveBundle/Resources/data/DDB_EpiDoc_XML
+/src/Papyrillio/BeehiveBundle/Resources/data/import.csv
+/src/Papyrillio/BeehiveBundle/Resources/data/idno.xml
+/src/Papyrillio/BeehiveBundle/Resources/data/register.csv
+/src/Papyrillio/BeehiveBundle/Resources/data/register.sql
+
+#NEW
+/.env
+/idp.data
+/data/*.fods
+robots.txt

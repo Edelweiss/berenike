@@ -1,0 +1,38 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                   https://raw.github.com/doctrine/doctrine2/master/doctrine-mapping.xsd">
+    <entity name="App\Entity\Find" table="find">
+        <id name="id" type="integer">
+            <generator strategy="AUTO"/>
+        </id>
+        <field name="trench" type="string" length="512" nullable="true"/>
+        <field name="date" type="date" nullable="true"/>
+        <field name="year" type="integer"/>
+        <field name="month" type="integer" nullable="false"/>
+        <field name="dateRemarks" type="string" length="512" nullable="true"/>
+        <field name="scaRegister" type="string" length="512" nullable="true"/>
+        <field name="object" type="text" length="64" nullable="true"/>
+        <field name="objectNo" type="text" length="64" nullable="true"/>
+        <field name="category" type="text" length="64" nullable="true"/>
+        <field name="categoryNo" type="text" length="64" nullable="true"/>
+        <field name="weight" type="text" length="64" nullable="true"/>
+        <field name="quantity" type="text" length="64" nullable="true"/>
+        <field name="dimensions" type="text" length="512" nullable="true"/>
+        <field name="preservation" type="text" nullable="true"/>
+        <field name="description" type="text" nullable="true"/>
+        <field name="material" type="text" length="64" nullable="true"/>
+        <field name="materialRemarks" type="text" length="512" nullable="true"/>
+        <field name="datingAbsolute" type="text" length="512" nullable="true"/>
+        <field name="typologyReference" type="text" length="512" nullable="true"/>
+        <field name="publications" type="text" length="512" nullable="true"/>
+        <field name="remarks" type="text" nullable="true"/>
+        <field name="rebuildChanges" type="text" nullable="true"/>
+        <field name="created" type="datetime"/>
+        <field name="modified" type="datetime"/>
+        <many-to-one field="bucket" target-entity="Bucket" inversed-by="finds">
+            <join-column name="bucket_id" referenced-column-name="id" nullable="false"/>
+        </many-to-one>
+        <!-- don't forget to init the collection in entity __construct() method -->
+    </entity>
+</doctrine-mapping>

@@ -1,0 +1,19 @@
+{% if locus %}
+  <h4>locus no. {{ locus.id }} – {{ locus.seasonYear }} </h4>
+  <ul style="columns: 3;">
+    <li><b>locus id:</b> {{ locus.id }}</li>
+    <li><b>siteId:</b> {{ locus.siteId }}</li>
+    <li><b>seasonId:</b> {{ locus.seasonId }}</li>
+    <li><b>trenchId:</b> {{ locus.trenchId }}</li>
+    <li><b>number:</b> {{ locus.number }}</li>
+    <li><b>description:</b> {{ locus.description }}</li>
+    <li><b>created:</b> {{ locus.created|date("d.m.Y") }}</li>
+    <li><b>modified:</b> {{ locus.modified|date("d.m.Y") }}</li>
+    <li>
+       <b>{{ locus.buckets|length }} buckets:</b>
+       {% for b in locus.buckets %}
+       <a href="{{ path('PapyrillioBerenike_BucketShow', {'id': b.id}) }}">{{ b.id }}</a>
+       {% endfor %}
+    </li>
+  </ul>
+{% endif %}

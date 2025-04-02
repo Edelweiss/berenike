@@ -1,0 +1,36 @@
+{% if find %}
+  <h4>find no. {{ find.id }} – {{ find.object }} {{ find.material ? '(' ~ find.material ~ ')' : ''}} {{ find.date ? find.date|date('d.m.Y') : find.year }} </h4>
+  <ul style="columns: 3;">
+    <li><b>find id:</b> {{ find.id }}</li>
+    <li><b>trench:</b> {{ find.trench }}</li>
+    <li><b>date:</b> {{ find.date|date("d.m.Y") }}</li>
+    <li><b>year:</b> {{ find.year }}</li>
+    <li><b>month:</b> {{ find.month }}</li>
+    <li><b>dateRemarks:</b> {{ find.dateRemarks }}</li>
+    <li><b>scaRegister:</b> {{ find.scaRegister }}</li>
+    <li><b>object:</b> {{ find.object }}</li>
+    <li><b>objectNo:</b> {{ find.objectNo }}</li>
+    <li><b>category:</b> {{ find.category }}</li>
+    <li><b>categoryNo:</b> {{ find.categoryNo }}</li>
+    <li><b>weight:</b> {{ find.weight }}</li>
+    <li><b>quantity:</b> {{ find.quantity }}</li>
+    <li><b>dimensions:</b> {{ find.dimensions }}</li>
+    <li><b>preservation:</b> {{ find.preservation }}</li>
+    <li><b>description:</b> {{ find.description }}</li>
+    <li><b>material:</b> {{ find.material }}</li>
+    <li><b>materialRemarks:</b> {{ find.materialRemarks }}</li>
+    <li><b>datingAbsolute:</b> {{ find.datingAbsolute }}</li>
+    <li><b>typologyReference:</b> {{ find.typologyReference }}</li>
+    <li><b>publications:</b> {{ find.publications }}</li>
+    <li><b>remarks:</b> {{ find.remarks }}</li>
+    <li><b>rebuildChanges:</b> {{ find.rebuildChanges }}</li>
+    <li><b>created:</b> {{ find.created|date("d.m.Y") }}</li>
+    <li><b>modified:</b> {{ find.modified|date("d.m.Y") }}</li>
+    <li><b>bucket:</b> {{ find.bucket.id }}</li>
+    <li><b>specialists:</b> …</li>
+    <li><b>photographs:</b> …</li>
+    <li><b>drawings:</b> …</li>
+  </ul>
+  <br />
+  {% include 'bucket/_bucket.html.twig' with {'bucket': find.bucket} %}
+{% endif %}

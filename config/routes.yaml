@@ -1,0 +1,28 @@
+PapyrillioBerenike_Home:
+    path:  /
+    controller: App\Controller\HomeController::index
+
+PapyrillioBerenike_FindList:
+    path:  /finds
+    controller: App\Controller\FindController::list
+
+PapyrillioBerenike_FindShow:
+    path:  /find/{id}
+    controller: App\Controller\FindController::show
+
+PapyrillioBerenike_BucketList:
+    path:  /buckets
+    controller: App\Controller\BucketController::list
+
+PapyrillioBerenike_BucketShow:
+    path:  /bucket/{id}
+    controller: App\Controller\BucketController::show
+
+PapyrillioBerenike_LocusList:
+    path:  /locus
+    controller: App\Controller\LocusController::list
+
+PapyrillioBerenike_LocusShow:
+    path:  /locus/{id}
+    controller: App\Controller\LocusController::show
+

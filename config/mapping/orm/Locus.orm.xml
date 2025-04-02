@@ -1,0 +1,28 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                   https://raw.github.com/doctrine/doctrine2/master/doctrine-mapping.xsd">
+    <entity name="App\Entity\Locus" table="locus">
+        <id name="id" type="integer">
+            <generator strategy="AUTO"/>
+        </id>
+        <field name="siteId" type="integer"/>
+        <field name="seasonId" type="integer"/>
+        <field name="trenchId" type="integer"/>
+        <field name="number" type="string" length="64" nullable="false"/>
+        <field name="description" type="string" nullable="true"/>
+        <field name="created" type="datetime"/>
+        <field name="modified" type="datetime"/>
+        <one-to-many field="buckets" target-entity="Bucket" mapped-by="locus">
+            <cascade>
+                <cascade-persist/>
+                <cascade-remove/>
+            </cascade>
+            <order-by>
+                <order-by-field name="dating" direction="ASC" />
+                <order-by-field name="number" direction="ASC" />
+            </order-by>
+        </one-to-many>
+        <!-- don't forget to init the collection in entity __construct() method -->
+    </entity>
+</doctrine-mapping>

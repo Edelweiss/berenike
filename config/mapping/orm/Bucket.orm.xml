@@ -1,0 +1,31 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                   https://raw.github.com/doctrine/doctrine2/master/doctrine-mapping.xsd">
+    <entity name="App\Entity\Bucket" table="bucket">
+        <id name="id" type="integer">
+            <generator strategy="AUTO"/>
+        </id>
+        <field name="number" type="string" length="64" nullable="false"/>
+        <field name="dating" type="string" length="64" nullable="false"/>
+        <field name="remarks" type="text" nullable="true"/>
+        <field name="created" type="datetime"/>
+        <field name="modified" type="datetime"/>
+        <many-to-one field="locus" target-entity="Locus" inversed-by="bucket">
+            <join-column name="locus_id" referenced-column-name="id" nullable="false"/>
+        </many-to-one>
+        <one-to-many field="finds" target-entity="Find" mapped-by="bucket">
+            <cascade>
+                <cascade-persist/>
+                <cascade-remove/>
+            </cascade>
+            <order-by>
+                <order-by-field name="trench" direction="ASC" />
+                <order-by-field name="year" direction="ASC" />
+                <order-by-field name="month" direction="ASC" />
+                <order-by-field name="date" direction="ASC" />
+            </order-by>
+        </one-to-many>
+        <!-- don't forget to init the collection in entity __construct() method -->
+    </entity>
+</doctrine-mapping>
