@@ -18,6 +18,11 @@ LOAD DATA LOCAL INFILE '001_find_specialist.csv' INTO TABLE find_specialist
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' IGNORE 2 LINES
 (find_id, specialist_id, year, speciality);
 
-LOAD DATA LOCAL INFILE '001_image_photo1.csv' INTO TABLE image
+LOAD DATA LOCAL INFILE '001_image.csv' INTO TABLE image
 FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' IGNORE 2 LINES
 (find_id, id, type, size, file, path);
+
+LOAD DATA LOCAL INFILE '001_image_specialist.csv' INTO TABLE image_specialist
+FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' IGNORE 2 LINES
+(image_id, specialist_id, year, speciality);
+
