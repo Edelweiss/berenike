@@ -1,0 +1,39 @@
+Textile Locus numbers (1-35)
+Zum Vergleich: SELECT DISTINCT number, cast(number as unsigned) FROM `locus` ORDER BY cast(number as unsigned) LIMIT 1000 
+FileMaker locus_sheet::locusNo lückenhaft 1 bis 186 und 999 
+--
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11,fehlt bei uns
+12
+13
+14,fehlt bei uns
+15,fehlt bei uns
+16
+17
+18
+19
+20,fehlt bei uns
+21
+22
+23
+24,fehlt bei uns
+25,fehlt bei uns
+26
+27,fehlt bei uns
+28
+29
+30
+31
+32,fehlt bei uns
+33
+34
+35,fehlt bei uns
