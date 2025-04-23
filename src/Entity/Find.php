@@ -1,15 +1,11 @@
 <?php
-
 namespace App\Entity;
-
 use App\Repository\FindRepository;
 use Doctrine\ORM\Mapping as ORM;
-
 use DateTime;
 use Exception;
 
-class Find
-{
+class Find {
     private $id;
     private $trench;
     private $date;
@@ -36,243 +32,198 @@ class Find
     private $created;
     private $modified;
     private $bucket;
+    private $findSpecialists;
     
-    public function __construct()
-    {
-
+    public function __construct() {
+        $this->findSpecialists = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
-    public function setId($id)
-    {
+    public function setId($id) {
         $this->id = $id;
     }
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
-    public function setTrench($trench)
-    {
+    public function setTrench($trench) {
         $this->trench = $trench;
     }
-    public function getTrench()
-    {
+    public function getTrench() {
         return $this->trench;
     }
 
-    public function setDate($date)
-    {
+    public function setDate($date) {
         $this->date = $date;
     }
-    public function getDate()
-    {
+    public function getDate() {
         return $this->date;
     }
 
-    public function setYear($year)
-    {
+    public function setYear($year) {
         $this->year = $year;
     }
-    public function getYear()
-    {
+    public function getYear() {
         return $this->year;
     }
 
-    public function setMonth($month)
-    {
+    public function setMonth($month) {
         $this->month = $month;
     }
-    public function getMonth()
-    {
+    public function getMonth() {
         return $this->month;
     }
 
-    public function setDateRemarks($dateRemarks)
-    {
+    public function setDateRemarks($dateRemarks) {
         $this->dateRemarks = $dateRemarks;
     }
-    public function getDateRemarks()
-    {
+    public function getDateRemarks() {
         return $this->dateRemarks;
     }
 
-    public function setScaRegister($scaRegister)
-    {
+    public function setScaRegister($scaRegister) {
         $this->scaRegister = $scaRegister;
     }
-    public function getScaRegister()
-    {
+    public function getScaRegister() {
         return $this->scaRegister;
     }
 
-    public function setObject($object)
-    {
+    public function setObject($object) {
         $this->object = $object;
     }
-    public function getObject()
-    {
+    public function getObject() {
         return $this->object;
     }
 
-    public function setObjectNo($objectNo)
-    {
+    public function setObjectNo($objectNo) {
         $this->objectNo = $objectNo;
     }
-    public function getObjectNo()
-    {
+    public function getObjectNo() {
         return $this->objectNo;
     }
 
-    public function setCategory($category)
-    {
+    public function setCategory($category) {
         $this->category = $category;
     }
-    public function getCategory()
-    {
+    public function getCategory() {
         return $this->category;
     }
 
-    public function setCategoryNo($categoryNo)
-    {
+    public function setCategoryNo($categoryNo) {
         $this->categoryNo = $categoryNo;
     }
-    public function getCategoryNo()
-    {
+    public function getCategoryNo() {
         return $this->categoryNo;
     }
 
-    public function setWeight($weight)
-    {
+    public function setWeight($weight) {
         $this->weight = $weight;
     }
-    public function getWeight()
-    {
+    public function getWeight() {
         return $this->weight;
     }
 
-    public function setQuantity($quantity)
-    {
+    public function setQuantity($quantity) {
         $this->quantity = $quantity;
     }
-    public function getQuantity()
-    {
+    public function getQuantity() {
         return $this->quantity;
     }
 
-    public function setDimensions($dimensions)
-    {
+    public function setDimensions($dimensions) {
         $this->dimensions = $dimensions;
     }
-    public function getDimensions()
-    {
+    public function getDimensions() {
         return $this->dimensions;
     }
 
-    public function setPreservation($preservation)
-    {
+    public function setPreservation($preservation) {
         $this->preservation = $preservation;
     }
-    public function getPreservation()
-    {
+    public function getPreservation() {
         return $this->preservation;
     }
 
-    public function setDescription($description)
-    {
+    public function setDescription($description) {
         $this->description = $description;
     }
-    public function getDescription()
-    {
+    public function getDescription() {
         return $this->description;
     }
 
-    public function setMaterial($material)
-    {
+    public function setMaterial($material) {
         $this->material = $material;
     }
-    public function getMaterial()
-    {
+    public function getMaterial() {
         return $this->material;
     }
 
-    public function setMaterialRemarks($materialRemarks)
-    {
+    public function setMaterialRemarks($materialRemarks) {
         $this->materialRemarks = $materialRemarks;
     }
-    public function getMaterialRemarks()
-    {
+    public function getMaterialRemarks() {
         return $this->materialRemarks;
     }
 
-    public function setDatingAbsolute($datingAbsolute)
-    {
+    public function setDatingAbsolute($datingAbsolute) {
         $this->datingAbsolute = $datingAbsolute;
     }
-    public function getDatingAbsolute()
-    {
+    public function getDatingAbsolute() {
         return $this->datingAbsolute;
     }
 
-    public function setTypologyReference($typologyReference)
-    {
+    public function setTypologyReference($typologyReference) {
         $this->typologyReference = $typologyReference;
     }
-    public function getTypologyReference()
-    {
+    public function getTypologyReference() {
         return $this->typologyReference;
     }
 
-    public function setPublications($publications)
-    {
+    public function setPublications($publications) {
         $this->publications = $publications;
     }
-    public function getPublications()
-    {
+    public function getPublications() {
         return $this->publications;
     }
 
-    public function setRemarks($remarks)
-    {
+    public function setRemarks($remarks) {
         $this->remarks = $remarks;
     }
-    public function getRemarks()
-    {
+    public function getRemarks() {
         return $this->remarks;
     }
 
-    public function setRebuildChanges($rebuildChanges)
-    {
+    public function setRebuildChanges($rebuildChanges) {
         $this->rebuildChanges = $rebuildChanges;
     }
-    public function getRebuildChanges()
-    {
+    public function getRebuildChanges() {
         return $this->rebuildChanges;
     }
 
-    public function setCreated($created)
-    {
+    public function setCreated($created) {
         $this->created = $created;
     }
-    public function getCreated()
-    {
+    public function getCreated() {
         return $this->created;
     }
 
-    public function setModified($modified)
-    {
+    public function setModified($modified) {
         $this->modified = $modified;
     }
-    public function getModified()
-    {
+    public function getModified() {
         return $this->modified;
     }
 
-    public function setBucket(\App\Entity\Bucket $bucket)
-    {
+    public function setBucket(\App\Entity\Bucket $bucket){
         $this->bucket = bucket;
     }
-    public function getBucket()
-    {
+    public function getBucket(){
         return $this->bucket;
-    }    
+    }
+
+    public function addFindSpecialist(\App\Entity\addFindSpecialist $findSpecialist) {
+        $this->findSpecialists[] = $findSpecialist;
+    }
+    public function getFindSpecialists() {
+        return $this->findSpecialists;
+    }
 }

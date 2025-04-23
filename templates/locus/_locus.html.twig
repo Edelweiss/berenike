@@ -10,7 +10,7 @@
     <li><b>created:</b> {{ locus.created|date("d.m.Y") }}</li>
     <li><b>modified:</b> {{ locus.modified|date("d.m.Y") }}</li>
     <li>
-       <b>{{ locus.buckets|length }} buckets:</b>
+       <b>{{ locus.buckets|length }} bucket{% if locus.buckets|length > 1 %}s{% endif %}:</b>
        {% for b in locus.buckets %}
        <a href="{{ path('PapyrillioBerenike_BucketShow', {'id': b.id}) }}">{{ b.id }}</a>
        {% endfor %}

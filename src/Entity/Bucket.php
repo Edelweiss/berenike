@@ -4,9 +4,7 @@ namespace App\Entity;
 use App\Repository\BucketRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-class Bucket
-{
-
+class Bucket {
     private $id;
     private $number;
     private $dating;
@@ -77,7 +75,7 @@ class Bucket
 
     public function setLocus(\App\Entity\Locus $locus)
     {
-        $this->locus = locus;
+        $this->locus = $locus;
     }
     public function getLocus()
     {

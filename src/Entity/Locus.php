@@ -5,8 +5,7 @@ namespace App\Entity;
 use App\Repository\LocusRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-class Locus
-{
+class Locus {
     private $id;
     private $siteId;
     private $seasonId;

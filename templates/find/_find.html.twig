@@ -27,7 +27,13 @@
     <li><b>created:</b> {{ find.created|date("d.m.Y") }}</li>
     <li><b>modified:</b> {{ find.modified|date("d.m.Y") }}</li>
     <li><b>bucket:</b> {{ find.bucket.id }}</li>
-    <li><b>specialists:</b> …</li>
+    <li><b>specialists:</b>
+    <ul>
+    {% for fs in find.findSpecialists %}
+      <li>{{ fs.specialist.name }}{% if fs.year %} {{ fs.year }}{% endif %} {% if fs.speciality %} ({{ fs.speciality }}){% endif %}</li>
+    {% endfor %}
+    </ul>
+    </li>
     <li><b>photographs:</b> …</li>
     <li><b>drawings:</b> …</li>
   </ul>
