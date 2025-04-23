@@ -1,10 +1,10 @@
 {% if locus %}
-  <h4>locus no. {{ locus.id }} – {{ locus.seasonYear }} </h4>
+  <h4>locus {{ locus.excavation.site }}{{ locus.excavation.season }}-{{ locus.excavation.trench }}/{{ locus.number }} (id {{ locus.id }}) </h4>
   <ul style="columns: 3;">
     <li><b>locus id:</b> {{ locus.id }}</li>
-    <li><b>siteId:</b> {{ locus.siteId }}</li>
-    <li><b>seasonId:</b> {{ locus.seasonId }}</li>
-    <li><b>trenchId:</b> {{ locus.trenchId }}</li>
+    <li><b>siteId:</b> {{ locus.excavation.site }}</li>
+    <li><b>seasonId:</b> {{ locus.excavation.season }}</li>
+    <li><b>trenchId:</b> {{ locus.excavation.trench }}</li>
     <li><b>number:</b> {{ locus.number }}</li>
     <li><b>description:</b> {{ locus.description }}</li>
     <li><b>created:</b> {{ locus.created|date("d.m.Y") }}</li>

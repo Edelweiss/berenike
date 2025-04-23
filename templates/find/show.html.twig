@@ -1,5 +1,10 @@
 {% extends 'frontend.html.twig' %}
 
+{% block top %}
+  <span title="site">{{ find.bucket.locus.excavation.site }}</span><span title="season">{{ find.bucket.locus.excavation.season }}</span>-<span title="trench">{{ find.bucket.locus.excavation.trench }}</span>/<span title="locus">{{ find.bucket.locus.number }}</span>/<span title="bucket">{{ find.bucket.number }}</span>
+  <span title="objectNo">{{ find.objectNo }}</span>
+{% endblock %}
+
 {% block body %}
   {% include 'find/_find.html.twig' with {'find': find} %}
 {% endblock %}

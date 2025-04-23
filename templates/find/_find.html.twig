@@ -1,8 +1,8 @@
 {% if find %}
-  <h4>find no. {{ find.id }} – {{ find.object }} {{ find.material ? '(' ~ find.material ~ ')' : ''}} {{ find.date ? find.date|date('d.m.Y') : find.year }} </h4>
+  <h4>{{ find.object }} {{ find.material ? '(' ~ find.material ~ ')' : ''}} {{ find.date ? find.date|date('d.m.Y') : find.year }} (id {{ find.id }})</h4>
   <ul style="columns: 3;">
     <li><b>find id:</b> {{ find.id }}</li>
-    <li><b>trench:</b> {{ find.trench }}</li>
+    <li><b>trench":</b> {{ find.trench }}</li>
     <li><b>date:</b> {{ find.date|date("d.m.Y") }}</li>
     <li><b>year:</b> {{ find.year }}</li>
     <li><b>month:</b> {{ find.month }}</li>

@@ -1,5 +1,9 @@
 {% extends 'frontend.html.twig' %}
 
+{% block top %}
+  <span title="site">PB {{ bucket.number }}</span>
+{% endblock %}
+
 {% block body %}
   {% include 'bucket/_bucket.html.twig' with {'bucket': bucket} %}
 {% endblock %}
