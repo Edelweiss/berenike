@@ -1,5 +1,5 @@
 {% if bucket %}
-  <h4>bucket no. {{ bucket.id }}</h4>
+  <h4>bucket {{ bucket.number }} (id {{ bucket.id }})</h4>
     <ul style="columns: 3;">
       <li><b>bucket id:</b> {{ bucket.id }}</li>
       <li><b>number:</b> {{ bucket.number }}</li>
@@ -9,7 +9,7 @@
       <li><b>modified:</b> {{ bucket.modified|date("d.m.Y") }}</li>
       <li><b>locus:</b> {{ bucket.locus.id }}</li>
       <li>
-          <b>{{ bucket.finds|length }} finds:</b>
+          <b>{{ bucket.finds|length }} find{% if bucket.finds|length > 1 %}s{% endif %}:</b>
          {% for f in bucket.finds %}
          <a href="{{ path('PapyrillioBerenike_FindShow', {'id': f.id}) }}">{{ f.id }}</a>
          {% endfor %}

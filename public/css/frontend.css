@@ -136,16 +136,9 @@ div#navigation {
     #background-color: lightblue;
 }
 
-div#alpha {
-    #background-color: lightgreen;
-}
-
-div#beta {
-    #background-color: green;
-}
-
-div#gamma {
-    #background-color: darkgreen;
+div#top {
+    background-color: lightgreen;
+    position: auto;
 }
 
 div#logo {
@@ -161,24 +154,11 @@ div#subHeader {
     #background-color: black;
 }
 
-div#alpha h1 {
+div#top h1 {
     margin: 0 0 0 200px;
-    #background-color: red;
+    background-color: red;
+    margin: 0;
 }
-
-div#beta h2 {
-    font-size: 1.2em;
-    margin: 0 0 0 180px;
-    font-weight: bold;
-    #background-color: orange;
-}
-
-div#gamma p {
-    font-size: 1em;
-    margin: 0 0 0 160px;
-    #background-color: yellow;
-}
-
 
 /* MAIN CONTENT */
 

@@ -20,21 +20,20 @@
 <div id="container" class="container_12">
 
 	<div id="header" class="container_12">
-		<div id="subHeader" class="grid_10">
-			<div id="navigation" class="grid_10">
+		<!-- obere linke Ecke -->
+    <div id="logo" class="grid_3">&nbsp;</div>
+    <div id="subHeader" class="grid_9">
+			<div id="navigation" class="grid_9">
+        <a href>Admin</a>
+        <a href>Login</a>
+        <a href>Contact</a>
       </div>
-			<div id="alpha" class="grid_10">
-        <h1></h1>
-			</div>
-			<div id="beta" class="grid_10">
-        <h2>{% block beta %}{% endblock %}</h2>
-			</div>
-			<div id="gamma" class="grid_10">
-        <p>{% block gamma %}{% endblock %}</p>
+			<div id="top" class="grid_9">
+        <h1>{% block top %}top{% endblock %}</h1>
 			</div>
 		</div>
-		<!-- obere linke Ecke -->
-		<div id="logo" class="grid_2">&nbsp;</div>
+		
+		
 	</div>
 
 	<div id="left" class="grid_2">
@@ -63,16 +62,8 @@
 		</div>
 	</div>
 
-	<div id="content" class="grid_9">
+	<div id="content" class="grid_10">
 		{% block body %}{% endblock %}
-	</div>
-
-	<div id="right" class="grid_1">
-   <!-- rechte Minileiste -->
-    <div id="righty" class="grid_1">
-      <h5>{% block righty_title %}{% endblock %}</h5>
-      {% block righty %}{% endblock %}
-		</div>
 	</div>
 </div>
 

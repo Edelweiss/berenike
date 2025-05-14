@@ -33,6 +33,15 @@
         <many-to-one field="bucket" target-entity="Bucket" inversed-by="finds">
             <join-column name="bucket_id" referenced-column-name="id" nullable="false"/>
         </many-to-one>
+        <one-to-many field="findSpecialists" target-entity="FindSpecialist" mapped-by="find">
+            <cascade>
+                <cascade-persist/>
+                <cascade-remove/>
+            </cascade>
+            <order-by>
+                <order-by-field name="year" direction="ASC" />
+            </order-by>
+        </one-to-many>
         <!-- don't forget to init the collection in entity __construct() method -->
     </entity>
 </doctrine-mapping>
