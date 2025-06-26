@@ -86,9 +86,6 @@ class Locus {
     public function addBucket(\App\Entity\Bucket $bucket) {
         $this->buckets[] = bucket;
     }
-    public function getBucket() {
-        return $this->buckets;
-    }
 
     public function setExcavation(\App\Entity\Excavation $excavation) {
         $this->excavation = $excavation;
