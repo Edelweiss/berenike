@@ -17,7 +17,7 @@ class FindController extends BerenikeController{
     if ($this->request->getMethod() == 'POST') {
 
       // REQUEST PARAMETERS
-      
+
       $limit         = $this->getParameter('rows');
       $page          = $this->getParameter('page');
       $offset        = $page * $limit - $limit;
@@ -28,7 +28,7 @@ class FindController extends BerenikeController{
 
       // SELECT
 
-      $visibleColumns = ['title'];
+      $visibleColumns = ['object'];
       foreach($visible as $column){
         if($column != ''){
           $visibleColumns[] = $column;
@@ -42,17 +42,14 @@ class FindController extends BerenikeController{
       // ODER BY
 
       $orderBy = '';
-      if(in_array($sort, ['source', 'text', 'position', 'description', 'creator', 'created', 'status', 'compilationPage', 'compilationIndex'])){
-        $orderBy = ' ORDER BY c.' . $sort . ' ' . $sortDirection;
-      }
-      if(in_array($sort, ['tm', 'hgv', 'ddb'])){
-        $orderBy = ' ORDER BY r.' . $sort . ' ' . $sortDirection;
-      }
-      if($sort == 'edition'){
-        $orderBy = ' ORDER BY e.sort ' . $sortDirection .  ', e.title ' . $sortDirection;
-      }
-      if($sort == 'compilation'){
-        $orderBy = ' ORDER BY c2.volume ' . $sortDirection . ', c2.fascicle ' . $sortDirection;
+      if(in_array($sort, ['year', 'object', 'category', 'created'])){
+        $orderBy = ' ORDER BY f.' . $sort . ' ' . $sortDirection;
+      } elseif($sort === 'trench'){
+        $orderBy = ' ORDER BY e.' . $sort . ' ' . $sortDirection;
+      } elseif($sort === 'locus'){
+        $orderBy = ' ORDER BY l.number ' . $sortDirection;
+      } elseif($sort === 'bucket'){
+        $orderBy = ' ORDER BY b.number ' . $sortDirection;
       }
 
       // WHERE WITH
@@ -63,53 +60,41 @@ class FindController extends BerenikeController{
       if($this->getParameter('_search') == 'true'){
         $prefix = ' WHERE ';
 
-        foreach(['source', 'text', 'position', 'description', 'creator', 'created', 'status', 'compilationPage', 'compilationIndex'] as $field){
+        foreach(['year', 'object', 'category', 'created'] as $field){
           if(strlen($this->getParameter($field))){
-            $where .= $prefix . 'c.' . $field . ' LIKE :' . $field;
+            $where .= $prefix . 'f.' . $field . ' LIKE :' . $field;
             $parameters[$field] = '%' . $this->getParameter($field) . '%';
             $prefix = ' AND ';
           }
         }
 
-        foreach(['tm', 'hgv', 'ddb'] as $field){
+        foreach(['trench'] as $field){
           if(strlen($this->getParameter($field))){
-            $where .= $prefix . 'r.' . $field . ' LIKE :' . $field;
+            $where .= $prefix . 'e.' . $field . ' LIKE :' . $field;
             $parameters[$field] = '%' . $this->getParameter($field) . '%';
             $prefix = ' AND ';
           }
         }
 
-        if($this->getParameter('edition')){
-          $where .= $prefix . '(e.title LIKE :edition OR e.sort LIKE :edition)';
-          $parameters['edition'] = '%' . $this->getParameter('edition') . '%';
+        if($this->getParameter('locus')){
+          $where .= $prefix . 'l.number = :locus';
+          $parameters['locus'] = '%' . $this->getParameter('locus') . '%';
           $prefix = ' AND ';
         }
 
-        if($this->getParameter('compilation')){
-          $where .= $prefix . '(c2.title = :compilation OR c2.volume = :compilation)';
-          $parameters['compilation'] = $this->getParameter('compilation');
+        if($this->getParameter('bucket')){
+          $where .= $prefix . 'b.number = :bucket';
+          $parameters['bucket'] = '%' . $this->getParameter('bucket') . '%';
           $prefix = ' AND ';
-        }
-
-        $prefix = ' WITH ';
-        foreach(['task_bl', 'task_tm', 'task_hgv', 'task_ddb', 'task_apis', 'task_biblio'] as $field){
-          if(strlen($this->getParameter($field))){
-            $with = $prefix . ' (t.category = \'' . str_replace('task_', '', $field) . '\' AND t.description LIKE \'%' . ($this->getParameter($field) != '*' ? $this->getParameter($field) : '') . '%\')';
-            //$key =  ucfirst(str_replace('task_', '', $field));
-            //$with = $prefix . ' (t.category = :category' . $key . ' AND t.description LIKE :description' . $key . ')'; 
-            //$parameters['category' . $key] = strtolower($field);
-            //$parameters['description' . $key] = '%' . $this->getParameter($field) . '%';
-            $prefix = ' OR ';
-          }
         }
       }
 
       // LIMIT
 
       $query = $entityManager->createQuery('
-        SELECT count(DISTINCT c.id) FROM App\Entity\Correction c
-        LEFT JOIN c.registerEntries r LEFT JOIN c.tasks t JOIN c.edition e JOIN c.compilation c2
-        ' . $with . ' ' . $where
+        SELECT count(DISTINCT f.id) FROM App\Entity\Find f
+        LEFT JOIN f.bucket b LEFT JOIN b.locus l JOIN l.excavation e
+        ' . $where
       );
       $query->setParameters($parameters);
       $count = $query->getSingleScalarResult();
@@ -117,29 +102,26 @@ class FindController extends BerenikeController{
 
       // PAGINATION
 
-      if(!$print){
-        $query = $entityManager->createQuery('
-          SELECT DISTINCT c.id FROM App\Entity\Correction c
-          LEFT JOIN c.registerEntries r LEFT JOIN c.tasks t JOIN c.edition e JOIN c.compilation c2
-          ' . $with . ' ' . $where . ' ' . $orderBy
-        );
-        $query->setParameters($parameters);
-        $query->setFirstResult($offset)->setMaxResults($limit);
+      $query = $entityManager->createQuery('
+        SELECT DISTINCT f.id FROM App\Entity\Find f
+        LEFT JOIN f.bucket b LEFT JOIN b.locus l JOIN l.excavation e
+        ' . $where . ' ' . $orderBy
+      );
+      $query->setParameters($parameters);
+      $query->setFirstResult($offset)->setMaxResults($limit);
 
-        $result = $query->getScalarResult();
-        $ids = [];
-        foreach ($result as $row) {
-          $ids[] = $row['id'];
-        }
-        if($where === ''){
-          $where = ' WHERE ';
-        } else {
-          $where .= ' AND ';
-        }
-        $where .= 'c.id IN (:id)';
-        $parameters['id'] = $ids;
-
+      $result = $query->getScalarResult();
+      $ids = [];
+      foreach ($result as $row) {
+        $ids[] = $row['id'];
       }
+      if($where === ''){
+        $where = ' WHERE ';
+      } else {
+        $where .= ' AND ';
+      }
+      $where .= 'f.id IN (:id)';
+      $parameters['id'] = $ids;
 
       $this->logger->info('limit: ' . $limit);
       $this->logger->info('page: ' . $page);
@@ -151,24 +133,16 @@ class FindController extends BerenikeController{
       // QUERY
 
       $query = $entityManager->createQuery('
-        SELECT e, c, t FROM App\Entity\Correction c
-        LEFT JOIN c.registerEntries r LEFT JOIN c.tasks t JOIN c.edition e JOIN c.compilation c2 ' . $with . ' ' . $where . ' ' . $orderBy
+        SELECT f, b, l, e FROM App\Entity\Find f
+        LEFT JOIN f.bucket b LEFT JOIN b.locus l JOIN l.excavation e ' . $where . ' ' . $orderBy
       );
       $query->setParameters($parameters);
 
-      $corrections = $query->getResult();
+      $finds = $query->getResult();
 
-      if($print){
-        return $this->render('correction/print.html.twig', ['corrections' => $corrections, 'visible' => $visible]);
-      } else {
-        return $this->render('correction/list.xml.twig', ['corrections' => $corrections, 'count' => $count, 'totalPages' => $totalPages, 'page' => $page]);
-      }
+      return $this->render('find/list.xml.twig', ['finds' => $finds, 'count' => $count, 'totalPages' => $totalPages, 'page' => $page]);
     } else {
-      if($print){
-        return $this->render('correction/print.html.twig', ['corrections' => $corrections, 'visible' => []]);
-      } else {
-        return $this->render('correction/list.html.twig', ['corrections' => $corrections]);
-      }
+      return $this->render('find/list.html.twig', ['finds' => $finds]);
     }
   }
 

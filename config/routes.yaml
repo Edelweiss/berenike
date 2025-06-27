@@ -19,10 +19,18 @@ PapyrillioBerenike_BucketShow:
     controller: App\Controller\BucketController::show
 
 PapyrillioBerenike_LocusList:
-    path:  /locus
+    path:  /loci
     controller: App\Controller\LocusController::list
 
 PapyrillioBerenike_LocusShow:
     path:  /locus/{id}
     controller: App\Controller\LocusController::show
+
+PapyrillioBerenike_TrenchList:
+    path:  /trenches
+    controller: App\Controller\ExcavationController::list
+
+PapyrillioBerenike_TrenchShow:
+    path:  /trench/{id}
+    controller: App\Controller\ExcavationController::show
 
