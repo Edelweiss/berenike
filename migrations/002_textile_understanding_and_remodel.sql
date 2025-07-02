@@ -342,12 +342,15 @@ LIMIT 1000
 UPDATE `textile` t LEFT JOIN textile_pottery_bucket b ON b.Textile_ID13 = t.Textile_ID LEFT JOIN textile_locus l ON l.Textile_ID12 = t.Textile_ID LEFT JOIN textile_trench tt ON tt.Textile_ID11 = t.Textile_ID
 SET b.tmp_id = Concat(Pottery_bucket_number1, '_', Locus_number1, '_', tt.Trench_number1)
 
--- Buckets mit Id generieren
+-- Buckets mit Id generieren in Textiles (1), mit bucket, locus und excavation mappen in Finds (2)
 
-
-SELECT Textile_ID13 AS textile_id, b.id as bucket_id, b.tmp_id as bucket_tmp, Pottery_bucket_number as bucket_number
-FROM textile_pottery_bucket b LEFT JOIN pottery_bucket ON Pottery_bucket_number = Pottery_bucket_number1
+-- (1)
+SELECT Textile_ID13 AS textile_id, b.id as bucket_id, b.tmp_id as bucket_tmp, b.Pottery_bucket_number1 as bucket_number
+FROM textile_pottery_bucket b
 ORDER BY tmp_id
 LIMIT 1000
-
-
+-- (2) siehe View v_bucket_locus_trench
+SELECT b.id as bucket_id, b.number as bucket_number, l.id as locus_id, l.number as locus_number, e.id as excavation_id, e.number as trench_number
+FROM `bucket` b LEFT JOIN locus l ON b.locus_id = l.id LEFT JOIN excavation e ON l.excavation_id = e.id
+ORDER BY b.number, l.number, e.number
+LIMIT 1000
