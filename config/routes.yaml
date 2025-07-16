@@ -26,11 +26,11 @@ PapyrillioBerenike_LocusShow:
     path:  /locus/{id}
     controller: App\Controller\LocusController::show
 
-PapyrillioBerenike_TrenchList:
+PapyrillioBerenike_ExcavationList:
     path:  /trenches
     controller: App\Controller\ExcavationController::list
 
-PapyrillioBerenike_TrenchShow:
+PapyrillioBerenike_ExcavationShow:
     path:  /trench/{id}
     controller: App\Controller\ExcavationController::show
 
