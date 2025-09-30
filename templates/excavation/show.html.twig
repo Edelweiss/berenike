@@ -1,0 +1,64 @@
+{% extends 'frontend.html.twig' %}
+
+{% block title %}Trench {{ excavation.trench }} - Berenike{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h1>Trench {{ excavation.trench }}</h1>
+        
+        <div class="ui-widget">
+            <table class="ui-widget-content">
+                <tbody>
+                    <tr>
+                        <th class="ui-widget-header">Site</th>
+                        <td>{{ excavation.site }}</td>
+                    </tr>
+                    <tr>
+                        <th class="ui-widget-header">Season</th>
+                        <td>{{ excavation.season }}</td>
+                    </tr>
+                    <tr>
+                        <th class="ui-widget-header">Year</th>
+                        <td>{{ excavation.year }}</td>
+                    </tr>
+                    <tr>
+                        <th class="ui-widget-header">Context</th>
+                        <td>{{ excavation.context }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            {% if excavation.loci|length > 0 %}
+                <h2>Loci</h2>
+                <table class="ui-widget-content">
+                    <thead>
+                        <tr class="ui-widget-header">
+                            <th>Locus Number</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for locus in excavation.loci %}
+                        <tr>
+                            <td>{{ locus.number }}</td>
+                            <td>
+                                <a href="{{ path('PapyrillioBerenike_LocusShow', {'id': locus.id}) }}" 
+                                   class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+                                    <span class="ui-button-text">View</span>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </div>
+
+        <div class="actions">
+            <a href="{{ path('PapyrillioBerenike_ExcavationList') }}" 
+               class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+                <span class="ui-button-text">Back to Trenches</span>
+            </a>
+        </div>
+    </div>
+{% endblock %}

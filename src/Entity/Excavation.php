@@ -5,6 +5,9 @@ namespace App\Entity;
 use App\Repository\ExcavationRepository;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * @ORM\Entity(repositoryClass=ExcavationRepository::class)
+ */
 class Excavation {
     private $id;
     private $site;

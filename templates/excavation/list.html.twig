@@ -1,0 +1,39 @@
+{% extends 'frontend.html.twig' %}
+
+{% block title %}Trenches - Berenike{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h1>Trenches</h1>
+        
+        <table class="ui-widget ui-widget-content">
+            <thead>
+                <tr class="ui-widget-header">
+                    <th>Site</th>
+                    <th>Season</th>
+                    <th>Trench</th>
+                    <th>Year</th>
+                    <th>Context</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for excavation in excavations %}
+                <tr>
+                    <td>{{ excavation.site }}</td>
+                    <td>{{ excavation.season }}</td>
+                    <td>{{ excavation.trench }}</td>
+                    <td>{{ excavation.year }}</td>
+                    <td>{{ excavation.context }}</td>
+                    <td>
+                        <a href="{{ path('PapyrillioBerenike_ExcavationShow', {'id': excavation.id}) }}" 
+                           class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+                            <span class="ui-button-text">View</span>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
