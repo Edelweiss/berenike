@@ -5,6 +5,9 @@ namespace App\Entity;
 use App\Repository\LocusRepository;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * @ORM\Entity(repositoryClass=LocusRepository::class)
+ */
 class Locus {
     private $id;
     private $site;

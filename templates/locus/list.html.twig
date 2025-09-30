@@ -1,0 +1,39 @@
+{% extends 'frontend.html.twig' %}
+
+{% block title %}Loci - Berenike{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h1>Loci</h1>
+        
+        <table class="ui-widget ui-widget-content">
+            <thead>
+                <tr class="ui-widget-header">
+                    <th>Site</th>
+                    <th>Season</th>
+                    <th>Trench</th>
+                    <th>Number</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for locus in loci %}
+                <tr>
+                    <td>{{ locus.site }}</td>
+                    <td>{{ locus.season }}</td>
+                    <td>{{ locus.trench }}</td>
+                    <td>{{ locus.number }}</td>
+                    <td>{{ locus.description }}</td>
+                    <td>
+                        <a href="{{ path('PapyrillioBerenike_LocusShow', {'id': locus.id}) }}" 
+                           class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+                            <span class="ui-button-text">View</span>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock body %}
