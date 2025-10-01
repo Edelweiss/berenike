@@ -2,6 +2,7 @@
 
 {% block stylesheets %}
   {{ parent() }}
+  <link href="{{ asset('css/jquery/pepper-grinder/jquery-ui.css') }}" type="text/css" rel="stylesheet" />
   <link href="{{ asset('css/jquery/ui.jqgrid.css') }}" type="text/css" rel="stylesheet" />
 {% endblock %}
 
@@ -46,7 +47,7 @@ $(function(){
       'Publications', 'Remarks', 'Created', 'Modified', 'Actions'
     ],
     colModel :[ 
-      {name:'trench',            index:'trench',            width:55, resizable: false, sortable: false},
+      {name:'trench',            index:'trench',            width:55, resizable: false},
       {name:'locus',             index:'locus',             width:55},
       {name:'bucket',            index:'bucket',            width:55},
       {name:'date',              index:'date',              width:80, formatter:'date'},
