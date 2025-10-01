@@ -156,7 +156,7 @@ div#subHeader {
 
 div#top h1 {
     margin: 0 0 0 200px;
-    background-color: red;
+    background-color: #f5f2e7;  /* Slightly darker than #fdfaef */
     margin: 0;
 }
 
