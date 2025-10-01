@@ -8,10 +8,28 @@
       <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_ExcavationShow', {'id': find.bucket.locus.excavation.id}) }}" title="Trench Number {{ find.bucket.locus.excavation.trench }} {{ find.bucket.locus.excavation.season }}">{{ find.bucket.locus.excavation.trench }}</a>]]></cell>
       <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_LocusShow', {'id': find.bucket.locus.id}) }}" title="Locus Number {{ find.bucket.locus.number }}">{{ find.bucket.locus.number }}</a>]]></cell>
       <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_BucketShow', {'id': find.bucket.id}) }}" title="Bucket Number {{ find.bucket.number }}">{{ find.bucket.number }}</a>]]></cell>
+      <cell>{{ find.date ? find.date|date('Y-m-d') : '' }}</cell>
       <cell>{{ find.year }}</cell>
+      <cell>{{ find.month }}</cell>
+      <cell>{{ find.dateRemarks }}</cell>
+      <cell>{{ find.scaRegister }}</cell>
       <cell>{{ find.object }}</cell>
+      <cell>{{ find.objectNo }}</cell>
       <cell>{{ find.category }}</cell>
-      <cell>{{ find.created.format('d.m.Y H:i') }}</cell>
+      <cell>{{ find.categoryNo }}</cell>
+      <cell>{{ find.weight }}</cell>
+      <cell>{{ find.quantity }}</cell>
+      <cell>{{ find.dimensions }}</cell>
+      <cell>{{ find.preservation }}</cell>
+      <cell>{{ find.description }}</cell>
+      <cell>{{ find.material }}</cell>
+      <cell>{{ find.materialRemarks }}</cell>
+      <cell>{{ find.datingAbsolute }}</cell>
+      <cell>{{ find.typologyReference }}</cell>
+      <cell>{{ find.publications }}</cell>
+      <cell>{{ find.remarks }}</cell>
+      <cell>{{ find.created ? find.created|date('d.m.Y H:i') : '' }}</cell>
+      <cell>{{ find.modified ? find.modified|date('d.m.Y H:i') : '' }}</cell>
       <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_FindShow', {'id': find.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">View</span></a>]]></cell>
     </row>
   {% endfor %}

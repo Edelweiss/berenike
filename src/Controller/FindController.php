@@ -148,8 +148,11 @@ class FindController extends BerenikeController
       // QUERY
 
       $query = $this->entityManager->createQuery('
-        SELECT f, b, l, e FROM App\Entity\Find f
-        LEFT JOIN f.bucket b LEFT JOIN b.locus l JOIN l.excavation e ' . $where . ' ' . $orderBy
+        SELECT f, b, l, e, fs FROM App\Entity\Find f
+        LEFT JOIN f.bucket b 
+        LEFT JOIN b.locus l 
+        JOIN l.excavation e
+        LEFT JOIN f.findSpecialists fs ' . $where . ' ' . $orderBy
       );
       $query->setParameters($parameters);
 
