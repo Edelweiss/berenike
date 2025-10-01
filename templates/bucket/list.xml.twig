@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rows>
+    <page>{{ page }}</page>
+    <total>{{ totalPages }}</total>
+    <records>{{ count }}</records>
+    {% for bucket in buckets %}
+    <row id="{{ bucket.id }}">
+        <cell>{{ bucket.number }}</cell>
+        <cell>{{ bucket.dating }}</cell>
+        <cell>{% if bucket.locus %}{{ bucket.locus.number }}{% endif %}</cell>
+        <cell>{{ bucket.remarks }}</cell>
+        <cell>{{ bucket.created|date('Y-m-d H:i:s') }}</cell>
+        <cell>{{ bucket.modified|date('Y-m-d H:i:s') }}</cell>
+        <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_BucketShow', {'id': bucket.id}) }}" title="Bucket Number {{ bucket.number }}">View Bucket {{ bucket.number }}</a>]]></cell>
+    </row>
+    {% endfor %}
+</rows>

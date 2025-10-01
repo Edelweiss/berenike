@@ -1,0 +1,72 @@
+{% extends 'frontend.html.twig' %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <link href="{{ asset('css/jquery/ui.jqgrid.css') }}" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block top %}
+  Bucket-Liste
+{% endblock %}
+
+{% block body %}
+
+  <table id="list"></table>
+  <div id="pager"></div>
+  
+  <br />
+  
+  <button id="columnsHideShow" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false">
+    <span class="ui-button-text">hide/show columns</span>
+  </button>
+
+  <button id="print" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false">
+    <span class="ui-button-text">print</span>
+  </button>
+
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script src="{{ asset('js/jquery/i18n/grid.locale-en.js') }}" type="text/javascript"></script>
+  <script src="{{ asset('js/jquery/jquery-jqGrid.min.js') }}" type="text/javascript"></script>
+  <script src="{{ asset('js/correctionList.js') }}" type="text/javascript"></script>
+  <script type="text/javascript">
+
+$(function(){
+  $('#list').jqGrid({
+    url: '{{ path('PapyrillioBerenike_BucketList') }}',
+    datatype: 'xml',
+    mtype: 'POST',
+    colNames:['Number', 'Dating', 'Locus', 'Remarks', 'Created', 'Modified'],
+    colModel :[ 
+      {name:'number',    index:'number',    width:55},
+      {name:'dating',    index:'dating',    width:55},
+      {name:'locus',     index:'locus',     width:55},
+      {name:'remarks',   index:'remarks',   width:128},
+      {name:'created',   index:'created',   width:55, hidden: true},
+      {name:'modified',  index:'modified',  width:55, hidden: true}
+    ],
+    pager: '#pager',
+    rowNum:100,
+    height:'auto',
+    rowList:[10,20,50,100],
+    sortname: 'number',
+    sortorder: 'asc',
+    viewrecords: true,
+    gridview: true,
+    caption: null});
+
+    $('#list').jqGrid('filterToolbar', {});
+    
+    $('#list').jqGrid('gridResize', {});
+
+    $('#columnsHideShow').click(function(){
+      $('#list').jqGrid('columnChooser', {shrinkToFit: false, autowidth: false});
+      return false;
+    });
+
+  });
+
+  </script>
+{% endblock %}

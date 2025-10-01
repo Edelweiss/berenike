@@ -1,0 +1,44 @@
+{% extends 'frontend.html.twig' %}
+
+{% block title %}Edit Bucket {{ bucket.number }} - Berenike{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h1>Edit Bucket {{ bucket.number }}</h1>
+        
+        {{ form_start(form, {'attr': {'class': 'ui-form'}}) }}
+            <div class="form-group">
+                {{ form_label(form.number) }}
+                {{ form_widget(form.number, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.number) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.dating) }}
+                {{ form_widget(form.dating, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.dating) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.locus) }}
+                {{ form_widget(form.locus, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.locus) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.remarks) }}
+                {{ form_widget(form.remarks, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.remarks) }}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+                    <span class="ui-button-text">Save Changes</span>
+                </button>
+                <a href="{{ path('PapyrillioBerenike_BucketShow', {'id': bucket.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+                    <span class="ui-button-text">Cancel</span>
+                </a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

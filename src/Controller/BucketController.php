@@ -7,16 +7,33 @@ use App\Entity\Bucket;
 use App\Entity\Locus;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Psr\Log\LoggerInterface;
+use App\Repository\BucketRepository;
 
-class BucketController extends BerenikeController{
+class BucketController extends BerenikeController
+{
+    private $entityManager;
+    private $bucketRepository;
 
-  public function list(): Response {
-    $entityManager = $this->getDoctrine()->getManager();
-    $repository = $entityManager->getRepository(Bucket::class);
-    $buckets = [];
-    if ($this->request->getMethod() == 'POST') {
+    public function __construct(
+        RequestStack $requestStack,
+        LoggerInterface $logger,
+        EntityManagerInterface $entityManager,
+        BucketRepository $bucketRepository
+    ) {
+        parent::__construct($requestStack, $logger);
+        $this->entityManager = $entityManager;
+        $this->bucketRepository = $bucketRepository;
+    }
 
-      // REQUEST PARAMETERS
+    public function list(Request $request): Response
+    {
+        $buckets = [];
+        if ($this->request->getMethod() == 'POST') {
+
+            // REQUEST PARAMETERS
       
       $limit         = $this->getParameter('rows');
       $page          = $this->getParameter('page');
@@ -42,74 +59,41 @@ class BucketController extends BerenikeController{
       // ODER BY
 
       $orderBy = '';
-      if(in_array($sort, ['source', 'text', 'position', 'description', 'creator', 'created', 'status', 'compilationPage', 'compilationIndex'])){
-        $orderBy = ' ORDER BY c.' . $sort . ' ' . $sortDirection;
+      if(in_array($sort, ['number', 'dating', 'remarks', 'created', 'modified'])){
+        $orderBy = ' ORDER BY b.' . $sort . ' ' . $sortDirection;
       }
-      if(in_array($sort, ['tm', 'hgv', 'ddb'])){
-        $orderBy = ' ORDER BY r.' . $sort . ' ' . $sortDirection;
-      }
-      if($sort == 'edition'){
-        $orderBy = ' ORDER BY e.sort ' . $sortDirection .  ', e.title ' . $sortDirection;
-      }
-      if($sort == 'compilation'){
-        $orderBy = ' ORDER BY c2.volume ' . $sortDirection . ', c2.fascicle ' . $sortDirection;
+      if($sort == 'locus'){
+        $orderBy = ' ORDER BY l.number ' . $sortDirection;
       }
 
       // WHERE WITH
 
       $where = '';
-      $with = '';
       $parameters = [];
       if($this->getParameter('_search') == 'true'){
         $prefix = ' WHERE ';
 
-        foreach(['source', 'text', 'position', 'description', 'creator', 'created', 'status', 'compilationPage', 'compilationIndex'] as $field){
+        foreach(['number', 'dating', 'remarks'] as $field){
           if(strlen($this->getParameter($field))){
-            $where .= $prefix . 'c.' . $field . ' LIKE :' . $field;
+            $where .= $prefix . 'b.' . $field . ' LIKE :' . $field;
             $parameters[$field] = '%' . $this->getParameter($field) . '%';
             $prefix = ' AND ';
           }
         }
 
-        foreach(['tm', 'hgv', 'ddb'] as $field){
-          if(strlen($this->getParameter($field))){
-            $where .= $prefix . 'r.' . $field . ' LIKE :' . $field;
-            $parameters[$field] = '%' . $this->getParameter($field) . '%';
-            $prefix = ' AND ';
-          }
-        }
-
-        if($this->getParameter('edition')){
-          $where .= $prefix . '(e.title LIKE :edition OR e.sort LIKE :edition)';
-          $parameters['edition'] = '%' . $this->getParameter('edition') . '%';
+        if($this->getParameter('locus')){
+          $where .= $prefix . 'l.number LIKE :locus';
+          $parameters['locus'] = '%' . $this->getParameter('locus') . '%';
           $prefix = ' AND ';
-        }
-
-        if($this->getParameter('compilation')){
-          $where .= $prefix . '(c2.title = :compilation OR c2.volume = :compilation)';
-          $parameters['compilation'] = $this->getParameter('compilation');
-          $prefix = ' AND ';
-        }
-
-        $prefix = ' WITH ';
-        foreach(['task_bl', 'task_tm', 'task_hgv', 'task_ddb', 'task_apis', 'task_biblio'] as $field){
-          if(strlen($this->getParameter($field))){
-            $with = $prefix . ' (t.category = \'' . str_replace('task_', '', $field) . '\' AND t.description LIKE \'%' . ($this->getParameter($field) != '*' ? $this->getParameter($field) : '') . '%\')';
-            //$key =  ucfirst(str_replace('task_', '', $field));
-            //$with = $prefix . ' (t.category = :category' . $key . ' AND t.description LIKE :description' . $key . ')'; 
-            //$parameters['category' . $key] = strtolower($field);
-            //$parameters['description' . $key] = '%' . $this->getParameter($field) . '%';
-            $prefix = ' OR ';
-          }
         }
       }
 
       // LIMIT
 
-      $query = $entityManager->createQuery('
-        SELECT count(DISTINCT c.id) FROM App\Entity\Correction c
-        LEFT JOIN c.registerEntries r LEFT JOIN c.tasks t JOIN c.edition e JOIN c.compilation c2
-        ' . $with . ' ' . $where
+      $query = $this->entityManager->createQuery('
+        SELECT count(DISTINCT b.id) FROM App\Entity\Bucket b
+        LEFT JOIN b.locus l
+        ' . $where
       );
       $query->setParameters($parameters);
       $count = $query->getSingleScalarResult();
@@ -117,29 +101,26 @@ class BucketController extends BerenikeController{
 
       // PAGINATION
 
-      if(!$print){
-        $query = $entityManager->createQuery('
-          SELECT DISTINCT c.id FROM App\Entity\Correction c
-          LEFT JOIN c.registerEntries r LEFT JOIN c.tasks t JOIN c.edition e JOIN c.compilation c2
-          ' . $with . ' ' . $where . ' ' . $orderBy
-        );
-        $query->setParameters($parameters);
-        $query->setFirstResult($offset)->setMaxResults($limit);
+      $query = $this->entityManager->createQuery('
+        SELECT DISTINCT b.id FROM App\Entity\Bucket b
+        LEFT JOIN b.locus l
+        ' . $where . ' ' . $orderBy
+      );
+      $query->setParameters($parameters);
+      $query->setFirstResult($offset)->setMaxResults($limit);
 
-        $result = $query->getScalarResult();
-        $ids = [];
-        foreach ($result as $row) {
-          $ids[] = $row['id'];
-        }
-        if($where === ''){
-          $where = ' WHERE ';
-        } else {
-          $where .= ' AND ';
-        }
-        $where .= 'c.id IN (:id)';
-        $parameters['id'] = $ids;
-
+      $result = $query->getScalarResult();
+      $ids = [];
+      foreach ($result as $row) {
+        $ids[] = $row['id'];
       }
+      if($where === ''){
+        $where = ' WHERE ';
+      } else {
+        $where .= ' AND ';
+      }
+      $where .= 'b.id IN (:id)';
+      $parameters['id'] = $ids;
 
       $this->logger->info('limit: ' . $limit);
       $this->logger->info('page: ' . $page);
@@ -150,152 +131,87 @@ class BucketController extends BerenikeController{
 
       // QUERY
 
-      $query = $entityManager->createQuery('
-        SELECT e, c, t FROM App\Entity\Correction c
-        LEFT JOIN c.registerEntries r LEFT JOIN c.tasks t JOIN c.edition e JOIN c.compilation c2 ' . $with . ' ' . $where . ' ' . $orderBy
+      $query = $this->entityManager->createQuery('
+        SELECT b, l, f FROM App\Entity\Bucket b
+        LEFT JOIN b.locus l LEFT JOIN b.finds f' . $where . ' ' . $orderBy
       );
       $query->setParameters($parameters);
 
-      $corrections = $query->getResult();
+      $buckets = $query->getResult();
 
-      if($print){
-        return $this->render('correction/print.html.twig', ['corrections' => $corrections, 'visible' => $visible]);
-      } else {
-        return $this->render('correction/list.xml.twig', ['corrections' => $corrections, 'count' => $count, 'totalPages' => $totalPages, 'page' => $page]);
-      }
+      return $this->render('bucket/list.xml.twig', ['buckets' => $buckets, 'count' => $count, 'totalPages' => $totalPages, 'page' => $page]);
     } else {
-      if($print){
-        return $this->render('correction/print.html.twig', ['corrections' => $corrections, 'visible' => []]);
-      } else {
-        return $this->render('correction/list.html.twig', ['corrections' => $corrections]);
-      }
+      return $this->render('bucket/list.html.twig', ['buckets' => $buckets]);
     }
   }
 
   public function new(): Response {
-    $correction = new Correction();
+    $bucket = new Bucket();
+    $bucket->setCreated(new \DateTime());
+    $bucket->setModified(new \DateTime());
 
-    $correction->setCreator($this->getUser()->getUsername());
-    // $this->get('security.context')->getToken()->getUser()->getUsername()
-
-    $entityManager = $this->getDoctrine()->getManager();
-    $editionRepository = $entityManager->getRepository(Edition::class);
-
-    $correction->setCompilation($this->getCompilation());
-    $correction->setEdition($this->getEdition());
-
-    $registerRepository = $entityManager->getRepository(Register::class);
-
-    $form = $this->createForm(CorrectionNewType::class, $correction, ['attr' => ['wizardUrl' => $this->generateUrl('PapyrillioBeehive_NumberWizardLookup')]]);
+    $form = $this->createForm(BucketType::class, $bucket);
 
     if ($this->request->getMethod() == 'POST') {
       $form->handleRequest($this->request);
       if ($form->isValid()) {
-        foreach($this->getParameter('task') as $category => $description){
-          if(strlen(trim($description))){
-            $task = new Task();
-            $task->setCategory($category);
-            $task->setDescription(trim($description));
-            $task->setCorrection($correction);
-            $entityManager->persist($task);
-          }
-        }
+        $this->entityManager->persist($bucket);
+        $this->entityManager->flush();
 
-        if($this->getParameter('register')){
-          foreach($this->getParameter('register') as $registerId){
-            $register = $registerRepository->findOneBy(['id' => $registerId]);
-            if($register){
-              $correction->addRegisterEntry($register);
-            }
-          }
-        }
-        $entityManager->persist($correction);
-        $entityManager->flush();
-
-        if($this->getParameter('redirectTarget') === 'new'){
-          $this->addFlash('notice', 'Der Datensatz wurde angelegt!');
-          return $this->redirect($this->generateUrl('PapyrillioBeehive_CorrectionNew'));
-        } else {
-          return $this->redirect($this->generateUrl('PapyrillioBeehive_CorrectionShow', ['id' => $correction->getId()]));
-        }
+        $this->addFlash('notice', 'Bucket was created successfully!');
+        return $this->redirect($this->generateUrl('PapyrillioBerenike_BucketShow', ['id' => $bucket->getId()]));
       }
     }
 
-    return $this->render('correction/new.html.twig', ['form' => $form->createView(), 'compilations' => $this->getCompilations(), 'editions' => $editionRepository->findBy([], ['sort' => 'asc'])]);
+    return $this->render('bucket/new.html.twig', ['form' => $form->createView()]);
   }
 
-  protected function getCompilation($id = null){
-    $entityManager = $this->getDoctrine()->getManager();
-    $repository = $entityManager->getRepository(Compilation::class);
+  public function edit($id): Response {
+    $bucket = $this->bucketRepository->find($id);
 
-    if($id !== null){
-      return $repository->findOneBy(['id' => $id]);
-    } else if($this->request->getMethod() == 'POST'){
-      return $repository->findOneBy(['id' => $this->getParameter('compilation')]);
-    } else {
-      return $repository->findOneBy(['volume' => 14]);
+    if (!$bucket) {
+        throw $this->createNotFoundException('Bucket not found');
     }
-  }
 
-  protected function getCompilations(){
-    $entityManager = $this->getDoctrine()->getManager();
-    $repository = $entityManager->getRepository(Compilation::class);
+    $form = $this->createForm(BucketType::class, $bucket);
 
-    return $repository->findAll();
-  }
+    if ($this->request->getMethod() == 'POST') {
+        $form->handleRequest($this->request);
+        if ($form->isValid()) {
+            $bucket->setModified(new \DateTime());
+            $this->entityManager->flush();
 
-  protected function getEdition(){
-    $entityManager = $this->getDoctrine()->getManager();
-    $repository = $entityManager->getRepository(Edition::class);
-
-    if($this->request->getMethod() == 'POST'){
-      return $repository->findOneBy(['id' => $this->getParameter('edition')]);
-    }else{
-      return $repository->findOneBy(['sort' => 0]);
+            $this->addFlash('notice', 'Bucket was updated successfully!');
+            return $this->redirect($this->generateUrl('PapyrillioBerenike_BucketShow', ['id' => $bucket->getId()]));
+        }
     }
-  }
 
-  public function update($id): Response {
-    $this->retrieveCorrection($id);
-    $elementId = $this->getParameter('elementid');
-
-    if($elementId == 'compilation'){
-      $this->correction->setCompilation($this->getCompilation($this->getParameter('newvalue')));
-      $this->entityManager->flush();
-      return new Response(htmlspecialchars($this->correction->getCompilation()->getTitle()));
-    } else {
-      $setter = 'set' . ucfirst($elementId);
-      $getter = 'get' . ucfirst($elementId);
-      
-      $this->correction->$setter($this->getParameter('newvalue'));
-      $this->entityManager->flush();
-      $this->entityManager->refresh($this->correction);
-      return new Response(htmlspecialchars($this->correction->$getter()));
-    }
+    return $this->render('bucket/edit.html.twig', [
+        'form' => $form->createView(),
+        'bucket' => $bucket
+    ]);
   }
 
   public function delete($id): Response {
-    $entityManager = $this->getDoctrine()->getManager();
-    $repository = $entityManager->getRepository(Correction::class);
-    $correction = $repository->findOneBy(['id' => $id]);
-    foreach($correction->getTasks() as $task){
-      $entityManager->remove($task);
-    }
-    foreach($correction->getIndexEntries() as $indexEntry){
-      $entityManager->remove($indexEntry);
+    $bucket = $this->bucketRepository->find($id);
+
+    if (!$bucket) {
+        throw $this->createNotFoundException('Bucket not found');
     }
 
-    $entityManager->remove($correction);
-    $entityManager->flush();
-    return $this->redirect($this->generateUrl('PapyrillioBeehive_CorrectionList'));
+    $this->entityManager->remove($bucket);
+    $this->entityManager->flush();
+
+    $this->addFlash('notice', 'Bucket was deleted successfully!');
+    return $this->redirect($this->generateUrl('PapyrillioBerenike_BucketList'));
   }
 
   public function show($id): Response {
     if(!$id){
       return $this->forward('PapyrillioBerenikeBundle:Bucket:list');
     }
-    $entityManager = $this->getDoctrine()->getManager();
-    $repository = $entityManager->getRepository(Bucket::class);
+
+    $repository = $this->entityManager->getRepository(Bucket::class);
     $bucket = $repository->findOneBy(['id' => $id]);
 
     return $this->render('bucket/show.html.twig', ['bucket' => $bucket]);
