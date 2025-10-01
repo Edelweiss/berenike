@@ -11,7 +11,7 @@
         <cell>{{ bucket.remarks }}</cell>
         <cell>{{ bucket.created|date('Y-m-d H:i:s') }}</cell>
         <cell>{{ bucket.modified|date('Y-m-d H:i:s') }}</cell>
-        <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_BucketShow', {'id': bucket.id}) }}" title="Bucket Number {{ bucket.number }}">View Bucket {{ bucket.number }}</a>]]></cell>
+        <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_BucketShow', {'id': bucket.id}) }}" title="Bucket Number {{ bucket.number }}">View</a>]]></cell>
     </row>
     {% endfor %}
 </rows>

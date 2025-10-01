@@ -38,14 +38,15 @@ $(function(){
     url: '{{ path('PapyrillioBerenike_BucketList') }}',
     datatype: 'xml',
     mtype: 'POST',
-    colNames:['Number', 'Dating', 'Locus', 'Remarks', 'Created', 'Modified'],
+    colNames:['Number', 'Dating', 'Locus', 'Remarks', 'Created', 'Modified', 'Actions'],
     colModel :[ 
       {name:'number',    index:'number',    width:55},
       {name:'dating',    index:'dating',    width:55},
       {name:'locus',     index:'locus',     width:55},
       {name:'remarks',   index:'remarks',   width:128},
       {name:'created',   index:'created',   width:55, hidden: true},
-      {name:'modified',  index:'modified',  width:55, hidden: true}
+      {name:'modified',  index:'modified',  width:55, hidden: true},
+      {name:'actions',   index:'actions',   width:55, sortable: false, search: false}
     ],
     pager: '#pager',
     rowNum:100,
