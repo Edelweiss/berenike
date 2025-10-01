@@ -33,7 +33,7 @@ class BucketController extends BerenikeController
         $buckets = [];
         if ($this->request->getMethod() == 'POST') {
 
-            // REQUEST PARAMETERS
+        // REQUEST PARAMETERS
       
       $limit         = $this->getParameter('rows');
       $page          = $this->getParameter('page');

@@ -7,10 +7,27 @@ use App\Entity\Bucket;
 use App\Entity\Locus;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Psr\Log\LoggerInterface;
+use App\Repository\FindRepository;
 
-class FindController extends BerenikeController{
+class FindController extends BerenikeController
+{
+  private $entityManager;
+  private $findRepository;
 
-  public function list(): Response {
+  public function __construct(
+      RequestStack $requestStack,
+      LoggerInterface $logger,
+      EntityManagerInterface $entityManager,
+      FindRepository $findRepository) {
+      parent::__construct($requestStack, $logger);
+      $this->entityManager = $entityManager;
+      $this->findRepository = $findRepository;
+  }
+
+  public function list(Request $request): Response {
     $entityManager = $this->getDoctrine()->getManager();
     $repository = $entityManager->getRepository(Find::class);
     $finds = [];
