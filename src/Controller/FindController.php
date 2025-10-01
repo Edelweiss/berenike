@@ -28,8 +28,6 @@ class FindController extends BerenikeController
   }
 
   public function list(Request $request): Response {
-    $entityManager = $this->getDoctrine()->getManager();
-    $repository = $entityManager->getRepository(Find::class);
     $finds = [];
     if ($this->request->getMethod() == 'POST') {
 
@@ -108,7 +106,7 @@ class FindController extends BerenikeController
 
       // LIMIT
 
-      $query = $entityManager->createQuery('
+      $query = $this->entityManager->createQuery('
         SELECT count(DISTINCT f.id) FROM App\Entity\Find f
         LEFT JOIN f.bucket b LEFT JOIN b.locus l JOIN l.excavation e
         ' . $where
@@ -119,7 +117,7 @@ class FindController extends BerenikeController
 
       // PAGINATION
 
-      $query = $entityManager->createQuery('
+      $query = $this->entityManager->createQuery('
         SELECT DISTINCT f.id FROM App\Entity\Find f
         LEFT JOIN f.bucket b LEFT JOIN b.locus l JOIN l.excavation e
         ' . $where . ' ' . $orderBy
@@ -149,7 +147,7 @@ class FindController extends BerenikeController
 
       // QUERY
 
-      $query = $entityManager->createQuery('
+      $query = $this->entityManager->createQuery('
         SELECT f, b, l, e FROM App\Entity\Find f
         LEFT JOIN f.bucket b LEFT JOIN b.locus l JOIN l.excavation e ' . $where . ' ' . $orderBy
       );
@@ -164,130 +162,75 @@ class FindController extends BerenikeController
   }
 
   public function new(): Response {
-    $correction = new Correction();
+    $find = new Find();
+    $find->setCreated(new \DateTime());
+    $find->setModified(new \DateTime());
 
-    $correction->setCreator($this->getUser()->getUsername());
-    // $this->get('security.context')->getToken()->getUser()->getUsername()
-
-    $entityManager = $this->getDoctrine()->getManager();
-    $editionRepository = $entityManager->getRepository(Edition::class);
-
-    $correction->setCompilation($this->getCompilation());
-    $correction->setEdition($this->getEdition());
-
-    $registerRepository = $entityManager->getRepository(Register::class);
-
-    $form = $this->createForm(CorrectionNewType::class, $correction, ['attr' => ['wizardUrl' => $this->generateUrl('PapyrillioBeehive_NumberWizardLookup')]]);
+    $form = $this->createForm(FindType::class, $find);
 
     if ($this->request->getMethod() == 'POST') {
       $form->handleRequest($this->request);
       if ($form->isValid()) {
-        foreach($this->getParameter('task') as $category => $description){
-          if(strlen(trim($description))){
-            $task = new Task();
-            $task->setCategory($category);
-            $task->setDescription(trim($description));
-            $task->setCorrection($correction);
-            $entityManager->persist($task);
-          }
-        }
+        $this->entityManager->persist($find);
+        $this->entityManager->flush();
 
-        if($this->getParameter('register')){
-          foreach($this->getParameter('register') as $registerId){
-            $register = $registerRepository->findOneBy(['id' => $registerId]);
-            if($register){
-              $correction->addRegisterEntry($register);
-            }
-          }
-        }
-        $entityManager->persist($correction);
-        $entityManager->flush();
-
-        if($this->getParameter('redirectTarget') === 'new'){
-          $this->addFlash('notice', 'Der Datensatz wurde angelegt!');
-          return $this->redirect($this->generateUrl('PapyrillioBeehive_CorrectionNew'));
-        } else {
-          return $this->redirect($this->generateUrl('PapyrillioBeehive_CorrectionShow', ['id' => $correction->getId()]));
-        }
+        $this->addFlash('notice', 'Find was created successfully!');
+        return $this->redirect($this->generateUrl('PapyrillioBerenike_FindShow', ['id' => $find->getId()]));
       }
     }
 
-    return $this->render('correction/new.html.twig', ['form' => $form->createView(), 'compilations' => $this->getCompilations(), 'editions' => $editionRepository->findBy([], ['sort' => 'asc'])]);
+    return $this->render('find/new.html.twig', ['form' => $form->createView()]);
   }
 
-  protected function getCompilation($id = null){
-    $entityManager = $this->getDoctrine()->getManager();
-    $repository = $entityManager->getRepository(Compilation::class);
+  public function edit($id): Response {
+    $find = $this->findRepository->find($id);
 
-    if($id !== null){
-      return $repository->findOneBy(['id' => $id]);
-    } else if($this->request->getMethod() == 'POST'){
-      return $repository->findOneBy(['id' => $this->getParameter('compilation')]);
-    } else {
-      return $repository->findOneBy(['volume' => 14]);
+    if (!$find) {
+        throw $this->createNotFoundException('Find not found');
     }
-  }
 
-  protected function getCompilations(){
-    $entityManager = $this->getDoctrine()->getManager();
-    $repository = $entityManager->getRepository(Compilation::class);
+    $form = $this->createForm(FindType::class, $find);
 
-    return $repository->findAll();
-  }
+    if ($this->request->getMethod() == 'POST') {
+        $form->handleRequest($this->request);
+        if ($form->isValid()) {
+            $find->setModified(new \DateTime());
+            $this->entityManager->flush();
 
-  protected function getEdition(){
-    $entityManager = $this->getDoctrine()->getManager();
-    $repository = $entityManager->getRepository(Edition::class);
-
-    if($this->request->getMethod() == 'POST'){
-      return $repository->findOneBy(['id' => $this->getParameter('edition')]);
-    }else{
-      return $repository->findOneBy(['sort' => 0]);
+            $this->addFlash('notice', 'Find was updated successfully!');
+            return $this->redirect($this->generateUrl('PapyrillioBerenike_FindShow', ['id' => $find->getId()]));
+        }
     }
-  }
 
-  public function update($id): Response {
-    $this->retrieveCorrection($id);
-    $elementId = $this->getParameter('elementid');
-
-    if($elementId == 'compilation'){
-      $this->correction->setCompilation($this->getCompilation($this->getParameter('newvalue')));
-      $this->entityManager->flush();
-      return new Response(htmlspecialchars($this->correction->getCompilation()->getTitle()));
-    } else {
-      $setter = 'set' . ucfirst($elementId);
-      $getter = 'get' . ucfirst($elementId);
-      
-      $this->correction->$setter($this->getParameter('newvalue'));
-      $this->entityManager->flush();
-      $this->entityManager->refresh($this->correction);
-      return new Response(htmlspecialchars($this->correction->$getter()));
-    }
+    return $this->render('find/edit.html.twig', [
+        'form' => $form->createView(),
+        'find' => $find
+    ]);
   }
 
   public function delete($id): Response {
-    $entityManager = $this->getDoctrine()->getManager();
-    $repository = $entityManager->getRepository(Correction::class);
-    $correction = $repository->findOneBy(['id' => $id]);
-    foreach($correction->getTasks() as $task){
-      $entityManager->remove($task);
-    }
-    foreach($correction->getIndexEntries() as $indexEntry){
-      $entityManager->remove($indexEntry);
+    $find = $this->findRepository->find($id);
+    
+    if (!$find) {
+        throw $this->createNotFoundException('Find not found');
     }
 
-    $entityManager->remove($correction);
-    $entityManager->flush();
-    return $this->redirect($this->generateUrl('PapyrillioBeehive_CorrectionList'));
+    $this->entityManager->remove($find);
+    $this->entityManager->flush();
+
+    $this->addFlash('notice', 'Find was deleted successfully!');
+    return $this->redirect($this->generateUrl('PapyrillioBerenike_FindList'));
   }
 
   public function show($id): Response {
     if(!$id){
       return $this->forward('PapyrillioBerenikeBundle:Find:list');
     }
-    $entityManager = $this->getDoctrine()->getManager();
-    $repository = $entityManager->getRepository(Find::class);
-    $find = $repository->findOneBy(['id' => $id]);
+    
+    $find = $this->findRepository->find($id);
+    if (!$find) {
+        throw $this->createNotFoundException('Find not found');
+    }
 
     return $this->render('find/show.html.twig', ['find' => $find]);
   }
