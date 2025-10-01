@@ -6,11 +6,10 @@
 {% endblock %}
 
 {% block top %}
-  Buckets
+  Trenches
 {% endblock %}
 
 {% block body %}
-
   <table id="list"></table>
   <div id="pager"></div>
   
@@ -23,7 +22,6 @@
   <button id="print" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false">
     <span class="ui-button-text">print</span>
   </button>
-
 {% endblock %}
 
 {% block javascripts %}
@@ -35,17 +33,17 @@
 
 $(function(){
   $('#list').jqGrid({
-    url: '{{ path('PapyrillioBerenike_BucketList') }}',
+    url: '{{ path('PapyrillioBerenike_TrenchList') }}',
     datatype: 'xml',
     mtype: 'POST',
-    colNames:['Number', 'Dating', 'Locus', 'Remarks', 'Created', 'Modified'],
+    colNames:['Site', 'Season', 'Number', 'Description', 'Created', 'Modified'],
     colModel :[ 
-      {name:'number',    index:'number',    width:55},
-      {name:'dating',    index:'dating',    width:55},
-      {name:'locus',     index:'locus',     width:55},
-      {name:'remarks',   index:'remarks',   width:128},
-      {name:'created',   index:'created',   width:55, hidden: true},
-      {name:'modified',  index:'modified',  width:55, hidden: true}
+      {name:'site',        index:'site',        width:55},
+      {name:'season',      index:'season',      width:55},
+      {name:'number',      index:'number',      width:55},
+      {name:'description', index:'description', width:128},
+      {name:'created',     index:'created',     width:55, hidden: true},
+      {name:'modified',    index:'modified',    width:55, hidden: true}
     ],
     pager: '#pager',
     rowNum:100,

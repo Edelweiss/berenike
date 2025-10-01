@@ -38,7 +38,7 @@ $(function(){
     url: '{{ path('PapyrillioBerenike_FindList') }}',
     datatype: 'xml',
     mtype: 'POST',
-    colNames:['Trench', 'Locus', 'Bucket', 'Year', 'Object', 'Category', 'Created'],
+    colNames:['Trench', 'Locus', 'Bucket', 'Year', 'Object', 'Category', 'Created', 'Actions'],
     colModel :[ 
       {name:'trench',     index:'trench',    width:55, resizable: false, sortable: false},
       {name:'locus',      index:'locus',     width:55},
@@ -46,7 +46,8 @@ $(function(){
       {name:'year',       index:'tm',        width:55},
       {name:'object',     index:'object',    width:128},
       {name:'category',   index:'category',  width:55, hidden: true},
-      {name:'created',    index:'created',   width:55, hidden: true}
+      {name:'created',    index:'created',   width:55, hidden: true},
+      {name:'actions',    index:'actions',   width:55, sortable: false, search: false}
     ],
     pager: '#pager',
     rowNum:100,

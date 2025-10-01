@@ -12,6 +12,7 @@
       <cell>{{ find.object }}</cell>
       <cell>{{ find.category }}</cell>
       <cell>{{ find.created.format('d.m.Y H:i') }}</cell>
+      <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_FindShow', {'id': find.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">View</span></a>]]></cell>
     </row>
   {% endfor %}
 </rows>
