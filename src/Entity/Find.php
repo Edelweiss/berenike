@@ -11,6 +11,16 @@ class Find {
     private $date;
     private $year;
     private $month;
+    
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $inventoryNumber;
+    
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $tm;
     private $dateRemarks;
     private $scaRegister;
     private $object;
@@ -214,10 +224,26 @@ class Find {
     }
 
     public function setBucket(\App\Entity\Bucket $bucket){
-        $this->bucket = bucket;
+        $this->bucket = $bucket;
     }
     public function getBucket(){
         return $this->bucket;
+    }
+
+    public function setInventoryNumber(?string $inventoryNumber): self {
+        $this->inventoryNumber = $inventoryNumber;
+        return $this;
+    }
+    public function getInventoryNumber(): ?string {
+        return $this->inventoryNumber;
+    }
+
+    public function setTm(?int $tm): self {
+        $this->tm = $tm;
+        return $this;
+    }
+    public function getTm(): ?int {
+        return $this->tm;
     }
 
     public function addFindSpecialist(\App\Entity\addFindSpecialist $findSpecialist) {

@@ -8,6 +8,8 @@
       <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_ExcavationShow', {'id': find.bucket.locus.excavation.id}) }}" title="Trench Number {{ find.bucket.locus.excavation.trench }} {{ find.bucket.locus.excavation.season }}">{{ find.bucket.locus.excavation.trench }}</a>]]></cell>
       <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_LocusShow', {'id': find.bucket.locus.id}) }}" title="Locus Number {{ find.bucket.locus.number }}">{{ find.bucket.locus.number }}</a>]]></cell>
       <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_BucketShow', {'id': find.bucket.id}) }}" title="Bucket Number {{ find.bucket.number }}">{{ find.bucket.number }}</a>]]></cell>
+      <cell>{{ find.inventoryNumber }}</cell>
+      <cell>{{ find.tm }}</cell>
       <cell>{{ find.date ? find.date|date('Y-m-d') : '' }}</cell>
       <cell>{{ find.year }}</cell>
       <cell>{{ find.month }}</cell>
