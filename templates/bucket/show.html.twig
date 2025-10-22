@@ -1,5 +1,7 @@
 {% extends 'frontend.html.twig' %}
 
+{% block title %}Bucket {{ bucket.locus.excavation.site }}{{ bucket.locus.excavation.season }}-{{ bucket.locus.excavation.trench }}/{{ bucket.locus.number }}/{{ bucket.number }} | Berenike.project{% endblock %}
+
 {% block top %}
   <span title="site">PB {{ bucket.number }}</span>
 {% endblock %}
