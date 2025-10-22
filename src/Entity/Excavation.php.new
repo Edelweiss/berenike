@@ -1,0 +1,214 @@
+<?php
+
+namespace App\Entity;
+
+use App\Repository\ExcavationRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * @ORM\Entity(repositoryClass=ExcavationRepository::class)
+ */
+class Excavation
+{
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(type="integer")
+     */
+    private $id;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $site;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $season;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $trench;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $context;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $year;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Locus", mappedBy="excavation")
+     */
+    private $loci;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $created;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $modified;
+
+    public function __construct()
+    {
+        $this->loci = new ArrayCollection();
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getSite(): ?string
+    {
+        return $this->site;
+    }
+
+    public function setSite(string $site): self
+    {
+        $this->site = $site;
+        return $this;
+    }
+
+    public function getSeason(): ?string
+    {
+        return $this->season;
+    }
+
+    public function setSeason(string $season): self
+    {
+        $this->season = $season;
+        return $this;
+    }
+
+    public function getTrench(): ?string
+    {
+        return $this->trench;
+    }
+
+    public function setTrench(string $trench): self
+    {
+        $this->trench = $trench;
+        return $this;
+    }
+
+    public function getContext(): ?string
+    {
+        return $this->context;
+    }
+
+    public function setContext(?string $context): self
+    {
+        $this->context = $context;
+        return $this;
+    }
+
+    public function getYear(): ?int
+    {
+        return $this->year;
+    }
+
+    public function setYear(?int $year): self
+    {
+        $this->year = $year;
+        return $this;
+    }
+
+    /**
+     * @return Collection|Locus[]
+     */
+    public function getLoci(): Collection
+    {
+        return $this->loci;
+    }
+
+    public function addLocus(Locus $locus): self
+    {
+        if (!$this->loci->contains($locus)) {
+            $this->loci[] = $locus;
+            $locus->setExcavation($this);
+        }
+        return $this;
+    }
+
+    public function removeLocus(Locus $locus): self
+    {
+        if ($this->loci->removeElement($locus)) {
+            // set the owning side to null (unless already changed)
+            if ($locus->getExcavation() === $this) {
+                $locus->setExcavation(null);
+            }
+        }
+        return $this;
+    }
+
+    public function getCreated(): ?\DateTimeInterface
+    {
+        return $this->created;
+    }
+
+    public function setCreated(?\DateTimeInterface $created): self
+    {
+        $this->created = $created;
+        return $this;
+    }
+
+    public function getModified(): ?\DateTimeInterface
+    {
+        return $this->modified;
+    }
+
+    public function setModified(?\DateTimeInterface $modified): self
+    {
+        $this->modified = $modified;
+        return $this;
+    }
+
+    /**
+     * Magic method to handle dynamic property access
+     *
+     * @param string $name The name of the method being called
+     * @param array $arguments An array of arguments passed to the method
+     * @return mixed
+     * @throws \BadMethodCallException
+     */
+    public function __call($name, $arguments)
+    {
+        // Common properties that might be accessed
+        $properties = [
+            'created' => null,
+            'modified' => null,
+            // Add other dynamically accessed properties here
+        ];
+
+        // Handle getters for dynamic properties
+        if (strpos($name, 'get') === 0) {
+            $property = lcfirst(substr($name, 3));
+            if (array_key_exists($property, $properties)) {
+                return $this->$property ?? null;
+            }
+        }
+        // Handle setters for dynamic properties
+        elseif (strpos($name, 'set') === 0) {
+            $property = lcfirst(substr($name, 3));
+            if (array_key_exists($property, $properties)) {
+                $this->$property = $arguments[0] ?? null;
+                return $this;
+            }
+        }
+
+        throw new \BadMethodCallException(sprintf(
+            'Method %s::%s does not exist.', static::class, $name
+        ));
+    }
+}

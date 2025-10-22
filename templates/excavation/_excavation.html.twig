@@ -1,0 +1,40 @@
+{% if excavation %}
+  <div class="ui-widget">
+    <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
+      <h3 style="margin: 0; font-size: 1.1em;">Trench {{ excavation.site }}{{ excavation.season }}-{{ excavation.trench }}</h3>
+    </div>
+    
+    <div class="ui-widget-content ui-corner-bottom" style="padding: 0.5em;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 0.5em;">
+        <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
+          <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">Location</h4>
+          <div class="ui-helper-clearfix">
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Site</span> {{ excavation.site }}</p>
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Season</span> {{ excavation.season }}</p>
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Trench</span> {{ excavation.trench }}</p>
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Year</span> {{ excavation.year }}</p>
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Context</span> {{ excavation.context }}</p>
+          </div>
+        </div>
+
+        <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
+          <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">Related Loci</h4>
+          <div class="ui-helper-clearfix">
+            {% if excavation.loci|length > 0 %}
+              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.3em;">
+                {% for locus in excavation.loci %}
+                  <a href="{{ path('PapyrillioBerenike_LocusShow', {'id': locus.id}) }}" class="ui-state-default" style="padding: 0.2em 0.4em; font-size: 0.9em; text-decoration: none; text-align: center;">
+                    Locus {{ locus.number }}
+                  </a>
+                {% endfor %}
+              </div>
+            {% else %}
+              <p class="ui-state-disabled" style="padding: 0.2em; margin: 0;">No loci assigned</p>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+{% endif %}
