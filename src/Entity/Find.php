@@ -4,6 +4,7 @@ use App\Repository\FindRepository;
 use Doctrine\ORM\Mapping as ORM;
 use DateTime;
 use Exception;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class Find {
     private $id;
@@ -18,7 +19,8 @@ class Find {
     private $inventoryNumber;
     
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="integer", nullable=true, options={"unsigned"=true})
+     * @Assert\GreaterThanOrEqual(value = 0, message = "TM must be a positive integer or null")
      */
     private $tm;
     private $dateRemarks;

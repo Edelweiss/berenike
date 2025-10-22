@@ -25,6 +25,12 @@ class FindType extends AbstractType
             ->add('tm', IntegerType::class, [
                 'required' => false,
                 'label' => 'TM',
+                'attr' => [
+                    'min' => 1,
+                    'placeholder' => 'Enter a positive number or leave empty',
+                    'oninvalid' => 'this.setCustomValidity("TM must be a positive number")',
+                    'oninput' => 'setCustomValidity("")'
+                ]
             ])
             ->add('trench', TextType::class, [
                 'required' => false,
