@@ -1,88 +1,18 @@
 {% extends 'frontend.html.twig' %}
 
-{% block title %}Locus {{ locus.number }} - Berenike{% endblock %}
+{% block top %}
+  <span title="site">{{ locus.excavation.site }}</span><span title="season">{{ locus.excavation.season }}</span>-<span title="trench">{{ locus.excavation.trench }}</span>/<span title="locus">{{ locus.number }}</span>
+{% endblock %}
+
+{% block title %}Locus {{ locus.excavation.site }}{{ locus.excavation.season }}-{{ locus.excavation.trench }}/{{ locus.number }} - Berenike{% endblock %}
 
 {% block body %}
-    <div class="container">
-        <h1>Locus {{ locus.number }}</h1>
-        
-        <div class="ui-widget">
-            <table class="ui-widget-content">
-                <tbody>
-                    <tr>
-                        <th class="ui-widget-header">Site</th>
-                        <td>{{ locus.site }}</td>
-                    </tr>
-                    <tr>
-                        <th class="ui-widget-header">Season</th>
-                        <td>{{ locus.season }}</td>
-                    </tr>
-                    <tr>
-                        <th class="ui-widget-header">Trench</th>
-                        <td>{{ locus.trench }}</td>
-                    </tr>
-                    <tr>
-                        <th class="ui-widget-header">Description</th>
-                        <td>{{ locus.description }}</td>
-                    </tr>
-                    <tr>
-                        <th class="ui-widget-header">Created</th>
-                        <td>{{ locus.created|date('Y-m-d H:i:s') }}</td>
-                    </tr>
-                    <tr>
-                        <th class="ui-widget-header">Modified</th>
-                        <td>{{ locus.modified|date('Y-m-d H:i:s') }}</td>
-                    </tr>
-                </tbody>
-            </table>
+  {% include 'locus/_locus.html.twig' with {'locus': locus} %}
 
-            {% if locus.buckets|length > 0 %}
-                <h2>Buckets</h2>
-                <table class="ui-widget-content">
-                    <thead>
-                        <tr class="ui-widget-header">
-                            <th>Number</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for bucket in locus.buckets %}
-                        <tr>
-                            <td>{{ bucket.number }}</td>
-                            <td>
-                                <a href="{{ path('PapyrillioBerenike_BucketShow', {'id': bucket.id}) }}" 
-                                   class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
-                                    <span class="ui-button-text">View</span>
-                                </a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            {% endif %}
-
-            {% if locus.excavation %}
-                <h2>Excavation</h2>
-                <table class="ui-widget-content">
-                    <tbody>
-                        <tr>
-                            <th class="ui-widget-header">Trench</th>
-                            <td>
-                                <a href="{{ path('PapyrillioBerenike_ExcavationShow', {'id': locus.excavation.id}) }}">
-                                    {{ locus.excavation.trench }}
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            {% endif %}
-        </div>
-
-        <div class="actions">
-            <a href="{{ path('PapyrillioBerenike_LocusList') }}" 
-               class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
-                <span class="ui-button-text">Back to Loci</span>
-            </a>
-        </div>
-    </div>
-{% endblock body %}
+  <div class="actions" style="margin-top: 1em;">
+    <a href="{{ path('PapyrillioBerenike_LocusList') }}" 
+       class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+      <span class="ui-button-text">Back to Loci</span>
+    </a>
+  </div>
+{% endblock %}
