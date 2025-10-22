@@ -8,7 +8,10 @@
 {% block body %}
   {% include 'find/_find.html.twig' with {'find': find} %}
   
-  <div style="margin-top: 1em;">
+  <div class="actions" style="margin-top: 1em;">
+    <a href="{{ path('PapyrillioBerenike_FindList') }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+      <span class="ui-button-text">Back to Finds</span>
+    </a>
     <a href="{{ path('PapyrillioBerenike_FindEdit', {'id': find.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
       <span class="ui-button-text">Edit</span>
     </a>
