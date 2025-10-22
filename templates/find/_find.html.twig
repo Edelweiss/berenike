@@ -1,44 +1,117 @@
 {% if find %}
-  <h4>{{ find.object }} {{ find.material ? '(' ~ find.material ~ ')' : ''}} {{ find.date ? find.date|date('d.m.Y') : find.year }} (id {{ find.id }})</h4>
-  <ul style="columns: 3;">
-    <li><b>find id:</b> {{ find.id }}</li>
-    <li><b>inventory number:</b> {{ find.inventoryNumber }}</li>
-    <li><b>tm:</b> {{ find.tm }}</li>
-    <li><b>trench":</b> {{ find.trench }}</li>
-    <li><b>date:</b> {{ find.date|date("d.m.Y") }}</li>
-    <li><b>year:</b> {{ find.year }}</li>
-    <li><b>month:</b> {{ find.month }}</li>
-    <li><b>dateRemarks:</b> {{ find.dateRemarks }}</li>
-    <li><b>scaRegister:</b> {{ find.scaRegister }}</li>
-    <li><b>object:</b> {{ find.object }}</li>
-    <li><b>objectNo:</b> {{ find.objectNo }}</li>
-    <li><b>category:</b> {{ find.category }}</li>
-    <li><b>categoryNo:</b> {{ find.categoryNo }}</li>
-    <li><b>weight:</b> {{ find.weight }}</li>
-    <li><b>quantity:</b> {{ find.quantity }}</li>
-    <li><b>dimensions:</b> {{ find.dimensions }}</li>
-    <li><b>preservation:</b> {{ find.preservation }}</li>
-    <li><b>description:</b> {{ find.description }}</li>
-    <li><b>material:</b> {{ find.material }}</li>
-    <li><b>materialRemarks:</b> {{ find.materialRemarks }}</li>
-    <li><b>datingAbsolute:</b> {{ find.datingAbsolute }}</li>
-    <li><b>typologyReference:</b> {{ find.typologyReference }}</li>
-    <li><b>publications:</b> {{ find.publications }}</li>
-    <li><b>remarks:</b> {{ find.remarks }}</li>
-    <li><b>rebuildChanges:</b> {{ find.rebuildChanges }}</li>
-    <li><b>created:</b> {{ find.created|date("d.m.Y") }}</li>
-    <li><b>modified:</b> {{ find.modified|date("d.m.Y") }}</li>
-    <li><b>bucket:</b> {{ find.bucket.id }}</li>
-    <li><b>specialists:</b>
-    <ul>
-    {% for fs in find.findSpecialists %}
-      <li>{{ fs.specialist.name }}{% if fs.year %} {{ fs.year }}{% endif %} {% if fs.speciality %} ({{ fs.speciality }}){% endif %}</li>
-    {% endfor %}
-    </ul>
-    </li>
-    <li><b>photographs:</b> …</li>
-    <li><b>drawings:</b> …</li>
-  </ul>
-  <br />
-  {% include 'bucket/_bucket.html.twig' with {'bucket': find.bucket} %}
+  <div class="ui-widget">
+    <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
+      <h3 style="margin: 0; font-size: 1.1em;">{{ find.object }} {{ find.material ? '(' ~ find.material ~ ')' : ''}} {{ find.date ? find.date|date('d.m.Y') : find.year }}</h3>
+    </div>
+    
+    <div class="ui-widget-content ui-corner-bottom" style="padding: 0.5em;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 0.5em;">
+        <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
+          <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">Basic Information</h4>
+          <div class="ui-helper-clearfix">
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">ID</span> {{ find.id }}</p>
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Inventory</span> {{ find.inventoryNumber }}</p>
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">TM</span> {{ find.tm }}</p>
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Trench</span> {{ find.trench }}</p>
+          </div>
+        </div>
+
+        <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
+          <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">Dating</h4>
+          <div class="ui-helper-clearfix">
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Date</span> {{ find.date ? find.date|date("d.m.Y") : 'N/A' }}</p>
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Year</span> {{ find.year }}</p>
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Month</span> {{ find.month }}</p>
+            {% if find.dateRemarks %}
+              <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Remarks</span> {{ find.dateRemarks }}</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
+          <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">Object Details</h4>
+          <div class="ui-helper-clearfix">
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Object</span> {{ find.object }}</p>
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Object No</span> {{ find.objectNo }}</p>
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Category</span> {{ find.category }}</p>
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Category No</span> {{ find.categoryNo }}</p>
+          </div>
+        </div>
+
+        <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
+          <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">Physical Properties</h4>
+          <div class="ui-helper-clearfix">
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Weight</span> {{ find.weight }}</p>
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Quantity</span> {{ find.quantity }}</p>
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Dimensions</span> {{ find.dimensions }}</p>
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Preservation</span> {{ find.preservation }}</p>
+          </div>
+        </div>
+
+        <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
+          <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">Material Information</h4>
+          <div class="ui-helper-clearfix">
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Material</span> {{ find.material }}</p>
+            {% if find.materialRemarks %}
+              <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Remarks</span> {{ find.materialRemarks }}</p>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if find.description or find.remarks %}
+          <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em; grid-column: 1 / -1;">
+            <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">Description & Remarks</h4>
+            {% if find.description %}
+              <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Description</span> {{ find.description }}</p>
+            {% endif %}
+            {% if find.remarks %}
+              <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Remarks</span> {{ find.remarks }}</p>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
+          <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">References</h4>
+          <div class="ui-helper-clearfix">
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Dating</span> {{ find.datingAbsolute }}</p>
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Typology</span> {{ find.typologyReference }}</p>
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Publications</span> {{ find.publications }}</p>
+          </div>
+        </div>
+
+        <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
+          <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">Specialists</h4>
+          <div class="ui-helper-clearfix">
+            {% if find.findSpecialists|length > 0 %}
+              {% for fs in find.findSpecialists %}
+                <p style="margin: 0.2em 0;">
+                  <span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">
+                    {% if fs.speciality %}{{ fs.speciality }}{% else %}Specialist{% endif %}
+                  </span>
+                  {{ fs.specialist.name }}{% if fs.year %} ({{ fs.year }}){% endif %}
+                </p>
+              {% endfor %}
+            {% else %}
+              <p class="ui-state-disabled" style="margin: 0.2em 0; padding: 0.2em;">No specialists assigned</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
+          <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">System Info</h4>
+          <div class="ui-helper-clearfix">
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Created</span> {{ find.created|date("d.m.Y") }}</p>
+            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Modified</span> {{ find.modified|date("d.m.Y") }}</p>
+            {% if find.rebuildChanges %}
+              <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Changes</span> {{ find.rebuildChanges }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="margin-top: 0.5em;">
+    {% include 'bucket/_bucket.html.twig' with {'bucket': find.bucket} %}
+  </div>
 {% endif %}

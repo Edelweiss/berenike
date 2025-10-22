@@ -4,6 +4,27 @@
 
 {% block top %}Edit Find{% endblock %}
 
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $(document).ready(function() {
+            var tmInput = $('input[name$="[tm]"]');
+            tmInput.on('input', function() {
+                var value = $(this).val();
+                if (value !== '') {
+                    if (parseInt(value) <= 0) {
+                        this.setCustomValidity('TM must be a positive number');
+                    } else {
+                        this.setCustomValidity('');
+                    }
+                } else {
+                    this.setCustomValidity(''); // Empty value is allowed
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
 {% block body %}
     {{ form_start(form, {'attr': {'class': 'ui-widget'}}) }}
     <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 1em; margin-bottom: 1em;">

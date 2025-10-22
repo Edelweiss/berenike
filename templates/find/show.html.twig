@@ -7,4 +7,10 @@
 
 {% block body %}
   {% include 'find/_find.html.twig' with {'find': find} %}
+  
+  <div style="margin-top: 1em;">
+    <a href="{{ path('PapyrillioBerenike_FindEdit', {'id': find.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+      <span class="ui-button-text">Edit</span>
+    </a>
+  </div>
 {% endblock %}
