@@ -2,7 +2,6 @@
 
 {% block stylesheets %}
   {{ parent() }}
-  <link href="{{ asset('css/jquery/pepper-grinder/jquery-ui.css') }}" type="text/css" rel="stylesheet" />
   <link href="{{ asset('css/jquery/ui.jqgrid.css') }}" type="text/css" rel="stylesheet" />
 {% endblock %}
 
@@ -74,7 +73,7 @@ $(function(){
       {name:'remarks',           index:'remarks',           width:120, hidden: true},
       {name:'created',           index:'created',           width:120, formatter:'date', hidden: true},
       {name:'modified',          index:'modified',          width:120, formatter:'date', hidden: true},
-      {name:'actions',           index:'actions',           width:55, sortable: false, search: false}
+      {name:'actions',           index:'actions',           width:85, sortable: false, search: false}
     ],
     pager: '#pager',
     rowNum:100,

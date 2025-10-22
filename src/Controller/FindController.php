@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Find;
 use App\Entity\Bucket;
 use App\Entity\Locus;
+use App\Form\FindType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,6 +26,29 @@ class FindController extends BerenikeController
       parent::__construct($requestStack, $logger);
       $this->entityManager = $entityManager;
       $this->findRepository = $findRepository;
+  }
+
+  public function edit(Request $request, $id): Response
+  {
+      $find = $this->findRepository->find($id);
+      if (!$find) {
+          throw $this->createNotFoundException('Find not found');
+      }
+
+      $form = $this->createForm(FindType::class, $find);
+      $form->handleRequest($request);
+
+      if ($form->isSubmitted() && $form->isValid()) {
+          $find->setModified(new \DateTime());
+          $this->entityManager->flush();
+
+          return $this->redirectToRoute('PapyrillioBerenike_FindShow', ['id' => $find->getId()]);
+      }
+
+      return $this->render('find/edit.html.twig', [
+          'find' => $find,
+          'form' => $form->createView(),
+      ]);
   }
 
   public function list(Request $request): Response {
@@ -183,32 +207,6 @@ class FindController extends BerenikeController
     }
 
     return $this->render('find/new.html.twig', ['form' => $form->createView()]);
-  }
-
-  public function edit($id): Response {
-    $find = $this->findRepository->find($id);
-
-    if (!$find) {
-        throw $this->createNotFoundException('Find not found');
-    }
-
-    $form = $this->createForm(FindType::class, $find);
-
-    if ($this->request->getMethod() == 'POST') {
-        $form->handleRequest($this->request);
-        if ($form->isValid()) {
-            $find->setModified(new \DateTime());
-            $this->entityManager->flush();
-
-            $this->addFlash('notice', 'Find was updated successfully!');
-            return $this->redirect($this->generateUrl('PapyrillioBerenike_FindShow', ['id' => $find->getId()]));
-        }
-    }
-
-    return $this->render('find/edit.html.twig', [
-        'form' => $form->createView(),
-        'find' => $find
-    ]);
   }
 
   public function delete($id): Response {

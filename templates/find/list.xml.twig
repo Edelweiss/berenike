@@ -32,7 +32,7 @@
       <cell>{{ find.remarks }}</cell>
       <cell>{{ find.created ? find.created|date('d.m.Y H:i') : '' }}</cell>
       <cell>{{ find.modified ? find.modified|date('d.m.Y H:i') : '' }}</cell>
-      <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_FindShow', {'id': find.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">View</span></a>]]></cell>
+      <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_FindShow', {'id': find.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">View</span></a><a href="{{ path('PapyrillioBerenike_FindEdit', {'id': find.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">Edit</span></a>]]></cell>
     </row>
   {% endfor %}
 </rows>

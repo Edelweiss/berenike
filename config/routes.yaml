@@ -10,6 +10,11 @@ PapyrillioBerenike_FindShow:
     path:  /find/{id}
     controller: App\Controller\FindController::show
 
+PapyrillioBerenike_FindEdit:
+    path:  /find/{id}/edit
+    controller: App\Controller\FindController::edit
+    methods: [GET, POST]
+
 PapyrillioBerenike_BucketList:
     path:  /buckets
     controller: App\Controller\BucketController::list
