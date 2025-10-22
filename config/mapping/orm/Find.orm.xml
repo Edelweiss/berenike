@@ -7,7 +7,7 @@
             <generator strategy="AUTO"/>
         </id>
         <field name="inventoryNumber" type="string" length="255" nullable="true"/>
-        <field name="tm" type="integer" nullable="true"/>
+        <field name="tm" type="integer" nullable="true" unsigned="true"/>
         <field name="trench" type="string" length="512" nullable="true"/>
         <field name="date" type="date" nullable="true"/>
         <field name="year" type="integer"/>
