@@ -248,7 +248,7 @@ class Find {
         return $this->tm;
     }
 
-    public function addFindSpecialist(\App\Entity\addFindSpecialist $findSpecialist) {
+    public function addFindSpecialist(\App\Entity\FindSpecialist $findSpecialist) {
         $this->findSpecialists[] = $findSpecialist;
     }
     public function getFindSpecialists() {
