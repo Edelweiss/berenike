@@ -11,6 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 
 class FindType extends AbstractType
@@ -41,13 +42,22 @@ class FindType extends AbstractType
                 'widget' => 'single_text',
                 'label' => 'Date',
             ])
-            ->add('year', IntegerType::class, [
+            ->add('year', ChoiceType::class, [
                 'required' => true,
                 'label' => 'Year',
+                'choices' => array_combine(
+                    range(1995, date('Y')),
+                    range(1995, date('Y'))
+                ),
             ])
-            ->add('month', IntegerType::class, [
-                'required' => true,
-                'label' => 'Month',
+            ->add('month', ChoiceType::class, [
+                'required' => false,
+                'label' => '',
+                'placeholder' => '-- none --',
+                'choices' => array_combine(
+                    range(1, 12),
+                    range(1, 12)
+                ),
             ])
             ->add('dateRemarks', TextType::class, [
                 'required' => false,
