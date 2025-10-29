@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Excavation;
+use App\Form\ExcavationType;
 use App\Repository\ExcavationRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -132,6 +133,29 @@ class ExcavationController extends BerenikeController
 
         return $this->render('excavation/show.html.twig', [
             'excavation' => $excavation
+        ]);
+    }
+
+    public function edit(Request $request, $id): Response
+    {
+        $excavation = $this->excavationRepository->find($id);
+        
+        if (!$excavation) {
+            throw $this->createNotFoundException('Excavation not found');
+        }
+
+        $form = $this->createForm(ExcavationType::class, $excavation);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->entityManager->flush();
+
+            return $this->redirectToRoute('PapyrillioBerenike_ExcavationShow', ['id' => $excavation->getId()]);
+        }
+
+        return $this->render('excavation/edit.html.twig', [
+            'excavation' => $excavation,
+            'form' => $form->createView(),
         ]);
     }
 }

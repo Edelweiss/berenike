@@ -39,3 +39,7 @@ PapyrillioBerenike_ExcavationShow:
     path:  /trench/{id}
     controller: App\Controller\ExcavationController::show
 
+PapyrillioBerenike_ExcavationEdit:
+    path:  /trench/{id}/edit
+    controller: App\Controller\ExcavationController::edit
+
