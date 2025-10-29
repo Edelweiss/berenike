@@ -10,6 +10,9 @@
   {% include 'excavation/_excavation.html.twig' with {'excavation': excavation} %}
 
   <div class="actions" style="margin-top: 1em;">
+    <a href="{{ path('PapyrillioBerenike_ExcavationEdit', {'id': excavation.id}) }}"  class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+      <span class="ui-button-text">Edit</span>
+    </a>
     <a href="{{ path('PapyrillioBerenike_ExcavationList') }}"  class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
       <span class="ui-button-text">Back to Trenches</span>
     </a>
