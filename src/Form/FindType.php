@@ -143,6 +143,16 @@ class FindType extends AbstractType
                     $bucketNumber = $bucket->getNumber();
                     return sprintf('%s%s-%s/%s/%s', $site, $season, $trench, $locusNumber, $bucketNumber);
                 },
+                'query_builder' => function ($repository) {
+                    return $repository->createQueryBuilder('b')
+                        ->leftJoin('b.locus', 'l')
+                        ->leftJoin('l.excavation', 'e')
+                        ->orderBy('e.site', 'ASC')
+                        ->addOrderBy('e.season', 'ASC')
+                        ->addOrderBy('e.trench', 'ASC')
+                        ->addOrderBy('l.number', 'ASC')
+                        ->addOrderBy('b.number', 'ASC');
+                },
                 'required' => true,
                 'label' => 'Bucket',
             ])
