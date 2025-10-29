@@ -1,0 +1,41 @@
+{% extends 'frontend.html.twig' %}
+
+{% block title %}Edit Locus{% endblock %}
+
+{% block top %}Edit Locus{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .ui-widget label {
+            font-weight: bold;
+            display: inline-block;
+            width: 12em;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    {{ form_start(form, {'attr': {'class': 'ui-widget'}}) }}
+    <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 1em; margin-bottom: 1em;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1em;">
+            <div>
+                {{ form_row(form.excavation, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+                {{ form_row(form.number, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+            </div>
+            <div>
+                {{ form_row(form.description, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all', 'rows': 10}}) }}
+            </div>
+        </div>
+    </div>
+
+    <div style="margin: 1em 0;">
+        <button type="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+            <span class="ui-button-text">Save</span>
+        </button>
+        <a href="{{ path('PapyrillioBerenike_LocusShow', {'id': locus.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+            <span class="ui-button-text">Cancel</span>
+        </a>
+    </div>
+    {{ form_end(form) }}
+{% endblock %}

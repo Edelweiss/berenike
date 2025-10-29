@@ -12,37 +12,66 @@
 {% endblock %}
 
 {% block body %}
-    <div class="container">
-        <h1>Loci</h1>
-        
-        <table class="ui-widget ui-widget-content">
-            <thead>
-                <tr class="ui-widget-header">
-                    <th>Site</th>
-                    <th>Season</th>
-                    <th>Trench</th>
-                    <th>Number</th>
-                    <th>Description</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for locus in loci %}
-                <tr>
-                    <td>{{ locus.site }}</td>
-                    <td>{{ locus.season }}</td>
-                    <td>{{ locus.trench }}</td>
-                    <td>{{ locus.number }}</td>
-                    <td>{{ locus.description }}</td>
-                    <td>
-                        <a href="{{ path('PapyrillioBerenike_LocusShow', {'id': locus.id}) }}" 
-                           class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
-                            <span class="ui-button-text">View</span>
-                        </a>
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-{% endblock body %}
+
+  <table id="list"></table>
+  <div id="pager"></div>
+  
+  <br />
+  
+  <button id="columnsHideShow" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false">
+    <span class="ui-button-text">hide/show columns</span>
+  </button>
+
+  <button id="print" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false">
+    <span class="ui-button-text">print</span>
+  </button>
+
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script src="{{ asset('js/jquery/i18n/grid.locale-en.js') }}" type="text/javascript"></script>
+  <script src="{{ asset('js/jquery/jquery-jqGrid.min.js') }}" type="text/javascript"></script>
+  <script src="{{ asset('js/correctionList.js') }}" type="text/javascript"></script>
+  <script type="text/javascript">
+
+$(function(){
+  $('#list').jqGrid({
+    url: '{{ path('PapyrillioBerenike_LocusList') }}',
+    datatype: 'xml',
+    mtype: 'POST',
+    colNames:[
+      'Site', 'Season', 'Trench', 'Number', 'Description', 'Actions'
+    ],
+    colModel :[ 
+      {name:'site',        index:'site',        width:35},
+      {name:'season',      index:'season',      width:100},
+      {name:'trench',      index:'trench',      width:80},
+      {name:'number',      index:'number',      width:80},
+      {name:'description', index:'description', width:200},
+      {name:'actions',     index:'actions',     width:85, sortable: false, search: false}
+    ],
+    pager: '#pager',
+    rowNum:100,
+    height:'auto',
+    rowList:[10,20,50,100],
+    sortname: 'trench',
+    sortorder: 'asc',
+    viewrecords: true,
+    gridview: true,
+    caption: null});
+
+    $('#list').jqGrid('filterToolbar', {});
+    
+    $('#list').jqGrid('gridResize', {});
+
+    $('#columnsHideShow').click(function(){
+      $('#list').jqGrid('columnChooser', {shrinkToFit: false, autowidth: false});
+      return false;
+    });
+
+  });
+
+  </script>
+{% endblock %}
+

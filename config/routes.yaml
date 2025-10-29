@@ -36,6 +36,11 @@ PapyrillioBerenike_LocusShow:
     path:  /locus/{id}
     controller: App\Controller\LocusController::show
 
+PapyrillioBerenike_LocusEdit:
+    path:  /locus/{id}/edit
+    controller: App\Controller\LocusController::edit
+    methods: [GET, POST]
+
 PapyrillioBerenike_ExcavationList:
     path:  /trenches
     controller: App\Controller\ExcavationController::list

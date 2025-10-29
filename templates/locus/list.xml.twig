@@ -1,0 +1,16 @@
+<?xml version ="1.0" encoding="utf-8"?>
+<rows>
+  <page>{{ page }}</page>
+  <total>{{ totalPages }}</total>
+  <records>{{ count }}</records>
+  {% for locus in loci %}
+    <row id = '{{ locus.id }}'>
+      <cell>{{ locus.excavation.site }}</cell>
+      <cell>{{ locus.excavation.season }}</cell>
+      <cell>{{ locus.excavation.trench }}</cell>
+      <cell>{{ locus.number }}</cell>
+      <cell>{{ locus.description }}</cell>
+      <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_LocusShow', {'id': locus.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">View</span></a><a href="{{ path('PapyrillioBerenike_LocusEdit', {'id': locus.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">Edit</span></a>]]></cell>
+    </row>
+  {% endfor %}
+</rows>
