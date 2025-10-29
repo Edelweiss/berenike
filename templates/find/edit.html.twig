@@ -4,6 +4,17 @@
 
 {% block top %}Edit Find{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .ui-widget label {
+            font-weight: bold;
+            display: inline-block;
+            width: 12em;
+        }
+    </style>
+{% endblock %}
+
 {% block javascripts %}
     {{ parent() }}
     <script>

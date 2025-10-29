@@ -4,6 +4,17 @@
 
 {% block top %}Edit Bucket{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .ui-widget label {
+            font-weight: bold;
+            display: inline-block;
+            width: 12em;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
     {{ form_start(form, {'attr': {'class': 'ui-widget'}}) }}
     <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 1em; margin-bottom: 1em;">
