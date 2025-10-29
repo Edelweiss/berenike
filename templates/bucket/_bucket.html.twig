@@ -9,18 +9,18 @@
         <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
           <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">Basic Information</h4>
           <div class="ui-helper-clearfix">
-            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">ID</span> {{ bucket.id }}</p>
-            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Number</span> {{ bucket.number }}</p>
-            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Locus</span> {{ bucket.locus.id }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">ID:</strong> {{ bucket.id }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Number:</strong> {{ bucket.number }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Locus:</strong> {{ bucket.locus.id }}</p>
           </div>
         </div>
 
         <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
           <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">Dating & Notes</h4>
           <div class="ui-helper-clearfix">
-            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Dating</span> {{ bucket.dating }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Dating:</strong> {{ bucket.dating }}</p>
             {% if bucket.remarks %}
-              <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Remarks</span> {{ bucket.remarks }}</p>
+              <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Remarks:</strong> {{ bucket.remarks }}</p>
             {% endif %}
           </div>
         </div>
@@ -28,8 +28,8 @@
         <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
           <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">System Info</h4>
           <div class="ui-helper-clearfix">
-            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Created</span> {{ bucket.created|date("d.m.Y") }}</p>
-            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Modified</span> {{ bucket.modified|date("d.m.Y") }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Created:</strong> {{ bucket.created|date("d.m.Y") }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Modified:</strong> {{ bucket.modified|date("d.m.Y") }}</p>
           </div>
         </div>
 
@@ -37,9 +37,7 @@
           <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">Related Finds</h4>
           <div class="ui-helper-clearfix">
             <p style="margin: 0.2em 0;">
-              <span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">
-                {{ bucket.finds|length }} Find{% if bucket.finds|length > 1 %}s{% endif %}
-              </span>
+              <strong style="display: inline-block; width: 6em;">{{ bucket.finds|length }} Find{% if bucket.finds|length > 1 %}s{% endif %}:</strong>
               {% for f in bucket.finds %}
                 <a href="{{ path('PapyrillioBerenike_FindShow', {'id': f.id}) }}" class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin: 0.1em; font-size: 0.9em; text-decoration: none;">{{ f.id }}</a>
               {% endfor %}

@@ -9,17 +9,17 @@
         <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
           <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">Basic Information</h4>
           <div class="ui-helper-clearfix">
-            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">ID</span> {{ locus.id }}</p>
-            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Number</span> {{ locus.number }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">ID:</strong> {{ locus.id }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Number:</strong> {{ locus.number }}</p>
           </div>
         </div>
 
         <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
           <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">Location</h4>
           <div class="ui-helper-clearfix">
-            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Site</span> {{ locus.excavation.site }}</p>
-            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Season</span> {{ locus.excavation.season }}</p>
-            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Trench</span> {{ locus.excavation.trench }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Site:</strong> {{ locus.excavation.site }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Season:</strong> {{ locus.excavation.season }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Trench:</strong> {{ locus.excavation.trench }}</p>
           </div>
         </div>
 
@@ -37,8 +37,8 @@
         <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
           <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">System Info</h4>
           <div class="ui-helper-clearfix">
-            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Created</span> {{ locus.created|date("d.m.Y") }}</p>
-            <p style="margin: 0.2em 0;"><span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin-right: 0.3em; font-size: 0.9em;">Modified</span> {{ locus.modified|date("d.m.Y") }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Created:</strong> {{ locus.created|date("d.m.Y") }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Modified:</strong> {{ locus.modified|date("d.m.Y") }}</p>
           </div>
         </div>
 
