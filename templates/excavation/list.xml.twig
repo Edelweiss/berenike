@@ -1,0 +1,16 @@
+<?xml version ="1.0" encoding="utf-8"?>
+<rows>
+  <page>{{ page }}</page>
+  <total>{{ totalPages }}</total>
+  <records>{{ count }}</records>
+  {% for excavation in excavations %}
+    <row id = '{{ excavation.id }}'>
+      <cell>{{ excavation.site }}</cell>
+      <cell>{{ excavation.season }}</cell>
+      <cell>{{ excavation.trench }}</cell>
+      <cell>{{ excavation.year }}</cell>
+      <cell>{{ excavation.context }}</cell>
+      <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_ExcavationShow', {'id': excavation.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">View</span></a>]]></cell>
+    </row>
+  {% endfor %}
+</rows>

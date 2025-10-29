@@ -2,42 +2,75 @@
 
 {% block title %}Trenches | Berenike.project{% endblock %}
 
+{% block stylesheets %}
+  {{ parent() }}
+  <link href="{{ asset('css/jquery/ui.jqgrid.css') }}" type="text/css" rel="stylesheet" />
+{% endblock %}
+
 {% block top %}
   Trenches
 {% endblock %}
 
 {% block body %}
-    <div class="container">
-        <h1>Trenches</h1>
-        
-        <table class="ui-widget ui-widget-content">
-            <thead>
-                <tr class="ui-widget-header">
-                    <th>Site</th>
-                    <th>Season</th>
-                    <th>Trench</th>
-                    <th>Year</th>
-                    <th>Context</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for excavation in excavations %}
-                <tr>
-                    <td>{{ excavation.site }}</td>
-                    <td>{{ excavation.season }}</td>
-                    <td>{{ excavation.trench }}</td>
-                    <td>{{ excavation.year }}</td>
-                    <td>{{ excavation.context }}</td>
-                    <td>
-                        <a href="{{ path('PapyrillioBerenike_ExcavationShow', {'id': excavation.id}) }}" 
-                           class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
-                            <span class="ui-button-text">View</span>
-                        </a>
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
+
+  <table id="list"></table>
+  <div id="pager"></div>
+  
+  <br />
+  
+  <button id="columnsHideShow" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false">
+    <span class="ui-button-text">hide/show columns</span>
+  </button>
+
+  <button id="print" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false">
+    <span class="ui-button-text">print</span>
+  </button>
+
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script src="{{ asset('js/jquery/i18n/grid.locale-en.js') }}" type="text/javascript"></script>
+  <script src="{{ asset('js/jquery/jquery-jqGrid.min.js') }}" type="text/javascript"></script>
+  <script src="{{ asset('js/correctionList.js') }}" type="text/javascript"></script>
+  <script type="text/javascript">
+
+$(function(){
+  $('#list').jqGrid({
+    url: '{{ path('PapyrillioBerenike_ExcavationList') }}',
+    datatype: 'xml',
+    mtype: 'POST',
+    colNames:[
+      'Site', 'Season', 'Trench', 'Year', 'Context', 'Actions'
+    ],
+    colModel :[ 
+      {name:'site',     index:'site',     width:100},
+      {name:'season',   index:'season',   width:100},
+      {name:'trench',   index:'trench',   width:80},
+      {name:'year',     index:'year',     width:70},
+      {name:'context',  index:'context',  width:200},
+      {name:'actions',  index:'actions',  width:85, sortable: false, search: false}
+    ],
+    pager: '#pager',
+    rowNum:100,
+    height:'auto',
+    rowList:[10,20,50,100],
+    sortname: 'season',
+    sortorder: 'desc',
+    viewrecords: true,
+    gridview: true,
+    caption: null});
+
+    $('#list').jqGrid('filterToolbar', {});
+    
+    $('#list').jqGrid('gridResize', {});
+
+    $('#columnsHideShow').click(function(){
+      $('#list').jqGrid('columnChooser', {shrinkToFit: false, autowidth: false});
+      return false;
+    });
+
+  });
+
+  </script>
 {% endblock %}
