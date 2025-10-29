@@ -23,6 +23,11 @@ PapyrillioBerenike_BucketShow:
     path:  /bucket/{id}
     controller: App\Controller\BucketController::show
 
+PapyrillioBerenike_BucketEdit:
+    path:  /bucket/{id}/edit
+    controller: App\Controller\BucketController::edit
+    methods: [GET, POST]
+
 PapyrillioBerenike_LocusList:
     path:  /loci
     controller: App\Controller\LocusController::list

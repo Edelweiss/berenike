@@ -30,7 +30,22 @@ class BucketType extends AbstractType
             ])
             ->add('locus', EntityType::class, [
                 'class' => Locus::class,
-                'choice_label' => 'number',
+                'choice_label' => function (Locus $locus) {
+                    $site = $locus->getExcavation() ? $locus->getExcavation()->getSite() : '';
+                    $trench = $locus->getExcavation() ? $locus->getExcavation()->getTrench() : '';
+                    $locusNumber = $locus->getNumber();
+                    
+                    return sprintf('%s-%s/%s', $site, $trench, $locusNumber);
+                },
+                'query_builder' => function ($repository) {
+                    return $repository->createQueryBuilder('l')
+                        ->leftJoin('l.excavation', 'e')
+                        ->orderBy('e.site', 'ASC')
+                        ->addOrderBy('LENGTH(e.trench)', 'ASC')
+                        ->addOrderBy('e.trench', 'ASC')
+                        ->addOrderBy('LENGTH(l.number)', 'ASC')
+                        ->addOrderBy('l.number', 'ASC');
+                },
                 'required' => true,
                 'label' => 'Locus'
             ])

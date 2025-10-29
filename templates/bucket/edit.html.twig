@@ -1,44 +1,31 @@
 {% extends 'frontend.html.twig' %}
 
-{% block title %}Edit Bucket {{ bucket.number }} - Berenike{% endblock %}
+{% block title %}Edit Bucket{% endblock %}
+
+{% block top %}Edit Bucket{% endblock %}
 
 {% block body %}
-    <div class="container">
-        <h1>Edit Bucket {{ bucket.number }}</h1>
-        
-        {{ form_start(form, {'attr': {'class': 'ui-form'}}) }}
-            <div class="form-group">
-                {{ form_label(form.number) }}
-                {{ form_widget(form.number, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(form.number) }}
+    {{ form_start(form, {'attr': {'class': 'ui-widget'}}) }}
+    <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 1em; margin-bottom: 1em;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1em;">
+            <div style="display: flex; flex-direction: column; gap: 1em;">
+                {{ form_row(form.number, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+                {{ form_row(form.locus, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+                {{ form_row(form.dating, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
             </div>
-
-            <div class="form-group">
-                {{ form_label(form.dating) }}
-                {{ form_widget(form.dating, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(form.dating) }}
+            <div>
+                {{ form_row(form.remarks, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all', 'rows': 10}}) }}
             </div>
-
-            <div class="form-group">
-                {{ form_label(form.locus) }}
-                {{ form_widget(form.locus, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(form.locus) }}
-            </div>
-
-            <div class="form-group">
-                {{ form_label(form.remarks) }}
-                {{ form_widget(form.remarks, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(form.remarks) }}
-            </div>
-
-            <div class="form-actions">
-                <button type="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
-                    <span class="ui-button-text">Save Changes</span>
-                </button>
-                <a href="{{ path('PapyrillioBerenike_BucketShow', {'id': bucket.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
-                    <span class="ui-button-text">Cancel</span>
-                </a>
-            </div>
-        {{ form_end(form) }}
+        </div>
     </div>
+
+    <div style="margin: 1em 0;">
+        <button type="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+            <span class="ui-button-text">Save</span>
+        </button>
+        <a href="{{ path('PapyrillioBerenike_BucketShow', {'id': bucket.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+            <span class="ui-button-text">Cancel</span>
+        </a>
+    </div>
+    {{ form_end(form) }}
 {% endblock %}

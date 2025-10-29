@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Find;
 use App\Entity\Bucket;
 use App\Entity\Locus;
+use App\Form\BucketType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
