@@ -10,10 +10,12 @@
   {% include 'locus/_locus.html.twig' with {'locus': locus} %}
 
   <div class="actions" style="margin-top: 1em;">
+    {% if app.user %}
     <a href="{{ path('PapyrillioBerenike_LocusEdit', {'id': locus.id}) }}" 
        class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
       <span class="ui-button-text">Edit</span>
     </a>
+    {% endif %}
     <a href="{{ path('PapyrillioBerenike_LocusList') }}" 
        class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
       <span class="ui-button-text">Back to Loci</span>

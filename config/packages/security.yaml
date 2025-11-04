@@ -23,7 +23,10 @@ security:
     enable_authenticator_manager: true
 
     access_control:
-        - { path: '^/registration', roles: ROLE_ADMIN }
         - { path: '^/admin', roles: ROLE_ADMIN }
         - { path: '^/user', roles: ROLE_USER }
-        - { path: '^/(correction|admin|task|index|system|numberWizard)', roles: ROLE_USER }
+        - { path: '^/dashboard$', roles: ROLE_USER }
+        - { path: '^/find/.+/edit$', roles: ROLE_USER }
+        - { path: '^/bucket/.+/edit$', roles: ROLE_USER }
+        - { path: '^/locus/.+/edit$', roles: ROLE_USER }
+        - { path: '^/trench/.+/edit$', roles: ROLE_USER }

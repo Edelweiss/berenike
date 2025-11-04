@@ -11,7 +11,7 @@
         <cell>{{ bucket.remarks }}</cell>
         <cell>{{ bucket.created|date('Y-m-d H:i:s') }}</cell>
         <cell>{{ bucket.modified|date('Y-m-d H:i:s') }}</cell>
-        <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_BucketShow', {'id': bucket.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">View</span></a><a href="{{ path('PapyrillioBerenike_BucketEdit', {'id': bucket.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">Edit</span></a>]]></cell>
+        <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_BucketShow', {'id': bucket.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">View</span></a>{% if app.user %}<a href="{{ path('PapyrillioBerenike_BucketEdit', {'id': bucket.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">Edit</span></a>{% endif %}]]></cell>
     </row>
     {% endfor %}
 </rows>
