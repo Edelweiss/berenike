@@ -19,5 +19,12 @@
     <a href="{{ path('PapyrillioBerenike_FindList') }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
       <span class="ui-button-text">Back to Finds</span>
     </a>
+    {% if app.user %}
+    <form method="post" action="{{ path('PapyrillioBerenike_AdminDeleteFind', {'id': find.id}) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this find?');">
+      <button type="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="color: #cc0000;">
+        <span class="ui-button-text">Delete</span>
+      </button>
+    </form>
+    {% endif %}
   </div>
 {% endblock %}

@@ -78,6 +78,26 @@ PapyrillioBerenike_AdminNewTrench:
     controller: App\Controller\AdminController::newTrench
     methods: [GET, POST]
 
+PapyrillioBerenike_AdminDeleteFind:
+    path:  /admin/delete/find/{id}
+    controller: App\Controller\AdminController::deleteFind
+    methods: [POST]
+
+PapyrillioBerenike_AdminDeleteBucket:
+    path:  /admin/delete/bucket/{id}
+    controller: App\Controller\AdminController::deleteBucket
+    methods: [POST]
+
+PapyrillioBerenike_AdminDeleteLocus:
+    path:  /admin/delete/locus/{id}
+    controller: App\Controller\AdminController::deleteLocus
+    methods: [POST]
+
+PapyrillioBerenike_AdminDeleteTrench:
+    path:  /admin/delete/trench/{id}
+    controller: App\Controller\AdminController::deleteTrench
+    methods: [POST]
+
 PapyrillioBerenike_Logout:
     path: /logout
     controller: App\Controller\SecurityController::logout

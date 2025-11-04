@@ -10,9 +10,20 @@
   {% include 'locus/_locus.html.twig' with {'locus': locus} %}
 
   <div class="actions" style="margin-top: 1em;">
+    <a href="{{ path('PapyrillioBerenike_LocusEdit', {'id': locus.id}) }}" 
+       class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+      <span class="ui-button-text">Edit</span>
+    </a>
     <a href="{{ path('PapyrillioBerenike_LocusList') }}" 
        class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
       <span class="ui-button-text">Back to Loci</span>
     </a>
+    {% if app.user %}
+    <form method="post" action="{{ path('PapyrillioBerenike_AdminDeleteLocus', {'id': locus.id}) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this locus?');">
+      <button type="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="color: #cc0000;">
+        <span class="ui-button-text">Delete</span>
+      </button>
+    </form>
+    {% endif %}
   </div>
 {% endblock %}

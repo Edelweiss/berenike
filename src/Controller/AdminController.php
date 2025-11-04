@@ -10,6 +10,10 @@ use App\Form\FindType;
 use App\Form\BucketType;
 use App\Form\LocusType;
 use App\Form\ExcavationType;
+use App\Repository\FindRepository;
+use App\Repository\BucketRepository;
+use App\Repository\LocusRepository;
+use App\Repository\ExcavationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,14 +23,26 @@ use Psr\Log\LoggerInterface;
 class AdminController extends BerenikeController
 {
     private $entityManager;
+    private $findRepository;
+    private $bucketRepository;
+    private $locusRepository;
+    private $excavationRepository;
 
     public function __construct(
         RequestStack $requestStack,
         LoggerInterface $logger,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        FindRepository $findRepository,
+        BucketRepository $bucketRepository,
+        LocusRepository $locusRepository,
+        ExcavationRepository $excavationRepository
     ) {
         parent::__construct($requestStack, $logger);
         $this->entityManager = $entityManager;
+        $this->findRepository = $findRepository;
+        $this->bucketRepository = $bucketRepository;
+        $this->locusRepository = $locusRepository;
+        $this->excavationRepository = $excavationRepository;
     }
 
     public function newFind(Request $request): Response
@@ -106,5 +122,65 @@ class AdminController extends BerenikeController
         return $this->render('admin/newTrench.html.twig', [
             'form' => $form->createView(),
         ]);
+    }
+
+    public function deleteFind(Request $request, $id): Response
+    {
+        $find = $this->findRepository->find($id);
+        
+        if (!$find) {
+            throw $this->createNotFoundException('Find not found');
+        }
+
+        $this->entityManager->remove($find);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Find deleted successfully');
+        return $this->redirectToRoute('PapyrillioBerenike_FindList');
+    }
+
+    public function deleteBucket(Request $request, $id): Response
+    {
+        $bucket = $this->bucketRepository->find($id);
+        
+        if (!$bucket) {
+            throw $this->createNotFoundException('Bucket not found');
+        }
+
+        $this->entityManager->remove($bucket);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Bucket deleted successfully');
+        return $this->redirectToRoute('PapyrillioBerenike_BucketList');
+    }
+
+    public function deleteLocus(Request $request, $id): Response
+    {
+        $locus = $this->locusRepository->find($id);
+        
+        if (!$locus) {
+            throw $this->createNotFoundException('Locus not found');
+        }
+
+        $this->entityManager->remove($locus);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Locus deleted successfully');
+        return $this->redirectToRoute('PapyrillioBerenike_LocusList');
+    }
+
+    public function deleteTrench(Request $request, $id): Response
+    {
+        $excavation = $this->excavationRepository->find($id);
+        
+        if (!$excavation) {
+            throw $this->createNotFoundException('Trench not found');
+        }
+
+        $this->entityManager->remove($excavation);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Trench deleted successfully');
+        return $this->redirectToRoute('PapyrillioBerenike_ExcavationList');
     }
 }
