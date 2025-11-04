@@ -223,7 +223,7 @@ class FindController extends BerenikeController
     return $this->redirect($this->generateUrl('PapyrillioBerenike_FindList'));
   }
 
-  public function show($id): Response {
+  public function show($id, Request $request): Response {
     if(!$id){
       return $this->forward('PapyrillioBerenikeBundle:Find:list');
     }
@@ -233,6 +233,11 @@ class FindController extends BerenikeController
         throw $this->createNotFoundException('Find not found');
     }
 
+    // Check which route was used to access this action
+    $route = $request->attributes->get('_route');
+    if ($route === 'PapyrillioBerenike_FindShowForHeidIcon') {
+        return $this->render('find/showForHeidIcon.html.twig', ['find' => $find]);
+    }
     return $this->render('find/show.html.twig', ['find' => $find]);
   }
   
