@@ -1,0 +1,79 @@
+{% extends 'frontend.html.twig' %}
+
+{% block title %}Create New Find{% endblock %}
+
+{% block top %}Create New Find{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .ui-widget label {
+            font-weight: bold;
+            display: inline-block;
+            width: 12em;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $(document).ready(function() {
+            var tmInput = $('input[name$="[tm]"]');
+            tmInput.on('input', function() {
+                var value = $(this).val();
+                if (value !== '') {
+                    if (parseInt(value) <= 0) {
+                        this.setCustomValidity('TM must be a positive number');
+                    } else {
+                        this.setCustomValidity('');
+                    }
+                } else {
+                    this.setCustomValidity(''); // Empty value is allowed
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block body %}
+    {{ form_start(form, {'attr': {'class': 'ui-widget'}}) }}
+    <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 1em; margin-bottom: 1em;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1em;">
+            {{ form_row(form.inventoryNumber, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+            {{ form_row(form.tm, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+            {{ form_row(form.trench, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+            {{ form_row(form.date, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+            {{ form_row(form.year, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+            {{ form_row(form.month, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+            {{ form_row(form.dateRemarks, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+            {{ form_row(form.scaRegister, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+            {{ form_row(form.object, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+            {{ form_row(form.objectNo, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+            {{ form_row(form.category, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+            {{ form_row(form.categoryNo, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+            {{ form_row(form.weight, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+            {{ form_row(form.quantity, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+            {{ form_row(form.dimensions, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+            {{ form_row(form.preservation, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+            {{ form_row(form.description, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all', 'rows': 3}}) }}
+            {{ form_row(form.material, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+            {{ form_row(form.materialRemarks, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all', 'rows': 3}}) }}
+            {{ form_row(form.datingAbsolute, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+            {{ form_row(form.typologyReference, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+            {{ form_row(form.publications, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all', 'rows': 3}}) }}
+            {{ form_row(form.remarks, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all', 'rows': 3}}) }}
+            {{ form_row(form.bucket, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+        </div>
+    </div>
+
+    <div style="margin: 1em 0;">
+        <button type="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+            <span class="ui-button-text">Create</span>
+        </button>
+        <a href="{{ path('PapyrillioBerenike_FindList') }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+            <span class="ui-button-text">Cancel</span>
+        </a>
+    </div>
+    {{ form_end(form) }}
+{% endblock %}

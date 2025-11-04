@@ -24,7 +24,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
 {
     use TargetPathTrait;
 
-    public const LOGIN_ROUTE = 'PapyrillioBeehive_Login';
+    public const LOGIN_ROUTE = 'PapyrillioBerenike_Login';
 
     private $entityManager;
     private $urlGenerator;
@@ -98,7 +98,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
 
         // For example : return new RedirectResponse($this->urlGenerator->generate('some_route'));
         //throw new \Exception('TODO: provide a valid redirect inside '.__FILE__);
-        return new RedirectResponse($this->urlGenerator->generate('PapyrillioBeehive_Home'));
+        return new RedirectResponse($this->urlGenerator->generate('PapyrillioBerenike_Home'));
     }
 
     protected function getLoginUrl()

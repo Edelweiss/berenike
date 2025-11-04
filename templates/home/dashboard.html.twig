@@ -122,7 +122,18 @@
       <h3>Recent Activity</h3>
       <ul>
         <li>📊 Total Featured Finds: {{ finds|length }}</li>
-        <li>🔗 <a href="{{ path('PapyrillioBerenike_Home') }}">Go to Home</a></li>
+        <li><a href="{{ path('PapyrillioBerenike_Home') }}">🔗 Go to Home</a></li>
+      </ul>
+    </div>
+
+    <!-- Admin Tile -->
+    <div class="dashboard-tile">
+      <h3>Admin Actions</h3>
+      <ul>
+        <li><a href="{{ path('PapyrillioBerenike_AdminNewFind') }}">⭐ Create new Find</a></li>
+        <li><a href="{{ path('PapyrillioBerenike_AdminNewBucket') }}">⭐ Create new Bucket</a></li>
+        <li><a href="{{ path('PapyrillioBerenike_AdminNewLocus') }}">⭐ Create new Locus</a></li>
+        <li><a href="{{ path('PapyrillioBerenike_AdminNewTrench') }}">⭐ Create new Trench</a></li>
       </ul>
     </div>
 

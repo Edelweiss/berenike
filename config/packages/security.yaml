@@ -18,8 +18,8 @@ security:
                 authenticators:
                     - App\Security\LoginFormAuthenticator
             logout:
-                path: PapyrillioBeehive_Logout
-                target: PapyrillioBeehive_Home # where to redirect after logout
+                path: PapyrillioBerenike_Logout
+                target: PapyrillioBerenike_Home # where to redirect after logout
     enable_authenticator_manager: true
 
     access_control:

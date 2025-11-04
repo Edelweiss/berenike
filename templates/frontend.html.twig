@@ -25,9 +25,14 @@
     <div id="logo" class="grid_3">&nbsp;</div>
     <div id="subHeader" class="grid_9">
 			<div id="navigation" class="grid_9">
-        <a href>Admin</a>
-        <a href>Login</a>
-        <a href>Contact</a>
+        {% if app.user %}
+          Hello {{ app.user.username }}! 
+          <a href="{{ path('PapyrillioBerenike_Dashboard') }}">Admin</a>
+          <a href="{{ path('PapyrillioBerenike_Logout') }}">Logout</a>
+        {% else %}
+          <a href="{{ path('PapyrillioBerenike_Login') }}">Login</a>
+        {% endif %}
+        <a href="mailto:papyrologie@zaw.uni-heidelberg.de?subject=Berenike.project Feedback">Contact</a>
       </div>
 			<div id="top" class="grid_9">
         <h1>{% block top %}top{% endblock %}</h1>

@@ -56,4 +56,57 @@ PapyrillioBerenike_ExcavationShow:
 PapyrillioBerenike_ExcavationEdit:
     path:  /trench/{id}/edit
     controller: App\Controller\ExcavationController::edit
+    methods: [GET, POST]
 
+PapyrillioBerenike_AdminNewFind:
+    path:  /admin/new/find
+    controller: App\Controller\AdminController::newFind
+    methods: [GET, POST]
+
+PapyrillioBerenike_AdminNewBucket:
+    path:  /admin/new/bucket
+    controller: App\Controller\AdminController::newBucket
+    methods: [GET, POST]
+
+PapyrillioBerenike_AdminNewLocus:
+    path:  /admin/new/locus
+    controller: App\Controller\AdminController::newLocus
+    methods: [GET, POST]
+
+PapyrillioBerenike_AdminNewTrench:
+    path:  /admin/new/trench
+    controller: App\Controller\AdminController::newTrench
+    methods: [GET, POST]
+
+PapyrillioBerenike_Logout:
+    path: /logout
+    controller: App\Controller\SecurityController::logout
+
+PapyrillioBerenike_Login:
+    path: /login
+    controller: App\Controller\SecurityController::login
+
+PapyrillioBerenike_UserChangePassword:
+    path: /user/changePassword
+    controller: App\Controller\UserController::changePassword
+
+PapyrillioBerenike_UserEditProfile:
+    path: /user/editProfile
+    controller: App\Controller\UserController::editProfile
+
+PapyrillioBerenike_UserList:
+    path: /user/list
+    controller: App\Controller\UserController::list
+
+PapyrillioBerenike_UserNew:
+    path: /user/new
+    controller: App\Controller\UserController::new
+
+PapyrillioBerenike_UserShow:
+    path: /user/show/{id}
+    controller: App\Controller\UserController::show
+    requirements:
+      id: '\d+'
+
+PapyrillioBerenike_UserPassword:
+    path: /user/password
