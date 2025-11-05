@@ -81,7 +81,11 @@ class FindController extends BerenikeController
       // ODER BY
 
       $orderBy = '';
-      if(in_array($sort, ['year', 'object', 'category', 'created'])){
+      if(in_array($sort, ['year', 'month', 'object', 'objectNo', 'category', 'categoryNo', 'weight', 'quantity', 
+                          'dimensions', 'preservation', 'description', 'material', 'materialRemarks', 
+                          'datingAbsolute', 'typologyReference', 'publications', 'remarks', 'created', 'modified',
+                          'inventoryNumber', 'tm', 'date', 'dateRemarks', 'scaRegister', 'rebuildChanges',
+                          'heidiconId', 'heidiconUuid', 'heidiconSystemObjectId'])){
         $orderBy = ' ORDER BY f.' . $sort . ' ' . $sortDirection;
       } elseif($sort === 'trench'){
         $orderBy = ' ORDER BY e.' . $sort . ' ' . $sortDirection;
@@ -99,7 +103,11 @@ class FindController extends BerenikeController
       if($this->getParameter('_search') == 'true'){
         $prefix = ' WHERE ';
 
-        foreach(['year', 'object', 'category', 'created'] as $field){
+        foreach(['year', 'month', 'object', 'objectNo', 'category', 'categoryNo', 'weight', 'quantity', 
+                 'dimensions', 'preservation', 'description', 'material', 'materialRemarks', 
+                 'datingAbsolute', 'typologyReference', 'publications', 'remarks', 'created', 'modified',
+                 'inventoryNumber', 'tm', 'date', 'dateRemarks', 'scaRegister', 'rebuildChanges',
+                 'heidiconId', 'heidiconUuid', 'heidiconSystemObjectId'] as $field){
           if(strlen($this->getParameter($field))){
             $where .= $prefix . 'f.' . $field . ' LIKE :' . $field;
             $parameters[$field] = '%' . $this->getParameter($field) . '%';
@@ -116,13 +124,13 @@ class FindController extends BerenikeController
         }
 
         if($this->getParameter('locus')){
-          $where .= $prefix . 'l.number = :locus';
+          $where .= $prefix . 'l.number LIKE :locus';
           $parameters['locus'] = '%' . $this->getParameter('locus') . '%';
           $prefix = ' AND ';
         }
 
         if($this->getParameter('bucket')){
-          $where .= $prefix . 'b.number = :bucket';
+          $where .= $prefix . 'b.number LIKE :bucket';
           $parameters['bucket'] = '%' . $this->getParameter('bucket') . '%';
           $prefix = ' AND ';
         }

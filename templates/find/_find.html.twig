@@ -12,6 +12,15 @@
             <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">ID:</strong> {{ find.id }}</p>
             <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Inventory:</strong> {{ find.inventoryNumber }}</p>
             <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">TM:</strong> {{ find.tm }}</p>
+            {% if find.heidiconId %}
+              <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">HeidICON ID:</strong> {{ find.heidiconId }}</p>
+            {% endif %}
+            {% if find.heidiconUuid %}
+              <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">HeidICON UUID:</strong> {{ find.heidiconUuid }}</p>
+            {% endif %}
+            {% if find.heidiconSystemObjectId %}
+              <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">HeidICON Sys ID:</strong> {{ find.heidiconSystemObjectId }}</p>
+            {% endif %}
             <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Trench:</strong> {{ find.trench }}</p>
           </div>
         </div>

@@ -61,6 +61,37 @@
     {% endif %}
   </div>
 
+  <!-- HeidICON -->
+  {% if find.heidiconId or find.heidiconUuid or find.heidiconSystemObjectId %}
+  <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em; margin-bottom: 0.5em;">
+    <h3 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.5em -0.5em 0.5em -0.5em;">HeidICON</h3>
+    {% if find.heidiconId %}
+    <p>
+      <strong>HeidICON ID:</strong> {{ find.heidiconId }}
+      <button onclick="copyToClipboard('{{ find.heidiconId|e('js') }}', this)" class="ui-button ui-widget ui-state-default ui-corner-all" style="padding: 0.2em 0.4em; margin-left: 0.5em; font-size: 0.8em;">
+        <span class="ui-button-text">Copy</span>
+      </button>
+    </p>
+    {% endif %}
+    {% if find.heidiconUuid %}
+    <p>
+      <strong>HeidICON UUID:</strong> {{ find.heidiconUuid }}
+      <button onclick="copyToClipboard('{{ find.heidiconUuid|e('js') }}', this)" class="ui-button ui-widget ui-state-default ui-corner-all" style="padding: 0.2em 0.4em; margin-left: 0.5em; font-size: 0.8em;">
+        <span class="ui-button-text">Copy</span>
+      </button>
+    </p>
+    {% endif %}
+    {% if find.heidiconSystemObjectId %}
+    <p>
+      <strong>HeidICON System Object ID:</strong> {{ find.heidiconSystemObjectId }}
+      <button onclick="copyToClipboard('{{ find.heidiconSystemObjectId|e('js') }}', this)" class="ui-button ui-widget ui-state-default ui-corner-all" style="padding: 0.2em 0.4em; margin-left: 0.5em; font-size: 0.8em;">
+        <span class="ui-button-text">Copy</span>
+      </button>
+    </p>
+    {% endif %}
+  </div>
+  {% endif %}
+
   <!-- Inschrift/Wasserzeichen -->
   {% if find.tm %}
   <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em; margin-bottom: 0.5em;">

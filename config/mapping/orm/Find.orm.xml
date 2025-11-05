@@ -12,6 +12,17 @@
                 <option name="unsigned">true</option>
             </options>
         </field>
+        <field name="heidiconId" type="integer" nullable="true">
+            <options>
+                <option name="unsigned">true</option>
+            </options>
+        </field>
+        <field name="heidiconUuid" type="string" length="36" nullable="true"/>
+        <field name="heidiconSystemObjectId" type="integer" nullable="true">
+            <options>
+                <option name="unsigned">true</option>
+            </options>
+        </field>
         <field name="trench" type="string" length="512" nullable="true"/>
         <field name="date" type="date" nullable="true"/>
         <field name="year" type="integer">

@@ -6,6 +6,9 @@
   {% for find in finds %}
     <row id = '{{ find.id }}'>
       <cell>{% if find.tm %}<![CDATA[<a href="https://www.trismegistos.org/text/{{ find.tm }}" target="_blank" title="View in Trismegistos">{{ find.tm }}</a>]]>{% endif %}</cell>
+      <cell>{{ find.heidiconId }}</cell>
+      <cell>{{ find.heidiconUuid }}</cell>
+      <cell>{{ find.heidiconSystemObjectId }}</cell>
       <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_ExcavationShow', {'id': find.bucket.locus.excavation.id}) }}" title="Trench Number {{ find.bucket.locus.excavation.trench }} {{ find.bucket.locus.excavation.season }}">{{ find.bucket.locus.excavation.trench }}</a>]]></cell>
       <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_LocusShow', {'id': find.bucket.locus.id}) }}" title="Locus Number {{ find.bucket.locus.number }}">{{ find.bucket.locus.number }}</a>]]></cell>
       <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_BucketShow', {'id': find.bucket.id}) }}" title="Bucket Number {{ find.bucket.number }}">{{ find.bucket.number }}</a>]]></cell>
@@ -30,8 +33,8 @@
       <cell>{{ find.typologyReference }}</cell>
       <cell>{{ find.publications }}</cell>
       <cell>{{ find.remarks }}</cell>
-      <cell>{{ find.created ? find.created|date('d.m.Y H:i') : '' }}</cell>
-      <cell>{{ find.modified ? find.modified|date('d.m.Y H:i') : '' }}</cell>
+      <cell>{{ find.created ? find.created|date('d.m.Y H:i:s') : '' }}</cell>
+      <cell>{{ find.modified ? find.modified|date('d.m.Y H:i:s') : '' }}</cell>
       <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_FindShow', {'id': find.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">View</span></a>{% if app.user %}<a href="{{ path('PapyrillioBerenike_FindEdit', {'id': find.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">Edit</span></a>{% endif %}]]></cell>
     </row>
   {% endfor %}

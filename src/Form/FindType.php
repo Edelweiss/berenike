@@ -33,6 +33,31 @@ class FindType extends AbstractType
                     'oninput' => 'setCustomValidity("")'
                 ]
             ])
+            ->add('heidiconId', IntegerType::class, [
+                'required' => false,
+                'label' => 'HeidICON ID',
+                'attr' => [
+                    'min' => 1,
+                    'placeholder' => 'Enter a positive number or leave empty'
+                ]
+            ])
+            ->add('heidiconUuid', TextType::class, [
+                'required' => false,
+                'label' => 'HeidICON UUID',
+                'attr' => [
+                    'placeholder' => 'e.g., b17bf1dd-a7e7-42c2-b441-8f57cbd9e20e',
+                    'pattern' => '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}',
+                    'title' => 'Format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+                ]
+            ])
+            ->add('heidiconSystemObjectId', IntegerType::class, [
+                'required' => false,
+                'label' => 'HeidICON System Object ID',
+                'attr' => [
+                    'min' => 1,
+                    'placeholder' => 'Enter a positive number or leave empty'
+                ]
+            ])
             ->add('trench', TextType::class, [
                 'required' => false,
                 'label' => 'Trench',

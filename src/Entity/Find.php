@@ -23,6 +23,25 @@ class Find {
      * @Assert\GreaterThanOrEqual(value = 0, message = "TM must be a positive integer or null")
      */
     private $tm;
+    
+    /**
+     * @ORM\Column(type="integer", nullable=true, options={"unsigned"=true})
+     * @Assert\GreaterThanOrEqual(value = 0, message = "HeidICON ID must be a positive integer or null")
+     */
+    private $heidiconId;
+    
+    /**
+     * @ORM\Column(type="string", length=36, nullable=true)
+     * @Assert\Regex(pattern="/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i", message="HeidICON UUID must be in format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
+     */
+    private $heidiconUuid;
+    
+    /**
+     * @ORM\Column(type="integer", nullable=true, options={"unsigned"=true})
+     * @Assert\GreaterThanOrEqual(value = 0, message = "HeidICON System Object ID must be a positive integer or null")
+     */
+    private $heidiconSystemObjectId;
+    
     private $dateRemarks;
     private $scaRegister;
     private $object;
@@ -246,6 +265,30 @@ class Find {
     }
     public function getTm(): ?int {
         return $this->tm;
+    }
+
+    public function setHeidiconId(?int $heidiconId): self {
+        $this->heidiconId = $heidiconId;
+        return $this;
+    }
+    public function getHeidiconId(): ?int {
+        return $this->heidiconId;
+    }
+
+    public function setHeidiconUuid(?string $heidiconUuid): self {
+        $this->heidiconUuid = $heidiconUuid;
+        return $this;
+    }
+    public function getHeidiconUuid(): ?string {
+        return $this->heidiconUuid;
+    }
+
+    public function setHeidiconSystemObjectId(?int $heidiconSystemObjectId): self {
+        $this->heidiconSystemObjectId = $heidiconSystemObjectId;
+        return $this;
+    }
+    public function getHeidiconSystemObjectId(): ?int {
+        return $this->heidiconSystemObjectId;
     }
 
     public function addFindSpecialist(\App\Entity\FindSpecialist $findSpecialist) {
