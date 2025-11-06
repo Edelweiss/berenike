@@ -67,7 +67,7 @@
                 <order-by-field name="year" direction="ASC" />
             </order-by>
         </one-to-many>
-        <one-to-many field="images" target-entity="Image" mapped-by="find">
+        <one-to-many field="images" target-entity="Image" mapped-by="find" orphan-removal="true">
             <cascade>
                 <cascade-persist/>
                 <cascade-remove/>
