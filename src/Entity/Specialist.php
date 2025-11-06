@@ -7,9 +7,11 @@ class Specialist {
     private $id;
     private $name;
     private $findSpecialists;
+    private $imageSpecialists;
 
     public function __construct() {
         $this->findSpecialists = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->imageSpecialists = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     public function setId($id) {
@@ -31,5 +33,12 @@ class Specialist {
     }
     public function getFindSpecialists() {
         return $this->findSpecialists;
+    }
+
+    public function addImageSpecialist(\App\Entity\ImageSpecialist $imageSpecialist) {
+        $this->imageSpecialists[] = $imageSpecialist;
+    }
+    public function getImageSpecialists() {
+        return $this->imageSpecialists;
     }
 }

@@ -64,9 +64,11 @@ class Find {
     private $modified;
     private $bucket;
     private $findSpecialists;
+    private $images;
     
     public function __construct() {
         $this->findSpecialists = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->images = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     public function setId($id) {
@@ -296,5 +298,20 @@ class Find {
     }
     public function getFindSpecialists() {
         return $this->findSpecialists;
+    }
+
+    public function addImage(\App\Entity\Image $image) {
+        if (!$this->images->contains($image)) {
+            $this->images[] = $image;
+            $image->setFind($this);
+        }
+    }
+    
+    public function removeImage(\App\Entity\Image $image) {
+        $this->images->removeElement($image);
+    }
+    
+    public function getImages() {
+        return $this->images;
     }
 }
