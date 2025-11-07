@@ -314,4 +314,37 @@ class Find {
     public function getImages() {
         return $this->images;
     }
+    
+    /**
+     * Get the thumbnail image for this find.
+     * Returns the image with the lowest number if available,
+     * or the first image with HeidICON data.
+     * 
+     * @return Image|null
+     */
+    public function getThumbnailImage(): ?Image {
+        if ($this->images->isEmpty()) {
+            return null;
+        }
+        
+        $thumbnailImage = null;
+        $lowestNumber = null;
+        
+        foreach ($this->images as $image) {
+            // Only consider images with HeidICON data
+            if ($image->getHeidiconUuid() && $image->getHeidiconSystemObjectId()) {
+                // If this image has a number, check if it's the lowest
+                if ($image->getNumber() && ($lowestNumber === null || $image->getNumber() < $lowestNumber)) {
+                    $lowestNumber = $image->getNumber();
+                    $thumbnailImage = $image;
+                } elseif ($thumbnailImage === null) {
+                    // No image selected yet, use this one
+                    $thumbnailImage = $image;
+                }
+            }
+        }
+        
+        return $thumbnailImage;
+    }
 }
+

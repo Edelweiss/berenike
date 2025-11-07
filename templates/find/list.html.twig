@@ -41,13 +41,14 @@ $(function(){
     datatype: 'xml',
     mtype: 'POST',
     colNames:[
-      'TM', 'HeidICON ID', 'HeidICON UUID', 'HeidICON Sys ID', 'Trench', 'Locus', 'Bucket', 'Inventory No.', 'Date', 'Year', 'Month', 'Date Remarks',
+      'Image', 'TM', 'HeidICON ID', 'HeidICON UUID', 'HeidICON Sys ID', 'Trench', 'Locus', 'Bucket', 'Inventory No.', 'Date', 'Year', 'Month', 'Date Remarks',
       'SCA Register', 'Object', 'Object No', 'Category', 'Category No',
       'Weight', 'Quantity', 'Dimensions', 'Preservation', 'Description',
       'Material', 'Material Remarks', 'Dating Absolute', 'Typology Reference',
       'Publications', 'Remarks', 'Created', 'Modified', 'Actions'
     ],
     colModel :[ 
+      {name:'thumbnail',         index:'thumbnail',         width:60, sortable: false, search: false, align:'center'},
       {name:'tm',                index:'tm',                width:60},
       {name:'heidiconId',        index:'heidiconId',        width:90, hidden: true},
       {name:'heidiconUuid',      index:'heidiconUuid',      width:280, hidden: true},
