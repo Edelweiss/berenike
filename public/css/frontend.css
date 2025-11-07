@@ -116,9 +116,13 @@ a.backtotop,
 a.backtotop:link,
 a.backtotop:visited,
 a.backtotop:hover,
-a.backtotop:active {
+a.backtotop:active,
+a:has(img),
+a:has(img):link,
+a:has(img):visited,
+a:has(img):hover,
+a:has(img):active {
     background-image: none;
-
     color: #503d31;
     #font-family: Papyrus, Palatino, serif;
     text-decoration: none;

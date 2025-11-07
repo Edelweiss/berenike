@@ -19,7 +19,7 @@
               <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">HeidICON UUID:</strong> {{ find.heidiconUuid }}</p>
             {% endif %}
             {% if find.heidiconSystemObjectId %}
-              <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">HeidICON Sys ID:</strong> <a href="https://heidicon.ub.uni-heidelberg.de#/detail/{{ find.heidiconSystemObjectId }}">{{ find.heidiconSystemObjectId }}</a></p>
+              <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">HeidICON Sys ID:</strong> <a href="https://heidicon.ub.uni-heidelberg.de#/detail/{{ find.heidiconSystemObjectId }}" target="heidicon">{{ find.heidiconSystemObjectId }}</a></p>
             {% endif %}
             <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Trench:</strong> {{ find.trench }}</p>
           </div>
@@ -44,6 +44,7 @@
             <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Object No:</strong> {{ find.objectNo }}</p>
             <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Category:</strong> {{ find.category }}</p>
             <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Category No:</strong> {{ find.categoryNo }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">SCA Register:</strong> {{ find.scaRegister }}</p>
           </div>
         </div>
 
@@ -67,6 +68,15 @@
           </div>
         </div>
 
+        <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
+          <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">References</h4>
+          <div class="ui-helper-clearfix">
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Dating:</strong> {{ find.datingAbsolute }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Typology:</strong> {{ find.typologyReference }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Publications:</strong> {{ find.publications }}</p>
+          </div>
+        </div>
+
         {% if find.description or find.remarks %}
           <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em; grid-column: 1 / -1;">
             <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">Description & Remarks</h4>
@@ -78,15 +88,6 @@
             {% endif %}
           </div>
         {% endif %}
-
-        <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
-          <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">References</h4>
-          <div class="ui-helper-clearfix">
-            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Dating:</strong> {{ find.datingAbsolute }}</p>
-            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Typology:</strong> {{ find.typologyReference }}</p>
-            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Publications:</strong> {{ find.publications }}</p>
-          </div>
-        </div>
 
         <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
           <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">Specialists</h4>
@@ -117,6 +118,50 @@
       </div>
     </div>
   </div>
+  
+  {% if find.images|length > 0 %}
+  <div class="ui-widget" style="margin-top: 0.5em;">
+    <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
+      <h3 style="margin: 0; font-size: 1.1em;">Images</h3>
+    </div>
+    
+    <div class="ui-widget-content ui-corner-bottom" style="padding: 0.5em;">
+      <ul style="list-style: none; padding: 0; margin: 0;">
+        {% for image in find.images %}
+          <li style="margin-bottom: 1em; padding: 0.5em; background-color: #f9f9f9; border-radius: 4px;">
+            <div style="display: flex; align-items: flex-start; gap: 1em;">
+              {% if image.heidiconUuid and image.heidiconSystemObjectId %}
+                <div style="flex-shrink: 0;">
+                  <a href="https://heidicon.ub.uni-heidelberg.de#/detail/{{ image.heidiconSystemObjectId }}" target="heidicon">
+                    <img src="https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/{{ image.heidiconUuid }}/file/id/{{ image.heidiconSystemObjectId }}/file_version/name/small" alt="Image thumbnail" 
+                         style="max-width: 150px; height: auto; border: 1px solid #ccc; border-radius: 4px;" />
+                  </a>
+                </div>
+              {% endif %}
+              <div style="flex-grow: 1;">
+                <p style="margin: 0.2em 0;">
+                  <strong>{{ image.type|capitalize }}</strong>
+                  {% if image.imageSpecialists|length > 0 %}
+                    by 
+                    {% for imageSpecialist in image.imageSpecialists %}
+                      {{ imageSpecialist.specialist.name }}{% if imageSpecialist.year %} ({{ imageSpecialist.year }}){% endif %}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                </p>
+                {% if image.number %}
+                  <p style="margin: 0.2em 0; font-size: 0.9em; color: #666;">Number: {{ image.number }}</p>
+                {% endif %}
+                {% if image.file %}
+                  <p style="margin: 0.2em 0; font-size: 0.9em; color: #666;">File: {{ image.file }}</p>
+                {% endif %}
+              </div>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% endif %}
   
   <div style="margin-top: 0.5em;">
     {% include 'bucket/_bucket.html.twig' with {'bucket': find.bucket} %}
