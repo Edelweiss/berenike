@@ -267,6 +267,56 @@
     {% endif %}
   </div>
 
+  <!-- Aufnahmen/Reproduktion -->
+  <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em; margin-bottom: 0.5em;">
+    <h3 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.5em -0.5em 0.5em -0.5em;">Aufnahmen/Reproduktion</h3>
+    
+    <p>
+      <strong>Reproduktionstyp:</strong> Digitales Bild
+      <button onclick="copyToClipboard('Digitales Bild', this)" class="ui-button ui-widget ui-state-default ui-corner-all" style="padding: 0.2em 0.4em; margin-left: 0.5em; font-size: 0.8em;">
+        <span class="ui-button-text">Copy</span>
+      </button>
+    </p>
+
+    <p>
+      <strong>Relationstyp:</strong> Object
+      <button onclick="copyToClipboard('Object', this)" class="ui-button ui-widget ui-state-default ui-corner-all" style="padding: 0.2em 0.4em; margin-left: 0.5em; font-size: 0.8em;">
+        <span class="ui-button-text">Copy</span>
+      </button>, Reconstruction
+       <button onclick="copyToClipboard('Reconstruction', this)" class="ui-button ui-widget ui-state-default ui-corner-all" style="padding: 0.2em 0.4em; margin-left: 0.5em; font-size: 0.8em;">
+        <span class="ui-button-text">Copy</span>
+      </button>, Field Photo
+       <button onclick="copyToClipboard('Field Photo', this)" class="ui-button ui-widget ui-state-default ui-corner-all" style="padding: 0.2em 0.4em; margin-left: 0.5em; font-size: 0.8em;">
+        <span class="ui-button-text">Copy</span>
+      </button>, Drawing
+       <button onclick="copyToClipboard('Drawing', this)" class="ui-button ui-widget ui-state-default ui-corner-all" style="padding: 0.2em 0.4em; margin-left: 0.5em; font-size: 0.8em;">
+        <span class="ui-button-text">Copy</span>
+      </button>
+    </p>
+    
+    <p>
+      <strong>Beschreibung</strong> Weitere Infos, z.B. aus dem Dateinnamen wie »Reconstruction 2 - Location Variants«
+      <button onclick="copyToClipboard('Berenike', this)" class="ui-button ui-widget ui-state-default ui-corner-all" style="padding: 0.2em 0.4em; margin-left: 0.5em; font-size: 0.8em;">
+        <span class="ui-button-text">Copy</span>
+      </button>
+    </p>
+
+    <p>
+      <strong>Fotograf/Urheber (GND):</strong> …
+      <button onclick="copyToClipboard('Fotograf/Urheber', this)" class="ui-button ui-widget ui-state-default ui-corner-all" style="padding: 0.2em 0.4em; margin-left: 0.5em; font-size: 0.8em;">
+        <span class="ui-button-text">Copy</span>
+      </button>
+      <br/>(falls keine GND vorhanden: »Fotograf/Urheber«)
+    </p>
+    
+    <p>
+      <strong>Kommentar (unter Inv.Nr./Signatur)</strong> Weitere Infos, z.B. aus dem Dateinnamen wie »58948_7879_a, B/W«
+      <button onclick="copyToClipboard('Berenike', this)" class="ui-button ui-widget ui-state-default ui-corner-all" style="padding: 0.2em 0.4em; margin-left: 0.5em; font-size: 0.8em;">
+        <span class="ui-button-text">Copy</span>
+      </button>
+    </p>
+  </div>
+
   <div class="actions" style="margin-top: 1em;">
     {% if app.user %}
     <a href="{{ path('PapyrillioBerenike_FindEdit', {'id': find.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
