@@ -27,7 +27,7 @@ class HomeController extends BerenikeController{
 
     public function dashboard(): Response {
         // Fetch specific Find records
-        $findIds = [20742, 27904, 28416];
+        $findIds = [20742, 1110, 27904];
         $finds = $this->findRepository->findBy(['id' => $findIds]);
 
         return $this->render('home/dashboard.html.twig', [

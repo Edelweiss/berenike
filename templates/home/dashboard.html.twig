@@ -12,24 +12,18 @@
     .dashboard-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5em;
+      gap: 1em;
       padding: 1em;
     }
     
     .dashboard-tile {
-      background: white;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      padding: 1.5em;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      /* jQuery UI widget styling applied in HTML */
     }
     
     .dashboard-tile h3 {
-      margin-top: 0;
-      margin-bottom: 1em;
-      padding-bottom: 0.5em;
-      border-bottom: 2px solid #0066cc;
-      color: #0066cc;
+      margin: 0;
+      font-size: 1.1em;
+      font-weight: normal;
     }
     
     .dashboard-tile ul {
@@ -39,40 +33,18 @@
     }
     
     .dashboard-tile li {
-      margin-bottom: 0.75em;
-    }
-    
-    .dashboard-tile a {
-      color: #0066cc;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      padding: 0.5em;
-      border-radius: 3px;
-      transition: background-color 0.2s;
-    }
-    
-    .dashboard-tile a:hover {
-      background-color: #f0f8ff;
-      text-decoration: underline;
+      margin-bottom: 0.5em;
     }
     
     .find-item {
-      padding: 0.75em;
-      background: #f9f9f9;
-      border-left: 3px solid #0066cc;
-      margin-bottom: 0.75em;
-      border-radius: 3px;
+      padding: 0.5em;
+      margin-bottom: 0.5em;
+      border-radius: 4px;
     }
     
     .find-item strong {
       display: block;
       margin-bottom: 0.25em;
-      color: #333;
-    }
-    
-    .find-item small {
-      color: #666;
     }
   </style>
 {% endblock %}
@@ -81,60 +53,76 @@
   <div class="dashboard-grid">
     
     <!-- Quick Links Tile -->
-    <div class="dashboard-tile">
-      <h3>Quick Links</h3>
-      <ul>
-        <li><a href="{{ path('PapyrillioBerenike_FindList') }}">📋 All Finds</a></li>
-        <li><a href="{{ path('PapyrillioBerenike_BucketList') }}">🪣 All Buckets</a></li>
-        <li><a href="{{ path('PapyrillioBerenike_LocusList') }}">📍 All Loci</a></li>
-        <li><a href="{{ path('PapyrillioBerenike_ExcavationList') }}">🏗️ All Trenches</a></li>
-      </ul>
+    <div class="dashboard-tile ui-widget">
+      <div class="ui-widget-header ui-corner-top" style="padding: 0.5em;">
+        <h3>Quick Links</h3>
+      </div>
+      <div class="ui-widget-content ui-corner-bottom" style="padding: 0.5em;">
+        <ul>
+          <li><a href="{{ path('PapyrillioBerenike_FindList') }}">📋 All Finds</a></li>
+          <li><a href="{{ path('PapyrillioBerenike_BucketList') }}">🪣 All Buckets</a></li>
+          <li><a href="{{ path('PapyrillioBerenike_LocusList') }}">📍 All Loci</a></li>
+          <li><a href="{{ path('PapyrillioBerenike_ExcavationList') }}">🏗️ All Trenches</a></li>
+        </ul>
+      </div>
     </div>
 
     <!-- Selected Finds Tile -->
-    <div class="dashboard-tile">
-      <h3>Featured Finds</h3>
-      {% if finds is not empty %}
-        {% for find in finds %}
-          <div class="find-item">
-            <strong>
-              <a href="{{ path('PapyrillioBerenike_FindShow', {'id': find.id}) }}" style="color: #0066cc; text-decoration: none;">
-                ID {{ find.id }}{% if find.inventoryNumber %} - {{ find.inventoryNumber }}{% endif %}
-              </a>
-            </strong>
-            {% if find.object %}
-              <small>{{ find.object }}</small>
-            {% endif %}
-            {% if find.bucket and find.bucket.locus and find.bucket.locus.excavation %}
-              <small style="display: block; margin-top: 0.25em;">
-                Trench: {{ find.bucket.locus.excavation.trench }} | Locus: {{ find.bucket.locus.number }}
-              </small>
-            {% endif %}
-          </div>
-        {% endfor %}
-      {% else %}
-        <p style="color: #666; font-style: italic;">No featured finds available</p>
-      {% endif %}
+    <div class="dashboard-tile ui-widget">
+      <div class="ui-widget-header ui-corner-top" style="padding: 0.5em;">
+        <h3>Featured Finds</h3>
+      </div>
+      <div class="ui-widget-content ui-corner-bottom" style="padding: 0.5em;">
+        {% if finds is not empty %}
+          {% for find in finds %}
+            <div class="find-item ui-state-default ui-corner-all">
+              <strong>
+                <a href="{{ path('PapyrillioBerenike_FindShow', {'id': find.id}) }}">
+                  ID {{ find.id }}{% if find.inventoryNumber %} - {{ find.inventoryNumber }}{% endif %}
+                </a>
+              </strong>
+              {% if find.object %}
+                <small>{{ find.object }}</small>
+              {% endif %}
+              {% if find.bucket and find.bucket.locus and find.bucket.locus.excavation %}
+                <small style="display: block; margin-top: 0.25em;">
+                  Trench: {{ find.bucket.locus.excavation.trench }} | Locus: {{ find.bucket.locus.number }}
+                </small>
+              {% endif %}
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="ui-state-disabled" style="font-style: italic; padding: 0.5em;">No featured finds available</p>
+        {% endif %}
+      </div>
     </div>
 
     <!-- Statistics Tile -->
-    <div class="dashboard-tile">
-      <h3>Recent Activity</h3>
-      <ul>
-        <li>📊 Total Featured Finds: {{ finds|length }}</li>
-        <li><a href="{{ path('PapyrillioBerenike_Home') }}">🔗 Go to Home</a></li>
-      </ul>
+    <div class="dashboard-tile ui-widget">
+      <div class="ui-widget-header ui-corner-top" style="padding: 0.5em;">
+        <h3>Recent Activity</h3>
+      </div>
+      <div class="ui-widget-content ui-corner-bottom" style="padding: 0.5em;">
+        <ul>
+          <li>📊 Total Featured Finds: {{ finds|length }}</li>
+          <li><a href="{{ path('PapyrillioBerenike_Home') }}">🔗 Go to Home</a></li>
+        </ul>
+      </div>
     </div>
 
     <!-- Admin Tile -->
-    <div class="dashboard-tile">
-      <h3>Admin Actions</h3>
-      <ul>
-        <li><a href="{{ path('PapyrillioBerenike_AdminNewFind') }}">⭐ Create new Find</a></li>
-        <li><a href="{{ path('PapyrillioBerenike_AdminNewBucket') }}">⭐ Create new Bucket</a></li>
-        <li><a href="{{ path('PapyrillioBerenike_AdminNewLocus') }}">⭐ Create new Locus</a></li>
-        <li><a href="{{ path('PapyrillioBerenike_AdminNewTrench') }}">⭐ Create new Trench</a></li>
-      </ul>
+    <div class="dashboard-tile ui-widget">
+      <div class="ui-widget-header ui-corner-top" style="padding: 0.5em;">
+        <h3>Admin Actions</h3>
+      </div>
+      <div class="ui-widget-content ui-corner-bottom" style="padding: 0.5em;">
+        <ul>
+          <li><a href="{{ path('PapyrillioBerenike_AdminNewFind') }}">⭐ Create new Find</a></li>
+          <li><a href="{{ path('PapyrillioBerenike_AdminNewBucket') }}">⭐ Create new Bucket</a></li>
+          <li><a href="{{ path('PapyrillioBerenike_AdminNewLocus') }}">⭐ Create new Locus</a></li>
+          <li><a href="{{ path('PapyrillioBerenike_AdminNewTrench') }}">⭐ Create new Trench</a></li>
+        </ul>
+      </div>
     </div>
 
   </div>
