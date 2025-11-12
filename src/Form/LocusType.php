@@ -19,7 +19,7 @@ class LocusType extends AbstractType
             ->add('excavation', EntityType::class, [
                 'class' => Excavation::class,
                 'required' => true,
-                'label' => 'Excavation',
+                'label' => 'Trench',
                 'choice_label' => function(Excavation $excavation) {
                     return $excavation->getSite() . '-' . $excavation->getTrench();
                 },
