@@ -74,7 +74,7 @@ $(function(){
     height: 'auto'
   });
 
-  $('#list').jqGrid('navGrid', '#pager', {edit:false, add:false, del:false, search:true, refresh:true});
+  $('#list').jqGrid('navGrid', '#pager', {edit:false, add:false, del:false, search:false, refresh:false});
   $('#list').jqGrid('filterToolbar', {searchOperators: false, stringResult: true, searchOnEnter: false});
 
   $('#columnsHideShow').click(function(){
