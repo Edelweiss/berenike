@@ -1,0 +1,85 @@
+{% extends 'frontend.html.twig' %}
+
+{% block title %}Users | Berenike.project{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <link href="{{ asset('css/jquery/ui.jqgrid.css') }}" type="text/css" rel="stylesheet" />
+{% endblock %}
+
+{% block top %}
+  Users
+{% endblock %}
+
+{% block body %}
+
+  <table id="list"></table>
+  <div id="pager"></div>
+  
+  <br />
+  
+  <button id="columnsHideShow" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false">
+    <span class="ui-button-text">hide/show columns</span>
+  </button>
+
+  {% if app.user %}
+  <a href="{{ path('PapyrillioBerenike_UserNew') }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button">
+    <span class="ui-button-text">New User</span>
+  </a>
+  {% endif %}
+
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script src="{{ asset('js/jquery/i18n/grid.locale-en.js') }}" type="text/javascript"></script>
+  <script src="{{ asset('js/jquery/jquery-jqGrid.min.js') }}" type="text/javascript"></script>
+  <script type="text/javascript">
+
+$(function(){
+  $('#list').jqGrid({
+    url: '{{ path('PapyrillioBerenike_UserList') }}',
+    datatype: 'xml',
+    mtype: 'POST',
+    colNames:['ID', 'Username', 'Name', 'Email', 'Active', 'Last Login', 'Actions'],
+    colModel :[ 
+      {name:'id',         index:'id',        width:55,  sortable:true},
+      {name:'username',   index:'username',  width:100, sortable:true},
+      {name:'name',       index:'name',      width:150, sortable:true},
+      {name:'email',      index:'email',     width:180, sortable:true},
+      {name:'isActive',   index:'isActive',  width:60,  sortable:true, hidden: true},
+      {name:'lastLogin',  index:'lastLogin', width:100, sortable:true, hidden: true},
+      {name:'actions',    index:'actions',   width:85,  sortable:false, search:false}
+    ],
+    postData: {
+      visible: function(){
+        var visibleColumns = [];
+        var colModel = $('#list').jqGrid('getGridParam', 'colModel');
+        $.each(colModel, function(index, value){
+          if(!value.hidden && value.name != 'actions'){
+            visibleColumns.push(value.name);
+          }
+        });
+        return visibleColumns.join(';');
+      }
+    },
+    pager: '#pager',
+    rowNum: 25,
+    rowList: [10, 25, 50, 100],
+    sortname: 'username',
+    sortorder: 'asc',
+    viewrecords: true,
+    gridview: true,
+    caption: null,
+    height: 'auto'
+  });
+
+  $('#list').jqGrid('navGrid', '#pager', {edit:false, add:false, del:false, search:true, refresh:true});
+  $('#list').jqGrid('filterToolbar', {searchOperators: false, stringResult: true, searchOnEnter: false});
+
+  $('#columnsHideShow').click(function(){
+    $('#list').jqGrid('columnChooser');
+  });
+});
+  </script>
+{% endblock %}

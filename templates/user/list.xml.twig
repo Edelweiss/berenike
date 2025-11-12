@@ -1,0 +1,18 @@
+{% set count = count|default(0) %}
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+  <page>{{ page }}</page>
+  <total>{{ totalPages }}</total>
+  <records>{{ count }}</records>
+  {% for user in users %}
+  <row id="{{ user.id }}">
+    <cell>{{ user.id }}</cell>
+    <cell>{{ user.username }}</cell>
+    <cell>{{ user.name }}</cell>
+    <cell>{{ user.email }}</cell>
+    <cell>{% if user.isActive %}Yes{% else %}No{% endif %}</cell>
+    <cell>{% if user.lastLogin %}{{ user.lastLogin|date('d.m.Y H:i') }}{% endif %}</cell>
+    <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_UserShow', {'id': user.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="display: inline-block; padding: 0.2em 0.4em; text-decoration: none;"><span class="ui-button-text">View</span></a>{% if app.user %}<a href="{{ path('PapyrillioBerenike_UserEdit', {'id': user.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="display: inline-block; padding: 0.2em 0.4em; text-decoration: none;"><span class="ui-button-text">Edit</span></a>{% endif %}]]></cell>
+  </row>
+  {% endfor %}
+</rows>

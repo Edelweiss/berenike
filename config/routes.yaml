@@ -123,18 +123,31 @@ PapyrillioBerenike_UserEditProfile:
     controller: App\Controller\UserController::editProfile
 
 PapyrillioBerenike_UserList:
-    path: /user/list
+    path: /users
     controller: App\Controller\UserController::list
+    methods: [GET, POST]
 
 PapyrillioBerenike_UserNew:
     path: /user/new
     controller: App\Controller\UserController::new
+    methods: [GET, POST]
 
 PapyrillioBerenike_UserShow:
-    path: /user/show/{id}
+    path: /user/{id}
     controller: App\Controller\UserController::show
     requirements:
       id: '\d+'
 
-PapyrillioBerenike_UserPassword:
-    path: /user/password
+PapyrillioBerenike_UserEdit:
+    path: /user/{id}/edit
+    controller: App\Controller\UserController::edit
+    requirements:
+      id: '\d+'
+    methods: [GET, POST]
+
+PapyrillioBerenike_UserDelete:
+    path: /user/{id}/delete
+    controller: App\Controller\UserController::delete
+    requirements:
+      id: '\d+'
+    methods: [POST]

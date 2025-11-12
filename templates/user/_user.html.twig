@@ -1,0 +1,51 @@
+{% if user %}
+  <div class="ui-widget">
+    <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
+      <h3 style="margin: 0; font-size: 1.1em;">User: {{ user.name }}</h3>
+    </div>
+    
+    <div class="ui-widget-content ui-corner-bottom" style="padding: 0.5em;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 0.5em;">
+        <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
+          <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">Basic Information</h4>
+          <div class="ui-helper-clearfix">
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 8em;">ID:</strong> {{ user.id }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 8em;">Username:</strong> {{ user.username }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 8em;">Name:</strong> {{ user.name }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 8em;">Email:</strong> <a href="mailto:{{ user.email }}">{{ user.email }}</a></p>
+          </div>
+        </div>
+
+        <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
+          <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">Status & Roles</h4>
+          <div class="ui-helper-clearfix">
+            <p style="margin: 0.2em 0;">
+              <strong style="display: inline-block; width: 8em;">Active:</strong> 
+              <span class="{% if user.isActive %}ui-state-highlight{% else %}ui-state-error{% endif %}" style="padding: 0.2em 0.4em; border-radius: 3px;">
+                {% if user.isActive %}Yes{% else %}No{% endif %}
+              </span>
+            </p>
+            <p style="margin: 0.2em 0;">
+              <strong style="display: inline-block; width: 8em;">Roles:</strong>
+              {% for role in user.roles %}
+                <span class="ui-state-default" style="display: inline-block; padding: 0.2em 0.4em; margin: 0.1em; font-size: 0.9em; border-radius: 3px;">{{ role }}</span>
+              {% endfor %}
+            </p>
+          </div>
+        </div>
+
+        <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
+          <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">Login Information</h4>
+          <div class="ui-helper-clearfix">
+            {% if user.currentLogin %}
+              <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 8em;">Current Login:</strong> {{ user.currentLogin|date("d.m.Y H:i") }}</p>
+            {% endif %}
+            {% if user.lastLogin %}
+              <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 8em;">Last Login:</strong> {{ user.lastLogin|date("d.m.Y H:i") }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}
