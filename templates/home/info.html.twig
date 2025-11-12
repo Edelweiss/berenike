@@ -1,0 +1,122 @@
+{% extends 'frontend.html.twig' %}
+
+{% block title %}Information | Berenike.project{% endblock %}
+
+{% block top %}
+  Project Information
+{% endblock %}
+
+{% block body %}
+  <div style="max-width: 900px; margin: 0 auto;">
+    
+    <!-- About the Project -->
+    <div class="ui-widget" style="margin-bottom: 1em;">
+      <div class="ui-widget-header ui-corner-top" style="padding: 0.5em;">
+        <h3 style="margin: 0; font-size: 1.2em;">About the Berenike Project</h3>
+      </div>
+      <div class="ui-widget-content ui-corner-bottom" style="padding: 1em; line-height: 1.6;">
+        <p>
+          The Berenike Project is dedicated to the archaeological documentation and research of finds from 
+          the ancient port city of Berenike on the Red Sea coast of Egypt. This database system provides 
+          access to comprehensive records of archaeological finds, excavation contexts, and related documentation.
+        </p>
+        <p>
+          Berenike was a major trading port during the Ptolemaic and Roman periods, serving as a crucial 
+          link between the Mediterranean world and the Indian Ocean trade networks. The finds documented 
+          here represent decades of systematic archaeological excavation and research.
+        </p>
+      </div>
+    </div>
+
+    <!-- Publishers and Partners -->
+    <div class="ui-widget" style="margin-bottom: 1em;">
+      <div class="ui-widget-header ui-corner-top" style="padding: 0.5em;">
+        <h3 style="margin: 0; font-size: 1.2em;">Publishers & Partners</h3>
+      </div>
+      <div class="ui-widget-content ui-corner-bottom" style="padding: 1em; line-height: 1.6;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1em;">
+          <div>
+            <h4 style="margin-top: 0;">Institute</h4>
+            <p>
+              <a href="https://www.uni-heidelberg.de/fakultaeten/philosophie/zaw">Institut für Papyrologie</a><br>
+              Heidelberg University
+            </p>
+          </div>
+          <div>
+            <h4 style="margin-top: 0;">Partners</h4>
+            <ul style="list-style: none; padding: 0;">
+              <li><a href="https://heidicon.ub.uni-heidelberg.de">HeidICON Image Database</a></li>
+              <li><a href="https://www.trismegistos.org">Trismegistos</a></li>
+              <li><a href="https://berenike.pcma.uw.edu.pl/">Berenike Project – Poland</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- How to Use -->
+    <div class="ui-widget" style="margin-bottom: 1em;">
+      <div class="ui-widget-header ui-corner-top" style="padding: 0.5em;">
+        <h3 style="margin: 0; font-size: 1.2em;">How to Use This Site</h3>
+      </div>
+      <div class="ui-widget-content ui-corner-bottom" style="padding: 1em; line-height: 1.6;">
+        
+        <h4 style="margin-top: 0;">Navigation</h4>
+        <ul style="margin-left: 1.5em;">
+          <li><strong>Finds:</strong> Browse and search all archaeological finds with detailed information including object type, material, dimensions, and dating.</li>
+          <li><strong>Buckets:</strong> View excavation buckets which group finds from the same collection context.</li>
+          <li><strong>Loci:</strong> Explore archaeological loci (distinct stratigraphic units) within excavation trenches.</li>
+          <li><strong>Trenches:</strong> Access information about excavation areas organized by site, season, and trench number.</li>
+        </ul>
+
+        <h4>Searching and Filtering</h4>
+        <ul style="margin-left: 1.5em;">
+          <li>Use the <strong>filter toolbar</strong> at the top of list pages to search by specific fields.</li>
+          <li>Click <strong>column headers</strong> to sort results.</li>
+          <li>Use the <strong>"hide/show columns"</strong> button to customize which fields are displayed.</li>
+          <li>Click <strong>View</strong> to see detailed information about any record.</li>
+        </ul>
+
+        <h4>Images</h4>
+        <ul style="margin-left: 1.5em;">
+          <li>Many finds are linked to <strong>HeidICON</strong> images from the Heidelberg image database.</li>
+          <li>Click on thumbnails to view high-resolution images.</li>
+          <li>Image information includes photographer/artist credits and dates.</li>
+        </ul>
+
+        <h4>Data Structure</h4>
+        <div style="background-color: #f9f9f9; padding: 0.75em; border-radius: 4px; margin: 1em 0;">
+          <p style="margin: 0;"><strong>Hierarchy:</strong> Site/Season → Trench → Locus → Bucket → Find</p>
+        </div>
+        <p>
+          Each find is associated with a specific excavation context through this hierarchical structure, 
+          allowing you to trace objects back to their archaeological context.
+        </p>
+
+        <h4>For Registered Users</h4>
+        <ul style="margin-left: 1.5em;">
+          <li>Login to access <strong>edit functions</strong> for maintaining records.</li>
+          <li>Create new entries for finds, buckets, loci, and trenches.</li>
+          <li>Update existing records with new information or corrections.</li>
+          <li>Manage images and specialist attributions.</li>
+        </ul>
+
+      </div>
+    </div>
+
+    <!-- Contact -->
+    <div class="ui-widget" style="margin-bottom: 1em;">
+      <div class="ui-widget-header ui-corner-top" style="padding: 0.5em;">
+        <h3 style="margin: 0; font-size: 1.2em;">Contact & Support</h3>
+      </div>
+      <div class="ui-widget-content ui-corner-bottom" style="padding: 1em; line-height: 1.6;">
+        <p>
+          For questions, corrections, or access requests, please contact:<br>
+          <strong><a href="mailto:papyri@uni-heidelberg.de">Institut für Papyrologie</a></strong><br>
+          Heidelberg University<br>
+        </p>
+      </div>
+    </div>
+
+  </div>
+{% endblock %}

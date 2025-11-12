@@ -56,11 +56,13 @@
 			<h2><a href="{{ path('PapyrillioBerenike_ExcavationList') }}">Trenches</a></h2>
 		</div>
 		<div class="sidebarSection">
-			<h2><a href="">Search</a></h2>
+			<h2><a href="{{ path('PapyrillioBerenike_Info') }}">Info</a></h2>
 		</div>
+    {% if app.user %}
 		<div class="sidebarSection">
 			<h2><a href="{{ path('PapyrillioBerenike_Dashboard') }}">Dashboard</a></h2>
 		</div>
+    {% endif %}
 
     <div id="lefty" class="grid_2">
       <h5>{% block lefty_title %}{% endblock %}</h5>

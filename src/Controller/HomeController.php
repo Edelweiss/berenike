@@ -44,4 +44,8 @@ class HomeController extends BerenikeController{
     public function help(): Response {
         return $this->render('home/help.html.twig');
     }
+    
+    public function info(): Response {
+        return $this->render('home/info.html.twig');
+    }
 }

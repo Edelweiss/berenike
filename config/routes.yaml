@@ -6,6 +6,10 @@ PapyrillioBerenike_Dashboard:
     path:  /dashboard
     controller: App\Controller\HomeController::dashboard
 
+PapyrillioBerenike_Info:
+    path:  /info
+    controller: App\Controller\HomeController::info
+
 PapyrillioBerenike_FindList:
     path:  /finds
     controller: App\Controller\FindController::list
