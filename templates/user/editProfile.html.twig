@@ -1,0 +1,90 @@
+{% extends 'frontend.html.twig' %}
+
+{% block title %}Edit Profile - Berenike{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h1>Edit Your Profile</h1>
+        
+        {% for message in app.flashes('notice') %}
+            <div class="flash-notice" style="padding: 10px; margin: 10px 0; background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; border-radius: 4px;">
+                {{ message }}
+            </div>
+        {% endfor %}
+        
+        {% for message in app.flashes('error') %}
+            <div class="flash-error" style="padding: 10px; margin: 10px 0; background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; border-radius: 4px;">
+                {{ message }}
+            </div>
+        {% endfor %}
+        
+        <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 20px; margin: 20px 0;">
+            {{ form_start(form, {'attr': {'class': 'ui-form'}}) }}
+                <div class="form-group" style="margin-bottom: 15px;">
+                    {{ form_label(form.username, 'Username', {'attr': {'class': 'ui-widget-header', 'style': 'display: block; padding: 5px; margin-bottom: 5px;'}}) }}
+                    {{ form_widget(form.username, {'attr': {'class': 'form-control', 'style': 'width: 100%; padding: 5px;'}}) }}
+                    {{ form_errors(form.username) }}
+                </div>
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    {{ form_label(form.email, 'Email', {'attr': {'class': 'ui-widget-header', 'style': 'display: block; padding: 5px; margin-bottom: 5px;'}}) }}
+                    {{ form_widget(form.email, {'attr': {'class': 'form-control', 'style': 'width: 100%; padding: 5px;'}}) }}
+                    {{ form_errors(form.email) }}
+                </div>
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <p style="font-size: 0.9em; color: #666; font-style: italic;">Enter your current password to confirm changes</p>
+                    {{ form_label(form.password, 'Current Password', {'attr': {'class': 'ui-widget-header', 'style': 'display: block; padding: 5px; margin-bottom: 5px;'}}) }}
+                    {{ form_widget(form.password, {'attr': {'class': 'form-control', 'style': 'width: 100%; padding: 5px;'}}) }}
+                    {{ form_errors(form.password) }}
+                </div>
+
+                <div class="form-actions" style="margin-top: 20px;">
+                    <button type="submit" class="ui-button ui-widget ui-corner-all" style="padding: 8px 15px; margin-right: 10px;">
+                        Update Profile
+                    </button>
+                    <a href="{{ path('PapyrillioBerenike_UserChangePassword') }}" class="ui-button ui-widget ui-corner-all" style="padding: 8px 15px; margin-right: 10px; text-decoration: none; display: inline-block;">
+                        Change Password
+                    </a>
+                    <a href="{{ path('PapyrillioBerenike_Dashboard') }}" class="ui-button ui-widget ui-corner-all" style="padding: 8px 15px; text-decoration: none; display: inline-block;">
+                        Back to Dashboard
+                    </a>
+                </div>
+            {{ form_end(form) }}
+        </div>
+        
+        <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 20px; margin: 20px 0;">
+            <h3 class="ui-widget-header" style="padding: 5px 10px; margin: -20px -20px 15px -20px;">Account Information</h3>
+            <dl style="margin: 0;">
+                <dt style="font-weight: bold; margin-top: 10px;">Name:</dt>
+                <dd style="margin-left: 20px;">{{ app.user.name }}</dd>
+                
+                <dt style="font-weight: bold; margin-top: 10px;">Roles:</dt>
+                <dd style="margin-left: 20px;">
+                    {% for role in app.user.roles %}
+                        <span class="ui-state-default ui-corner-all" style="padding: 2px 8px; margin-right: 5px; display: inline-block;">{{ role }}</span>
+                    {% endfor %}
+                </dd>
+                
+                <dt style="font-weight: bold; margin-top: 10px;">Account Status:</dt>
+                <dd style="margin-left: 20px;">
+                    {% if app.user.isActive %}
+                        <span class="ui-state-highlight ui-corner-all" style="padding: 2px 8px; color: green;">Active</span>
+                    {% else %}
+                        <span class="ui-state-error ui-corner-all" style="padding: 2px 8px;">Inactive</span>
+                    {% endif %}
+                </dd>
+                
+                {% if app.user.currentLogin %}
+                <dt style="font-weight: bold; margin-top: 10px;">Current Login:</dt>
+                <dd style="margin-left: 20px;">{{ app.user.currentLogin|date('Y-m-d H:i:s') }}</dd>
+                {% endif %}
+                
+                {% if app.user.lastLogin %}
+                <dt style="font-weight: bold; margin-top: 10px;">Last Login:</dt>
+                <dd style="margin-left: 20px;">{{ app.user.lastLogin|date('Y-m-d H:i:s') }}</dd>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+{% endblock %}

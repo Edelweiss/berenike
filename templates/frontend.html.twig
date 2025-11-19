@@ -26,7 +26,7 @@
     <div id="subHeader" class="grid_9">
 			<div id="navigation" class="grid_9">
         {% if app.user %}
-          Hello {{ app.user.username }}! 
+          Hello <a href="{{ path('PapyrillioBerenike_UserEditProfile') }}">{{ app.user.username }}</a>! 
           <a href="{{ path('PapyrillioBerenike_Dashboard') }}">Admin</a>
           <a href="{{ path('PapyrillioBerenike_Logout') }}">Logout</a>
         {% else %}
