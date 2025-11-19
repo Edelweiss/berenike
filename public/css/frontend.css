@@ -184,54 +184,7 @@ div#topic {
     height: 150px;
 }
 
-div#topic.topic_PapyrillioBeehive_Apiary {
-    background-image: url("../images/frontend/topic_search.png");
-}
-
-div#topic.topic_PapyrillioBeehive_IndexEntryNew {
-    background-image: url("../images/frontend/topic_index.png");
-}
-
-div#topic.topic_PapyrillioBeehive_IndexEntryGhostword {
-    background-image: url("../images/frontend/topic_ghostwords.png");
-}
-
-div#topic.topic_PapyrillioBeehive_IndexEntryGhostwordSearch {
-    background-image: url("../images/frontend/topic_ghostsearch.png");
-}
-
-div#topic.topic_PapyrillioBeehive_IndexEntryNewSearch {
-    background-image: url("../images/frontend/topic_newsearch.png");
-}
-
-div#topic.topic_PapyrillioBeehive_ApiaryHoney {
-    background-image: url("../images/frontend/topic_boep.png");
-}
-
-div#topic.topic_PapyrillioBeehive_About,
-div#topic.topic_PapyrillioBeehive_Help {
-    background-image: url("../images/frontend/topic_institute.png");
-}
-
-div#topic.topic_PapyrillioBeehive_Archive {
-    background-image: url("../images/frontend/topic_archive.png");
-}
-
-div#topic.topic_PapyrillioBeehive_Home {
-    background-image: url("../images/frontend/topic_home.png");
-}
-
-div#topic.topic_PapyrillioBeehive_ApiaryCorrectionInfo {
-    background-image: url("../images/frontend/topic_vase.png");
-}
-
-div#topic.topic_PapyrillioBeehive_Editions {
-    background-image: url("../images/frontend/topic_honeycomb.png");
-}
-
-div#topic.topic_PapyrillioBeehive_Register {
-    background-image: url("../images/frontend/topic_leaf.png");
-}
+/* Removed unused Beehive-specific topic styles */
 
 div#quick1 {
     background-image: url("../images/frontend/quick1.png");
