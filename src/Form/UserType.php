@@ -34,7 +34,7 @@ class UserType extends AbstractType
                 'first_options' => ['label' => 'Password'],
                 'second_options' => ['label' => 'Confirm Password'],
                 'required' => false,
-                'mapped' => true
+                'mapped' => false
             ])
             ->add('isActive', CheckboxType::class, [
                 'label' => 'Active',
@@ -44,6 +44,7 @@ class UserType extends AbstractType
                 'label' => 'Roles',
                 'choices' => [
                     'User' => 'ROLE_USER',
+                    'Editor' => 'ROLE_EDITOR',
                     'Admin' => 'ROLE_ADMIN'
                 ],
                 'multiple' => true,

@@ -108,6 +108,8 @@ class UserController extends BerenikeController
     }
 
     public function list(): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN', null, 'User management requires administrator privileges.');
+        
         if ($this->request->getMethod() == 'POST') {
 
             // PARAMETERS
@@ -171,6 +173,8 @@ class UserController extends BerenikeController
     }
 
     public function show($id): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN', null, 'User management requires administrator privileges.');
+        
         if(!$id){
             return $this->redirectToRoute('PapyrillioBerenike_UserList');
         }
@@ -185,6 +189,8 @@ class UserController extends BerenikeController
     }
 
     public function new(): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN', null, 'User management requires administrator privileges.');
+        
         $user = new User();
         $user->setRoles(['ROLE_USER']);
         $user->setIsActive(true);
@@ -195,9 +201,12 @@ class UserController extends BerenikeController
             $form->handleRequest($this->request);
 
             if ($form->isValid()) {
-                // Hash the password
-                $hashedPassword = $this->passwordHasher->hashPassword($user, $user->getPassword());
-                $user->setPassword($hashedPassword);
+                // Get password from form and hash it
+                $plainPassword = $form->get('password')->getData();
+                if ($plainPassword) {
+                    $hashedPassword = $this->passwordHasher->hashPassword($user, $plainPassword);
+                    $user->setPassword($hashedPassword);
+                }
 
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
@@ -211,6 +220,8 @@ class UserController extends BerenikeController
     }
   
     public function edit($id): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN', null, 'User management requires administrator privileges.');
+        
         $user = $this->userRepository->find($id);
 
         if (!$user) {
@@ -222,9 +233,10 @@ class UserController extends BerenikeController
         if ($this->request->getMethod() == 'POST') {
             $form->handleRequest($this->request);
             if ($form->isValid()) {
-                // Only hash password if it was changed
-                if ($user->getPassword()) {
-                    $hashedPassword = $this->passwordHasher->hashPassword($user, $user->getPassword());
+                // Only hash password if a new one was provided
+                $plainPassword = $form->get('password')->getData();
+                if ($plainPassword) {
+                    $hashedPassword = $this->passwordHasher->hashPassword($user, $plainPassword);
                     $user->setPassword($hashedPassword);
                 }
                 
@@ -242,6 +254,8 @@ class UserController extends BerenikeController
     }
 
     public function delete($id): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN', null, 'User management requires administrator privileges.');
+        
         $user = $this->userRepository->find($id);
 
         if (!$user) {

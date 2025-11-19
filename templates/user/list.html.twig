@@ -22,7 +22,7 @@
     <span class="ui-button-text">hide/show columns</span>
   </button>
 
-  {% if app.user %}
+  {% if is_granted('ROLE_ADMIN') %}
   <a href="{{ path('PapyrillioBerenike_UserNew') }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button">
     <span class="ui-button-text">New User</span>
   </a>

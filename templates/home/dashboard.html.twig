@@ -63,7 +63,6 @@
           <li><a href="{{ path('PapyrillioBerenike_BucketList') }}">🪣 All Buckets</a></li>
           <li><a href="{{ path('PapyrillioBerenike_LocusList') }}">📍 All Loci</a></li>
           <li><a href="{{ path('PapyrillioBerenike_ExcavationList') }}">🏗️ All Trenches</a></li>
-          <li><a href="{{ path('PapyrillioBerenike_UserList') }}">👤 All Users</a></li>
         </ul>
       </div>
     </div>
@@ -98,6 +97,56 @@
       </div>
     </div>
 
+    <!-- Editor Tile -->
+    {% if is_granted('ROLE_EDITOR') %}
+    <div class="dashboard-tile ui-widget">
+      <div class="ui-widget-header ui-corner-top" style="padding: 0.5em;">
+        <h3>Edit Actions</h3>
+      </div>
+      <div class="ui-widget-content ui-corner-bottom" style="padding: 0.5em;">
+        <ul>
+          <li><a href="{{ path('PapyrillioBerenike_AdminNewFind') }}">⭐ Create new Find</a></li>
+          <li><a href="{{ path('PapyrillioBerenike_AdminNewBucket') }}">⭐ Create new Bucket</a></li>
+          <li><a href="{{ path('PapyrillioBerenike_AdminNewLocus') }}">⭐ Create new Locus</a></li>
+          <li><a href="{{ path('PapyrillioBerenike_AdminNewTrench') }}">⭐ Create new Trench</a></li>
+        </ul>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- External Resources Tile -->
+    {% if is_granted('ROLE_ADMIN') %}
+    <div class="dashboard-tile ui-widget">
+      <div class="ui-widget-header ui-corner-top" style="padding: 0.5em;">
+        <h3>External Resources</h3>
+      </div>
+      <div class="ui-widget-content ui-corner-bottom" style="padding: 0.5em;">
+        <ul>
+          <li><a href="https://github.com/Edelweiss/berenike/issues" target="_blank" rel="noopener noreferrer">🐛 GitHub Issues</a></li>
+          <li><a href="https://github.com/Edelweiss/berenike/wiki" target="_blank" rel="noopener noreferrer">📖 GitHub Wiki</a></li>
+          <li><a href="https://docs.google.com/spreadsheets/d/11CGc35lH0IEghwEJTflO1l0C-c7YV-Cj2SF88t05N_4/edit?usp=sharing" target="_blank" rel="noopener noreferrer">📊 Google Spreadsheet</a></li>
+          <li><a href="https://heidicon.ub.uni-heidelberg.de/" target="_blank" rel="noopener noreferrer">🖼️ HeidICON</a></li>
+          <li><a href="https://berenike.pcma.uw.edu.pl/" target="_blank" rel="noopener noreferrer">🌐 Berenike PCMA</a></li>
+        </ul>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Admin Tile -->
+    {% if is_granted('ROLE_ADMIN') %}
+    <div class="dashboard-tile ui-widget">
+      <div class="ui-widget-header ui-corner-top" style="padding: 0.5em;">
+        <h3>Admin Actions</h3>
+      </div>
+      <div class="ui-widget-content ui-corner-bottom" style="padding: 0.5em;">
+        <ul>
+          <li><a href="{{ path('PapyrillioBerenike_UserList') }}">👥 Manage Users</a></li>
+          <li><a href="{{ path('PapyrillioBerenike_UserNew') }}">➕ Create new User</a></li>
+        </ul>
+      </div>
+    </div>
+    {% endif %}
+
     <!-- Statistics Tile -->
     <div class="dashboard-tile ui-widget">
       <div class="ui-widget-header ui-corner-top" style="padding: 0.5em;">
@@ -107,21 +156,6 @@
         <ul>
           <li>📊 Total Featured Finds: {{ finds|length }}</li>
           <li><a href="{{ path('PapyrillioBerenike_Home') }}">🔗 Go to Home</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- Admin Tile -->
-    <div class="dashboard-tile ui-widget">
-      <div class="ui-widget-header ui-corner-top" style="padding: 0.5em;">
-        <h3>Admin Actions</h3>
-      </div>
-      <div class="ui-widget-content ui-corner-bottom" style="padding: 0.5em;">
-        <ul>
-          <li><a href="{{ path('PapyrillioBerenike_AdminNewFind') }}">⭐ Create new Find</a></li>
-          <li><a href="{{ path('PapyrillioBerenike_AdminNewBucket') }}">⭐ Create new Bucket</a></li>
-          <li><a href="{{ path('PapyrillioBerenike_AdminNewLocus') }}">⭐ Create new Locus</a></li>
-          <li><a href="{{ path('PapyrillioBerenike_AdminNewTrench') }}">⭐ Create new Trench</a></li>
         </ul>
       </div>
     </div>

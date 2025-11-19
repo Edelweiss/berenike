@@ -10,7 +10,7 @@
   {% include 'user/_user.html.twig' with {'user': user} %}
 
   <div class="actions" style="margin-top: 1em;">
-    {% if app.user %}
+    {% if is_granted('ROLE_ADMIN') %}
     <a href="{{ path('PapyrillioBerenike_UserEdit', {'id': user.id}) }}" 
        class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
       <span class="ui-button-text">Edit</span>
@@ -20,7 +20,7 @@
        class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
       <span class="ui-button-text">Back to Users</span>
     </a>
-    {% if app.user and app.user.id != user.id %}
+    {% if is_granted('ROLE_ADMIN') and app.user.id != user.id %}
     <form method="post" action="{{ path('PapyrillioBerenike_UserDelete', {'id': user.id}) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
       <button type="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="color: #cc0000;">
         <span class="ui-button-text">Delete</span>

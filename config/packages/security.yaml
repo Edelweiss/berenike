@@ -1,4 +1,8 @@
 security:
+    role_hierarchy:
+        ROLE_EDITOR: ROLE_USER
+        ROLE_ADMIN: [ROLE_EDITOR, ROLE_USER]
+    
     encoders:
         App\Entity\User:
             algorithm: auto
@@ -23,10 +27,19 @@ security:
     enable_authenticator_manager: true
 
     access_control:
-        - { path: '^/admin', roles: ROLE_ADMIN }
-        - { path: '^/user', roles: ROLE_USER }
+        # User management - requires ROLE_ADMIN
+        - { path: '^/users$', roles: ROLE_ADMIN }
+        - { path: '^/user/new$', roles: ROLE_ADMIN }
+        - { path: '^/user/[0-9]+$', roles: ROLE_ADMIN }
+        - { path: '^/user/[0-9]+/edit$', roles: ROLE_ADMIN }
+        - { path: '^/user/[0-9]+/delete$', roles: ROLE_ADMIN }
+        # User profile - requires ROLE_USER (any logged in user)
+        - { path: '^/user/editProfile', roles: ROLE_USER }
+        - { path: '^/user/changePassword', roles: ROLE_USER }
+        # General access rules
+        - { path: '^/admin', roles: ROLE_EDITOR }
         - { path: '^/dashboard$', roles: ROLE_USER }
-        - { path: '^/find/.+/edit$', roles: ROLE_USER }
-        - { path: '^/bucket/.+/edit$', roles: ROLE_USER }
-        - { path: '^/locus/.+/edit$', roles: ROLE_USER }
-        - { path: '^/trench/.+/edit$', roles: ROLE_USER }
+        - { path: '^/find/.+/edit$', roles: ROLE_EDITOR }
+        - { path: '^/bucket/.+/edit$', roles: ROLE_EDITOR }
+        - { path: '^/locus/.+/edit$', roles: ROLE_EDITOR }
+        - { path: '^/trench/.+/edit$', roles: ROLE_EDITOR }
