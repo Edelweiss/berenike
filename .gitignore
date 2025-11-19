@@ -1,4 +1,5 @@
 ###> symfony/framework-bundle ###
+/.env
 /.env.local
 /.env.local.php
 /.env.*.local
@@ -14,21 +15,13 @@
 /phpunit.xml
 ###< symfony/phpunit-bridge ###
 
+# IDE and OS files
 .DS_Store
-
-# LEGACY
-/web/bundles/
-/app/bootstrap*
-/app/cache/*
-/app/logs/*
-/vendor/
-/app/config/parameters.ini
 /.project
 /.settings
+
+# Application specific
+/data/
+robots.txt
 *.php~
 
-#NEW
-/.env
-/idp.data
-/data
-robots.txt
