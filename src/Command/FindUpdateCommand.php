@@ -328,6 +328,14 @@ class FindUpdateCommand extends Command
                 continue;
             }
 
+            // Check if field name ends with + (append mode)
+            $appendMode = false;
+            $actualFieldName = $fieldName;
+            if (substr($fieldName, -1) === '+') {
+                $appendMode = true;
+                $actualFieldName = substr($fieldName, 0, -1);
+            }
+
             $isEmpty = ($value === null || trim($value) === '');
             
             // Skip empty values unless setEmptyToNull is enabled
@@ -335,8 +343,9 @@ class FindUpdateCommand extends Command
                 continue;
             }
 
-            // Convert field name to setter method
-            $setterMethod = 'set' . ucfirst($fieldName);
+            // Convert field name to setter/getter methods
+            $setterMethod = 'set' . ucfirst($actualFieldName);
+            $getterMethod = 'get' . ucfirst($actualFieldName);
             
             if (method_exists($find, $setterMethod)) {
                 // Handle type conversions
@@ -344,8 +353,16 @@ class FindUpdateCommand extends Command
                     // Set to null
                     $find->$setterMethod(null);
                 } else {
-                    $convertedValue = $this->convertValue($fieldName, $value);
-                    $find->$setterMethod($convertedValue);
+                    if ($appendMode && method_exists($find, $getterMethod)) {
+                        // Append mode: get existing value and append new value if not already present
+                        $existingValue = $find->$getterMethod();
+                        $newValue = $this->appendValue($existingValue, $value);
+                        $find->$setterMethod($newValue);
+                    } else {
+                        // Replace mode: convert and set value
+                        $convertedValue = $this->convertValue($actualFieldName, $value);
+                        $find->$setterMethod($convertedValue);
+                    }
                 }
                 $updatedFields++;
             }
@@ -409,5 +426,31 @@ class FindUpdateCommand extends Command
                 // Return as string
                 return $value;
         }
+    }
+
+    private function appendValue(?string $existingValue, string $newValue): string
+    {
+        // If existing value is null or empty, just return the new value
+        if ($existingValue === null || trim($existingValue) === '') {
+            return $newValue;
+        }
+
+        // Trim both values
+        $existingValue = trim($existingValue);
+        $newValue = trim($newValue);
+
+        // If new value is empty, return existing value
+        if ($newValue === '') {
+            return $existingValue;
+        }
+
+        // Check if new value is already part of existing value
+        if (stripos($existingValue, $newValue) !== false) {
+            // New value already exists, return existing value unchanged
+            return $existingValue;
+        }
+
+        // Append new value with separator
+        return $existingValue . '; ' . $newValue;
     }
 }

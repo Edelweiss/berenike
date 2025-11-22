@@ -28,6 +28,7 @@ The CSV file must:
 - Have a header row with column names matching database field names
 - Contain an `id` column to identify which find record to update
 - Use snake_case or camelCase field names (both are supported)
+- Optionally append a `+` sign to field names to append values instead of replacing them
 
 Example CSV structure:
 ```csv
@@ -36,12 +37,30 @@ Example CSV structure:
 70787,19032,,44,"pottery"
 ```
 
+#### Append Mode with `+` Sign
+
+Add a `+` sign after a column name to append the value to existing content instead of replacing it:
+
+```csv
+"id","publications","remarks+"
+9,"Smith 2020","Additional note"
+44,"Jones 2019","Updated information"
+```
+
+In this example:
+- `publications` will **replace** the existing value with "Smith 2020" or "Jones 2019"
+- `remarks+` will **append** "Additional note" or "Updated information" to the existing remarks field
+  - If the new value is not already part of the existing content, it will be appended with "; " as separator
+  - If the new value is already present in the existing content, no change is made
+  - If the field is empty, the new value becomes the field content
+
 ### FileMaker XML Format
 
 The command supports standard FileMaker Pro XML export format (FMPXMLRESULT). The XML must:
 - Include a `METADATA` section defining field names
 - Include a `RESULTSET` section with `ROW` and `COL` elements
 - Have an `id` field to identify which find record to update
+- Field names can end with `+` to enable append mode (same as CSV)
 
 ## Examples
 
@@ -80,6 +99,35 @@ This is useful when you want to clear existing data. For example, if the CSV con
 ```
 - Without `--set-empty-to-null`: The `material` field will keep its existing value
 - With `--set-empty-to-null`: The `material` field will be set to NULL
+
+### Append Values to Existing Content
+Use the `+` sign after column names to append values instead of replacing:
+```bash
+php bin/console find:update find_append.csv --dry-run
+```
+
+Example CSV with append mode:
+```csv
+"id","publications+","remarks+"
+9,"New Publication 2025","Additional research findings"
+44,"Updated Study","Corrected measurements"
+```
+
+**Behavior Examples:**
+
+| Existing Value | CSV Column | CSV Value | Result After Update |
+|---------------|------------|-----------|---------------------|
+| "Smith 2020" | `publications` | "Jones 2019" | "Jones 2019" (replaced) |
+| "Smith 2020" | `publications+` | "Jones 2019" | "Smith 2020; Jones 2019" (appended) |
+| "Smith 2020; Jones 2019" | `publications+` | "Jones 2019" | "Smith 2020; Jones 2019" (no duplicate) |
+| "" (empty) | `publications+` | "Jones 2019" | "Jones 2019" (becomes new value) |
+| "Smith 2020" | `publications+` | "" (empty) | "Smith 2020" (unchanged) |
+
+**Important Notes:**
+- Duplicate detection is case-insensitive
+- The separator "; " is automatically added between values
+- The `+` suffix works with both CSV and XML files
+- Works with any text field (publications, remarks, description, etc.)
 
 ## Field Name Mapping
 
@@ -156,3 +204,34 @@ The command automatically handles type conversions:
 2. Always test with `--dry-run` first
 3. Monitor the output for "not found" or "error" messages
 4. Keep CSV/XML files in the `/data` directory for easy access
+
+## Advanced Usage Scenarios
+
+### Combining Features
+
+You can combine multiple features in a single import:
+
+**Example CSV combining replace, append, and empty fields:**
+```csv
+"id","tm","publications","remarks+","material"
+9,70778,"New Publication 2025","Archive verified",
+44,70787,,"Field note added","pottery"
+```
+
+**With command:**
+```bash
+php bin/console find:update combined.csv --set-empty-to-null
+```
+
+**Results:**
+- Record 9:
+  - `tm` = 70778 (replaced)
+  - `publications` = "New Publication 2025" (replaced)
+  - `remarks` = existing value + "; Archive verified" (appended)
+  - `material` = NULL (empty field set to null)
+  
+- Record 44:
+  - `tm` = 70787 (replaced)
+  - `publications` = NULL (empty field set to null)
+  - `remarks` = existing value + "; Field note added" (appended)
+  - `material` = "pottery" (replaced)

@@ -26,6 +26,9 @@
 - ✅ Skips records with invalid `tm` values (e.g., "NN", "SKIPPED", "NOT FOUND", "FILE_NOT_FOUND")
 - ✅ Ignores empty values by default (preserves existing data)
 - ✅ Optional mode to set empty fields to NULL with `--set-empty-to-null`
+- ✅ Append mode with `+` suffix on column names (e.g., `remarks+`)
+  - Appends new value to existing content with "; " separator
+  - Prevents duplicate content (checks if value already exists)
 - ✅ Gracefully handles fields without corresponding entity setters
 - ✅ Batch processing with periodic flush for performance
 
@@ -52,6 +55,9 @@ php bin/console find:update find_update.csv --batch-size=50
 
 # Set empty fields to NULL
 php bin/console find:update find_update.csv --set-empty-to-null
+
+# Append values to existing content using + suffix
+php bin/console find:update find_append.csv --dry-run
 ```
 
 ### XML Import
