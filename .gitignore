@@ -21,7 +21,8 @@
 /.settings
 
 # Application specific
-/data/
+/data/*.xml
+/data/*.csv
 robots.txt
 *.php~
 
