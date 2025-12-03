@@ -87,6 +87,17 @@ class Find {
 
     public function setDate($date) {
         $this->date = $date;
+        
+        // Automatically update year and month when date is set
+        if ($date instanceof \DateTime) {
+            $this->year = (int) $date->format('Y');
+            $this->month = (int) $date->format('m');
+        } elseif ($date === null) {
+            // If date is set to null, optionally clear year and month
+            // Uncomment the following lines if you want to clear year/month when date is null
+            // $this->year = null;
+            // $this->month = null;
+        }
     }
     public function getDate() {
         return $this->date;
@@ -94,6 +105,9 @@ class Find {
 
     public function setYear($year) {
         $this->year = $year;
+        
+        // Automatically update date when year changes
+        $this->updateDateFromYearMonth();
     }
     public function getYear() {
         return $this->year;
@@ -101,9 +115,27 @@ class Find {
 
     public function setMonth($month) {
         $this->month = $month;
+        
+        // Automatically update date when month changes
+        $this->updateDateFromYearMonth();
     }
     public function getMonth() {
         return $this->month;
+    }
+    
+    /**
+     * Update the date field based on year and month values
+     */
+    private function updateDateFromYearMonth() {
+        if ($this->year !== null && $this->month !== null) {
+            try {
+                // Create date from year and month (defaulting to first day of month)
+                $dateString = sprintf('%04d-%02d-01', $this->year, $this->month);
+                $this->date = new \DateTime($dateString);
+            } catch (\Exception $e) {
+                // If date creation fails, leave date as is
+            }
+        }
     }
 
     public function setDateRemarks($dateRemarks) {

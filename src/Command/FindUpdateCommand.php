@@ -384,6 +384,18 @@ class FindUpdateCommand extends Command
         
         $fieldName = trim($fieldName);
         
+        // Handle FileMaker-specific field mappings
+        $fileMakerMappings = [
+            'trench2' => 'trench',
+            'object id' => 'object',
+            'object no' => 'objectNo',
+        ];
+        
+        $lowerFieldName = strtolower($fieldName);
+        if (isset($fileMakerMappings[$lowerFieldName])) {
+            return $fileMakerMappings[$lowerFieldName];
+        }
+        
         // Handle snake_case
         if (strpos($fieldName, '_') !== false) {
             $parts = explode('_', $fieldName);

@@ -29,6 +29,8 @@
 - ✅ Append mode with `+` suffix on column names (e.g., `remarks+`)
   - Appends new value to existing content with "; " separator
   - Prevents duplicate content (checks if value already exists)
+- ✅ FileMaker-specific field mappings (`trench2` → `trench`, `object id` → `object`, `object no` → `objectNo`)
+- ✅ Automatic date/year/month synchronization in Find entity
 - ✅ Gracefully handles fields without corresponding entity setters
 - ✅ Batch processing with periodic flush for performance
 
@@ -129,13 +131,33 @@ Supports standard FileMaker Pro XML export with:
 - All errors are logged with record ID
 - Final statistics show all issues encountered
 
+## Entity Modifications
+
+### Find Entity (`src/Entity/Find.php`)
+
+Modified the `Find` entity to automatically synchronize date-related fields:
+
+**Date Setter (`setDate`)**:
+- When a `DateTime` object is set, automatically updates `year` and `month` fields
+- Example: `setDate(new DateTime('2025-11-15'))` sets `year=2025` and `month=11`
+
+**Year/Month Setters (`setYear`, `setMonth`)**:
+- When `year` or `month` is set, automatically creates/updates the `date` field
+- Uses the 1st day of the month for the date
+- Example: `setYear(2025)` and `setMonth(11)` creates `date=2025-11-01`
+
+**Benefits**:
+- Ensures data consistency between date, year, and month fields
+- Prevents mismatches when updating these fields
+- Works automatically with the import command
+
 ## Integration with Existing Code
 
 The command integrates seamlessly with the existing Symfony application:
 - Uses existing `FindRepository` for database operations
 - Works with existing `Find` entity and its setters
 - Respects Doctrine ORM mapping configuration
-- No changes to existing code required
+- Entity modifications are backward compatible
 
 ## Next Steps (Optional Enhancements)
 

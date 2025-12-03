@@ -133,10 +133,28 @@ Example CSV with append mode:
 
 The command automatically converts field names to match the Find entity:
 
+### General Mappings
 - `inventory_number` → `inventoryNumber`
 - `tm` → `tm`
 - `special_publication_notes` → `specialPublicationNotes`
 - `material` → `material`
+
+### FileMaker-Specific Mappings
+The following FileMaker field names are automatically mapped to database fields:
+- `trench2` → `trench`
+- `object id` → `object`
+- `object no` → `objectNo`
+- `material remarks` → `material_remarks`
+- `typology reference` → `typology_reference`
+- `dating absolute` → `dating_absolute`
+- `SCA Register No` → `sca_register`
+- `category no` → `category_no`
+
+### Date Field Synchronization
+The `date`, `year`, and `month` fields are automatically synchronized:
+- When you set `date`, the `year` and `month` fields are automatically updated
+- When you set `year` or `month`, the `date` field is automatically created (using the 1st day of the month)
+- Example: Setting `year=2025` and `month=11` automatically creates `date=2025-11-01`
 
 ## Special Values and Validation
 
