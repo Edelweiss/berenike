@@ -39,6 +39,7 @@ security:
         # General access rules
         - { path: '^/admin', roles: ROLE_EDITOR }
         - { path: '^/dashboard$', roles: ROLE_USER }
+        - { path: '^/filemaker', roles: ROLE_USER }
         - { path: '^/find/.+/edit$', roles: ROLE_EDITOR }
         - { path: '^/bucket/.+/edit$', roles: ROLE_EDITOR }
         - { path: '^/locus/.+/edit$', roles: ROLE_EDITOR }
