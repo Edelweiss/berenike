@@ -36,7 +36,7 @@ $(function(){
     datatype: 'xml',
     mtype: 'POST',
     colNames:[
-      'ID', 'Image', 'TM', 'HeidICON ID', 'HeidICON UUID', 'HeidICON Sys ID', 'Trench', 'Locus', 'Bucket', 'Inventory No.', 'Date', 'Year', 'Month', 'Date Remarks',
+      'ID', 'Trench', 'Locus', 'Bucket', 'Date', 'Date Remarks',
       'SCA Register', 'Object', 'Object No', 'Category', 'Category No',
       'Weight', 'Quantity', 'Dimensions', 'Preservation', 'Description',
       'Material', 'Material Remarks', 'Dating Absolute', 'Typology Reference',
@@ -44,18 +44,10 @@ $(function(){
     ],
     colModel :[
       {name:'id',                index:'id',                width:60},
-      {name:'thumbnail',         index:'thumbnail',         width:60, sortable: false, search: false, align:'center'},
-      {name:'tm',                index:'tm',                width:60},
-      {name:'heidiconId',        index:'heidiconId',        width:90, hidden: true},
-      {name:'heidiconUuid',      index:'heidiconUuid',      width:280, hidden: true},
-      {name:'heidiconSystemObjectId', index:'heidiconSystemObjectId', width:120, hidden: true},
       {name:'trench',            index:'trench',            width:55, resizable: false},
       {name:'locus',             index:'locus',             width:55},
       {name:'bucket',            index:'bucket',            width:55},
-      {name:'inventoryNumber',   index:'inventoryNumber',   width:90},
-      {name:'date',              index:'date',              width:80, formatter:'date', hidden: true},
-      {name:'year',              index:'year',              width:55},
-      {name:'month',             index:'month',             width:55, hidden: true},
+      {name:'date',              index:'date',              width:80, formatter:'date'},
       {name:'dateRemarks',       index:'dateRemarks',       width:100, hidden: true},
       {name:'scaRegister',       index:'scaRegister',       width:90, hidden: true},
       {name:'object',            index:'object',            width:128},
@@ -75,7 +67,7 @@ $(function(){
       {name:'remarks',           index:'remarks',           width:120},
       {name:'created',           index:'created',           width:120, hidden: true},
       {name:'modified',          index:'modified',          width:120, hidden: true},
-      {name:'actions',           index:'actions',           width:85, sortable: false, search: false}
+      {name:'actions',           index:'actions',           width:42, sortable: false, search: false}
     ],
     pager: '#pager',
     rowNum:100,

@@ -6,18 +6,10 @@
   {% for find in finds %}
     <row id = '{{ find.id }}'>
       <cell>{{ find.id }}</cell>
-      <cell>{% if find.thumbnailImage() %}<![CDATA[<a href="{{ path('PapyrillioBerenike_FileMakerFindShow', {'id': find.id}) }}" title="View Find"><img src="https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/{{ find.thumbnailImage().heidiconUuid }}/file/id/{{ find.thumbnailImage().heidiconSystemObjectId }}/file_version/name/small" alt="Thumbnail" style="max-width: 30px; max-height: 30px; border: 1px solid #ccc; border-radius: 4px;" /></a>]]>{% endif %}</cell>    
-      <cell>{% if find.tm %}<![CDATA[<a href="https://www.trismegistos.org/text/{{ find.tm }}" target="_blank" title="View in Trismegistos">{{ find.tm }}</a>]]>{% endif %}</cell>
-      <cell>{{ find.heidiconId }}</cell>
-      <cell>{{ find.heidiconUuid }}</cell>
-      <cell>{{ find.heidiconSystemObjectId }}</cell>
       <cell>{% if find.bucket is defined and find.bucket %}{% if find.bucket.locus is defined and find.bucket.locus.excavation is defined %}<![CDATA[{% if find.bucket.locus.excavation.id > 0 %}<a href="{{ path('PapyrillioBerenike_ExcavationShow', {'id': find.bucket.locus.excavation.id}) }}" title="Trench Number {{ find.bucket.locus.excavation.trench }} {{ find.bucket.locus.excavation.season }}">{{ find.bucket.locus.excavation.trench }}</a>{% else %}{{ find.bucket.locus.excavation.trench }}{% endif %}]]>{% endif %}{% endif %}</cell>
       <cell>{% if find.bucket is defined and find.bucket %}{% if find.bucket.locus is defined %}<![CDATA[{% if find.bucket.locus.id > 0 %}<a href="{{ path('PapyrillioBerenike_LocusShow', {'id': find.bucket.locus.id}) }}" title="Locus Number {{ find.bucket.locus.number }}">{{ find.bucket.locus.number }}</a>{% else %}{{ find.bucket.locus.number }}{% endif %}]]>{% endif %}{% endif %}</cell>
       <cell>{% if find.bucket is defined and find.bucket %}<![CDATA[{% if find.bucket.id > 0 %}<a href="{{ path('PapyrillioBerenike_BucketShow', {'id': find.bucket.id}) }}" title="Bucket Number {{ find.bucket.number }}">{{ find.bucket.number }}</a>{% else %}{{ find.bucket.number }}{% endif %}]]>{% endif %}</cell>
-      <cell>{{ find.inventoryNumber }}</cell>
       <cell>{{ find.date ? find.date|date('Y-m-d') : '' }}</cell>
-      <cell>{{ find.year }}</cell>
-      <cell>{{ find.month }}</cell>
       <cell>{{ find.dateRemarks }}</cell>
       <cell>{{ find.scaRegister }}</cell>
       <cell>{{ find.object }}</cell>
