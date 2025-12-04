@@ -1,6 +1,6 @@
 {% extends 'frontend.html.twig' %}
 
-{% block title %}Finds | Berenike.project{% endblock %}
+{% block title %}FileMaker Finds | Berenike.project{% endblock %}
 
 {% block stylesheets %}
   {{ parent() }}
@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block top %}
-  Liste der Funde
+  FileMaker Finds (from XML data dump)
 {% endblock %}
 
 {% block body %}
@@ -32,7 +32,7 @@
 
 $(function(){
   $('#list').jqGrid({
-    url: '{{ path('PapyrillioBerenike_FindList') }}',
+    url: '{{ path('PapyrillioBerenike_FileMakerFinds') }}',
     datatype: 'xml',
     mtype: 'POST',
     colNames:[
@@ -42,7 +42,7 @@ $(function(){
       'Material', 'Material Remarks', 'Dating Absolute', 'Typology Reference',
       'Publications', 'Remarks', 'Created', 'Modified', 'Actions'
     ],
-    colModel :[ 
+    colModel :[
       {name:'id',                index:'id',                width:60},
       {name:'thumbnail',         index:'thumbnail',         width:60, sortable: false, search: false, align:'center'},
       {name:'tm',                index:'tm',                width:60},
@@ -63,9 +63,6 @@ $(function(){
       {name:'category',          index:'category',          width:90, hidden: true},
       {name:'categoryNo',        index:'categoryNo',        width:80, hidden: true},
       {name:'weight',            index:'weight',            width:70, hidden: true},
-      {name:'quantity',          index:'quantity',          width:70, hidden: true},
-      {name:'dimensions',        index:'dimensions',        width:100, hidden: true},
-      {name:'preservation',      index:'preservation',      width:100, hidden: true},
       {name:'description',       index:'description',       width:200, hidden: true},
       {name:'material',          index:'material',          width:100, hidden: true},
       {name:'materialRemarks',   index:'materialRemarks',   width:120, hidden: true},
@@ -73,6 +70,9 @@ $(function(){
       {name:'typologyReference', index:'typologyReference', width:120, hidden: true},
       {name:'publications',      index:'publications',      width:120, hidden: true},
       {name:'remarks',           index:'remarks',           width:120, hidden: true},
+      {name:'typologyReference', index:'typologyReference', width:120, hidden: true},
+      {name:'publications',      index:'publications',      width:120},
+      {name:'remarks',           index:'remarks',           width:120},
       {name:'created',           index:'created',           width:120, hidden: true},
       {name:'modified',          index:'modified',          width:120, hidden: true},
       {name:'actions',           index:'actions',           width:85, sortable: false, search: false}

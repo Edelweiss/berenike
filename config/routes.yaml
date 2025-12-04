@@ -14,6 +14,14 @@ PapyrillioBerenike_FindList:
     path:  /finds
     controller: App\Controller\FindController::list
 
+PapyrillioBerenike_FileMakerFinds:
+    path:  /filemaker/finds
+    controller: App\Controller\FileMakerController::listFinds
+
+PapyrillioBerenike_FileMakerFindShow:
+    path:  /filemaker/find/{id}
+    controller: App\Controller\FileMakerController::showFind
+
 PapyrillioBerenike_FindShow:
     path:  /find/{id}
     controller: App\Controller\FindController::show

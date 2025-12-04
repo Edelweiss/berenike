@@ -1,0 +1,24 @@
+{% extends 'frontend.html.twig' %}
+
+{% block title %}
+  FileMaker Find {{ find.bucket.locus.excavation.site }}-{{ find.bucket.locus.excavation.season }}/{{ find.bucket.locus.excavation.trench }}/{{ find.bucket.locus.number }} {{ find.bucket.number }}
+{% endblock %}
+
+{% block top %}
+  <span title="site">{{ find.bucket.locus.excavation.site }}</span><span title="season">{{ find.bucket.locus.excavation.season }}</span>-<span title="trench">{{ find.bucket.locus.excavation.trench }}</span>/<span title="locus">{{ find.bucket.locus.number }}</span>/<span title="bucket">{{ find.bucket.number }}</span>
+  <span title="objectNo">{{ find.objectNo }}</span>
+  <span style="color: #888; font-size: 0.9em; margin-left: 1em;">(FileMaker Data)</span>
+{% endblock %}
+
+{% block body %}
+  {% include 'find/_find.html.twig' with {'find': find} %}
+
+  <div class="actions" style="margin-top: 1em;">
+    <a href="{{ path('PapyrillioBerenike_FileMakerFinds') }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+      <span class="ui-button-text">Back to FileMaker Finds</span>
+    </a>
+    <a href="{{ path('PapyrillioBerenike_FindList') }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+      <span class="ui-button-text">Back to Database Finds</span>
+    </a>
+  </div>
+{% endblock %}
