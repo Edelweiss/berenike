@@ -388,7 +388,12 @@ class FindUpdateCommand extends Command
         $fileMakerMappings = [
             'trench2' => 'trench',
             'object id' => 'object',
-            'object no' => 'objectNo',
+            'object no' => 'object_no',
+            'material remarks' => 'material_remarks',
+            'typology reference' => 'typology_reference',
+            'dating absolute' => 'dating_absolute',
+            'SCA Register No' => 'sca_register',
+            'category no' => 'category_no'
         ];
         
         $lowerFieldName = strtolower($fieldName);
