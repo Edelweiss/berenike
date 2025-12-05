@@ -142,19 +142,86 @@ class FileMakerController extends BerenikeController
         if (!file_exists($xmlFilePath)) {
             throw new \RuntimeException('FileMaker XML file not found: ' . $xmlFilePath);
         }
-        $finds = $this->parseFileMakerXml($xmlFilePath);
+        
+        // Load and parse XML
+        libxml_use_internal_errors(true);
+        $xml = simplexml_load_file($xmlFilePath);
+        
+        if ($xml === false) {
+            $errors = libxml_get_errors();
+            $errorMessages = array_map(function($error) {
+                return sprintf('Line %d: %s', $error->line, trim($error->message));
+            }, $errors);
+            libxml_clear_errors();
+            throw new \RuntimeException('Unable to parse XML file: ' . implode(', ', $errorMessages));
+        }
+        
+        // Get metadata (field names)
+        $metadata = $xml->METADATA ?? $xml->metadata;
+        if (!$metadata) {
+            throw new \RuntimeException('Invalid FileMaker XML: Missing METADATA section');
+        }
+        
+        $fieldNames = [];
+        foreach ($metadata->FIELD ?? $metadata->field as $field) {
+            $fieldNames[] = (string) ($field['NAME'] ?? $field['name']);
+        }
+        
         // Find the record with matching ID
-        $find = null;
-        foreach ($finds as $f) {
-            if ($f->id == $id) {
-                $find = $f;
+        $resultset = $xml->RESULTSET ?? $xml->resultset;
+        if (!$resultset) {
+            throw new \RuntimeException('Invalid FileMaker XML: Missing RESULTSET section');
+        }
+        
+        $rawXmlRow = null;
+        $recordData = [];
+        
+        foreach ($resultset->ROW ?? $resultset->row as $row) {
+            $colIndex = 0;
+            $currentId = null;
+            
+            foreach ($row->COL ?? $row->col as $col) {
+                if (isset($fieldNames[$colIndex]) && strtolower($fieldNames[$colIndex]) === 'id') {
+                    $currentId = (string) ($col->DATA ?? $col->data ?? '');
+                    break;
+                }
+                $colIndex++;
+            }
+            
+            if ($currentId == $id) {
+                // Found the matching record
+                $rawXmlRow = $row->asXML();
+                
+                // Format XML with proper indentation
+                $dom = new \DOMDocument('1.0');
+                $dom->preserveWhiteSpace = false;
+                $dom->formatOutput = true;
+                $dom->loadXML($rawXmlRow);
+                $formattedXml = $dom->saveXML();
+                
+                // Build record data as array
+                $colIndex = 0;
+                foreach ($row->COL ?? $row->col as $col) {
+                    if (isset($fieldNames[$colIndex])) {
+                        $value = (string) ($col->DATA ?? $col->data ?? '');
+                        $recordData[$fieldNames[$colIndex]] = $value;
+                    }
+                    $colIndex++;
+                }
                 break;
             }
         }
-        if (!$find) {
+        
+        if (!$rawXmlRow) {
             throw $this->createNotFoundException(sprintf('Find with ID %d not found in FileMaker data', $id));
         }
-        return $this->render('filemaker/show_find.html.twig', ['find' => $find]);
+        
+        return $this->render('filemaker/show_find.html.twig', [
+            'id' => $id,
+            'rawXml' => $formattedXml,
+            'recordData' => $recordData,
+            'fieldNames' => $fieldNames
+        ]);
     }
 
     private function parseFileMakerXml(string $filePath): array
@@ -434,6 +501,17 @@ class FileMakerController extends BerenikeController
             // Handle DateTime objects
             if ($valueA instanceof \DateTime && $valueB instanceof \DateTime) {
                 $result = $valueA <=> $valueB;
+            } elseif ($valueA instanceof \DateTime || $valueB instanceof \DateTime) {
+                // One is DateTime, one is not - convert DateTime to string for comparison
+                $strA = $valueA instanceof \DateTime ? $valueA->format('Y-m-d H:i:s') : (string)$valueA;
+                $strB = $valueB instanceof \DateTime ? $valueB->format('Y-m-d H:i:s') : (string)$valueB;
+                $result = strcasecmp($strA, $strB);
+            } elseif ($valueA === null && $valueB === null) {
+                $result = 0;
+            } elseif ($valueA === null) {
+                $result = 1; // nulls sort last
+            } elseif ($valueB === null) {
+                $result = -1; // nulls sort last
             } else {
                 // Convert to string for comparison
                 $result = strcasecmp((string)$valueA, (string)$valueB);
