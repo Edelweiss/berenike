@@ -13,12 +13,10 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-#[AsCommand(
-    name: 'find:update',
-    description: 'Update find records from a CSV or FileMaker XML file'
-)]
 class FindUpdateCommand extends Command
 {
+    protected static $defaultName = 'find:update';
+    protected static $defaultDescription = 'Update find records from a CSV or FileMaker XML file';
     private EntityManagerInterface $entityManager;
     private FindRepository $findRepository;
 
