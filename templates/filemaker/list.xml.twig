@@ -10,7 +10,6 @@
       <cell>{% if find.bucket is defined and find.bucket %}{% if find.bucket.locus is defined %}<![CDATA[{% if find.bucket.locus.id > 0 %}<a href="{{ path('PapyrillioBerenike_LocusShow', {'id': find.bucket.locus.id}) }}" title="Locus Number {{ find.bucket.locus.number }}">{{ find.bucket.locus.number }}</a>{% else %}{{ find.bucket.locus.number }}{% endif %}]]>{% endif %}{% endif %}</cell>
       <cell>{% if find.bucket is defined and find.bucket %}<![CDATA[{% if find.bucket.id > 0 %}<a href="{{ path('PapyrillioBerenike_BucketShow', {'id': find.bucket.id}) }}" title="Bucket Number {{ find.bucket.number }}">{{ find.bucket.number }}</a>{% else %}{{ find.bucket.number }}{% endif %}]]>{% endif %}</cell>
       <cell>{{ find.date ? find.date|date('Y-m-d') : '' }}</cell>
-      <cell>{{ find.dateRemarks }}</cell>
       <cell>{{ find.scaRegister }}</cell>
       <cell>{{ find.object }}</cell>
       <cell>{{ find.objectNo }}</cell>

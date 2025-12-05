@@ -15,7 +15,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'find:update',
-    description: 'Update find records from a CSV or FileMaker XML file',
+    description: 'Update find records from a CSV or FileMaker XML file'
 )]
 class FindUpdateCommand extends Command
 {
