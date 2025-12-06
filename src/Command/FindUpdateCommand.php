@@ -61,7 +61,7 @@ class FindUpdateCommand extends Command
 
         $io->title('Find Update Command');
         $io->info(sprintf('Processing file: %s', $filename));
-        
+
         if ($dryRun) {
             $io->warning('DRY RUN MODE - No changes will be persisted');
         }
@@ -237,10 +237,10 @@ class FindUpdateCommand extends Command
 
         foreach ($resultset->ROW ?? $resultset->row as $row) {
             $stats['processed']++;
-            
+
             $data = [];
             $colIndex = 0;
-            
+
             foreach ($row->COL ?? $row->col as $col) {
                 if (isset($fieldNames[$colIndex])) {
                     $fieldName = $fieldNames[$colIndex];
@@ -257,7 +257,7 @@ class FindUpdateCommand extends Command
             }
 
             $findId = (int) $data['id'];
-            
+
             // Validate tm field if present
             if (isset($data['tm']) && trim($data['tm']) !== '') {
                 // Check for special values
@@ -266,7 +266,7 @@ class FindUpdateCommand extends Command
                     $stats['skipped']++;
                     continue;
                 }
-                
+
                 // Check if tm is a valid positive integer
                 if (!ctype_digit(trim($data['tm'])) || (int) $data['tm'] <= 0) {
                     $io->writeln(sprintf('<comment>Skipping find ID %d: tm value "%s" is not a valid positive integer</comment>', $findId, $data['tm']));
@@ -277,11 +277,11 @@ class FindUpdateCommand extends Command
 
             try {
                 $result = $this->updateFind($findId, $data, $dryRun, $setEmptyToNull);
-                
+
                 if ($result === 'updated') {
                     $stats['updated']++;
                     $processedInBatch++;
-                    
+
                     if (!$dryRun && $processedInBatch >= $batchSize) {
                         $this->entityManager->flush();
                         $this->entityManager->clear();
@@ -312,13 +312,13 @@ class FindUpdateCommand extends Command
     private function updateFind(int $findId, array $data, bool $dryRun, bool $setEmptyToNull): string
     {
         $find = $this->findRepository->find($findId);
-        
+
         if (!$find) {
             return 'not_found';
         }
 
         $updatedFields = 0;
-        
+
         // Update fields based on data
         foreach ($data as $fieldName => $value) {
             // Skip the ID field itself
@@ -334,6 +334,9 @@ class FindUpdateCommand extends Command
                 $actualFieldName = substr($fieldName, 0, -1);
             }
 
+            // Sanitize the value before processing
+            $value = $this->sanitizeValue($value, $actualFieldName);
+            
             $isEmpty = ($value === null || trim($value) === '');
             
             // Skip empty values unless setEmptyToNull is enabled
@@ -373,33 +376,102 @@ class FindUpdateCommand extends Command
         return 'updated';
     }
 
+    /**
+     * Sanitize values from FileMaker exports
+     * - Clean up date formats (underscores to hyphens)
+     * - Remove leading/trailing whitespace and apostrophes
+     * - Clean up extra whitespace
+     */
+    private function sanitizeValue(string $value, string $fieldName): string
+    {
+        // Trim whitespace
+        $value = trim($value);
+        
+        // Remove leading/trailing apostrophes (common in FileMaker text fields)
+        $value = trim($value, "'\"");
+        
+        // Additional trim after removing quotes
+        $value = trim($value);
+        
+        // Date field sanitization
+        if (in_array($fieldName, ['date', 'created', 'modified'])) {
+            // Replace underscores with hyphens in dates (e.g., 2009_01_29 -> 2009-01-29)
+            $value = str_replace('_', '-', $value);
+            
+            // Handle various date separators (dots, slashes) and convert to ISO format
+            // Pattern: DD.MM.YYYY or D.M.YYYY
+            if (preg_match('/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/', $value, $matches)) {
+                $value = sprintf('%04d-%02d-%02d', $matches[3], $matches[2], $matches[1]);
+            }
+            // Pattern: DD/MM/YYYY or D/M/YYYY
+            elseif (preg_match('/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/', $value, $matches)) {
+                $value = sprintf('%04d-%02d-%02d', $matches[3], $matches[2], $matches[1]);
+            }
+        }
+        
+        // Normalize whitespace
+        // Replace multiple newlines with single newline
+        $value = preg_replace('/\n+/', "\n", $value);
+        // Replace multiple spaces and tabs with single space (but preserve newlines)
+        $value = preg_replace('/[ \t]+/', ' ', $value);
+        
+        // Final trim
+        $value = trim($value);
+        
+        return $value;
+    }
+
+    /*
+All FileMaker fields (for reference):
+id
+PB_Id
+trench2
+date
+SCA Register
+object id
+object no
+category
+category no
+weight
+quantity
+dimensions
+preservation
+description
+material
+material remarks
+dating absolute
+typology reference
+publications
+remarks
+rebuild_changes
+Created
+Modified
+    */
     private function normalizeFieldName(string $fieldName): string
     {
         // Convert field name to camelCase
-        // Example: "inventory_number" -> "inventoryNumber"
+        // Example: "Inventory Number" -> "inventoryNumber"
+        // Example: "object_id" -> "objectId"
         // Example: "tm" -> "tm"
-        // Example: "special_publication_notes" -> "specialPublicationNotes"
-        
+        // Example: "SCA Register" -> "scaRegister"
+
         $fieldName = trim($fieldName);
-        
+
         // Handle FileMaker-specific field mappings
         $fileMakerMappings = [
             'trench2' => 'trench',
             'object id' => 'object',
-            'object no' => 'object_no',
-            'material remarks' => 'material_remarks',
-            'typology reference' => 'typology_reference',
-            'dating absolute' => 'dating_absolute',
-            'SCA Register No' => 'sca_register',
-            'category no' => 'category_no'
+            'PB_Id' => 'bucketId'
         ];
-        
-        $lowerFieldName = strtolower($fieldName);
-        if (isset($fileMakerMappings[$lowerFieldName])) {
-            return $fileMakerMappings[$lowerFieldName];
+
+        if (isset($fileMakerMappings[$fieldName])) {
+            return $fileMakerMappings[$fieldName];
         }
-        
-        // Handle snake_case
+
+        // Replace both underscores and spaces with underscores for uniform processing
+        $fieldName = str_replace(' ', '_', $fieldName);
+        // Convert to lowercase and then to camelCase
+        $fieldName = strtolower($fieldName);
         if (strpos($fieldName, '_') !== false) {
             $parts = explode('_', $fieldName);
             $camelCase = array_shift($parts);
@@ -408,7 +480,7 @@ class FindUpdateCommand extends Command
             }
             return $camelCase;
         }
-        
+
         return lcfirst($fieldName);
     }
 

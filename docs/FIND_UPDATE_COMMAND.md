@@ -62,6 +62,24 @@ The command supports standard FileMaker Pro XML export format (FMPXMLRESULT). Th
 - Have an `id` field to identify which find record to update
 - Field names can end with `+` to enable append mode (same as CSV)
 
+### Data Sanitization
+
+The command automatically sanitizes messy data from FileMaker exports:
+
+**Date Fields:**
+- Converts underscores to hyphens: `2009_01_29` → `2009-01-29`
+- Converts European format: `22.1.2023` → `2023-01-22`
+- Converts slash format: `15/06/2020` → `2020-06-15`
+
+**Text Fields:**
+- Removes leading/trailing whitespace
+- Removes leading/trailing apostrophes and quotes: `'text'` → `text`
+- Normalizes multiple spaces and tabs to single space
+- Normalizes multiple newlines to single newline (preserves line breaks)
+- Example: `"  'intaglio'  "` → `intaglio`
+- Example: `"text    with    spaces"` → `text with spaces`
+- Example: `"line1\n\n\nline2"` → `"line1\nline2"`
+
 ## Examples
 
 ### Dry Run (Test Mode)

@@ -29,6 +29,11 @@
 - ✅ Append mode with `+` suffix on column names (e.g., `remarks+`)
   - Appends new value to existing content with "; " separator
   - Prevents duplicate content (checks if value already exists)
+- ✅ **Data Sanitization** - Cleans messy FileMaker data:
+  - Date formats: `2009_01_29` → `2009-01-29`, `22.1.2023` → `2023-01-22`
+  - Removes leading/trailing whitespace and quotes
+  - Normalizes multiple spaces/tabs to single space
+  - Normalizes multiple newlines to single newline (preserves line breaks)
 - ✅ FileMaker-specific field mappings (`trench2` → `trench`, `object id` → `object`, `object no` → `objectNo`)
 - ✅ Automatic date/year/month synchronization in Find entity
 - ✅ Gracefully handles fields without corresponding entity setters
