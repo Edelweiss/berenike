@@ -157,7 +157,7 @@ class FindUpdateCommand extends Command
             }
 
             try {
-                $result = $this->updateFind($findId, $data, $dryRun, $setEmptyToNull);
+                $result = $this->updateFind($findId, $data, $dryRun, $setEmptyToNull, $io);
                 
                 if ($result === 'updated') {
                     $stats['updated']++;
@@ -276,7 +276,7 @@ class FindUpdateCommand extends Command
             }
 
             try {
-                $result = $this->updateFind($findId, $data, $dryRun, $setEmptyToNull);
+                $result = $this->updateFind($findId, $data, $dryRun, $setEmptyToNull, $io);
 
                 if ($result === 'updated') {
                     $stats['updated']++;
@@ -309,7 +309,7 @@ class FindUpdateCommand extends Command
         return $stats;
     }
 
-    private function updateFind(int $findId, array $data, bool $dryRun, bool $setEmptyToNull): string
+    private function updateFind(int $findId, array $data, bool $dryRun, bool $setEmptyToNull, ?SymfonyStyle $io = null): string
     {
         $find = $this->findRepository->find($findId);
 
@@ -360,9 +360,14 @@ class FindUpdateCommand extends Command
                         $newValue = $this->appendValue($existingValue, $value);
                         $find->$setterMethod($newValue);
                     } else {
-                        // Replace mode: convert and set value
-                        $convertedValue = $this->convertValue($actualFieldName, $value);
-                        $find->$setterMethod($convertedValue);
+                        // Special handling for incomplete dates
+                        if ($actualFieldName === 'date') {
+                            $this->handleDateField($find, $value, $io);
+                        } else {
+                            // Replace mode: convert and set value
+                            $convertedValue = $this->convertValue($actualFieldName, $value);
+                            $find->$setterMethod($convertedValue);
+                        }
                     }
                 }
                 $updatedFields++;
@@ -374,6 +379,180 @@ class FindUpdateCommand extends Command
         }
 
         return 'updated';
+    }
+    
+    /**
+     * Handle date field with support for incomplete dates
+     * - Full date: 2009-01-29 -> setDate() (also sets year and month)
+     * - Year-month only: 2009-01 -> setYear() + setMonth()
+     * - Year only: 2009 -> setYear() only
+     * - Uncertain dates: 1996-0x-xx, 1997-01-?? -> extract what's valid
+     * - Invalid: return without changes
+     */
+    private function handleDateField(Find $find, string $value, ?SymfonyStyle $io = null): void
+    {
+        $value = trim($value);
+        
+        if ($value === '') {
+            return;
+        }
+        
+        // Try to parse as complete date first
+        $dateInfo = $this->parseDateValue($value);
+        
+        if ($dateInfo === null) {
+            // Completely invalid date
+            if ($io) {
+                $io->writeln(sprintf('<comment>Skipping invalid date value: "%s" for find ID %d</comment>', $value, $find->getId()), OutputInterface::VERBOSITY_VERBOSE);
+            }
+            return;
+        }
+        
+        // If we have a complete date (year, month, day), use setDate
+        if ($dateInfo['complete']) {
+            try {
+                $date = new \DateTime(sprintf('%04d-%02d-%02d', $dateInfo['year'], $dateInfo['month'], $dateInfo['day']));
+                $find->setDate($date);
+            } catch (\Exception $e) {
+                if ($io) {
+                    $io->writeln(sprintf('<comment>Failed to create date from "%s": %s</comment>', $value, $e->getMessage()), OutputInterface::VERBOSITY_VERBOSE);
+                }
+            }
+        } else {
+            // Incomplete date - set year and/or month directly
+            if ($dateInfo['year'] !== null) {
+                $find->setYear($dateInfo['year']);
+            }
+            if ($dateInfo['month'] !== null) {
+                $find->setMonth($dateInfo['month']);
+            }
+            if ($io) {
+                $io->writeln(sprintf('<comment>Incomplete date "%s": set year=%s, month=%s for find ID %d</comment>', 
+                    $value, 
+                    $dateInfo['year'] ?? 'null', 
+                    $dateInfo['month'] ?? 'null',
+                    $find->getId()
+                ), OutputInterface::VERBOSITY_VERBOSE);
+            }
+        }
+    }
+    
+    /**
+     * Parse a date value and return structured info about what was extracted
+     * Returns null if completely invalid, otherwise an array with:
+     * - 'complete' => bool (whether all parts are valid)
+     * - 'year' => int|null
+     * - 'month' => int|null  
+     * - 'day' => int|null
+     */
+    private function parseDateValue(string $value): ?array
+    {
+        $value = trim($value);
+        
+        // Reject obviously invalid values
+        if ($value === '' || preg_match('/^[a-z]+$/i', $value) || $value === '000') {
+            return null;
+        }
+        
+        // Try standard ISO format: YYYY-MM-DD or YYYY_MM_DD
+        // Also handles dates with 00 for invalid month/day (e.g., 2003-00-00)
+        if (preg_match('/^(\d{4})[-_](\d{2})[-_](\d{2})$/', $value, $matches)) {
+            $year = (int) $matches[1];
+            $month = (int) $matches[2];
+            $day = (int) $matches[3];
+            
+            $validYear = ($year >= 1990 && $year <= 2100);
+            $validMonth = ($month >= 1 && $month <= 12);
+            $validDay = ($day >= 1 && $day <= 31);
+            
+            if ($validYear && $validMonth && $validDay) {
+                return ['complete' => true, 'year' => $year, 'month' => $month, 'day' => $day];
+            }
+            
+            // Handle incomplete dates with 00 values (e.g., 2003-00-00, 2003-01-00)
+            if ($validYear) {
+                return [
+                    'complete' => false, 
+                    'year' => $year, 
+                    'month' => $validMonth ? $month : null, 
+                    'day' => $validDay ? $day : null
+                ];
+            }
+        }
+        
+        // Try DD-MM-YY format: 31-12-13
+        if (preg_match('/^(\d{2})-(\d{2})-(\d{2})$/', $value, $matches)) {
+            $day = (int) $matches[1];
+            $month = (int) $matches[2];
+            $year = (int) $matches[3];
+            // Assume 20xx for years 00-30, 19xx for 31-99
+            $year = $year <= 30 ? 2000 + $year : 1900 + $year;
+            
+            if ($month >= 1 && $month <= 12 && $day >= 1 && $day <= 31) {
+                return ['complete' => true, 'year' => $year, 'month' => $month, 'day' => $day];
+            }
+        }
+        
+        // Try year-only: 1996, 2020
+        if (preg_match('/^(\d{4})$/', $value, $matches)) {
+            $year = (int) $matches[1];
+            if ($year >= 1990 && $year <= 2100) {
+                return ['complete' => false, 'year' => $year, 'month' => null, 'day' => null];
+            }
+        }
+        
+        // Try year-month only: 2009-01 or 2009_01
+        if (preg_match('/^(\d{4})[-_](\d{1,2})$/', $value, $matches)) {
+            $year = (int) $matches[1];
+            $month = (int) $matches[2];
+            if ($year >= 1990 && $year <= 2100 && $month >= 1 && $month <= 12) {
+                return ['complete' => false, 'year' => $year, 'month' => $month, 'day' => null];
+            }
+        }
+        
+        // Try uncertain dates with ? or x placeholders: 1996-0x-xx, 1997-01-??, 2015-01-??
+        if (preg_match('/^(\d{4})[-_](\d{1,2}|[x?]+)[-_](\d{1,2}|[x?]+)$/i', $value, $matches)) {
+            $year = (int) $matches[1];
+            $monthPart = $matches[2];
+            $dayPart = $matches[3];
+            
+            // Check if month is valid number
+            $month = null;
+            if (preg_match('/^\d{1,2}$/', $monthPart)) {
+                $monthNum = (int) $monthPart;
+                if ($monthNum >= 1 && $monthNum <= 12) {
+                    $month = $monthNum;
+                }
+            }
+            
+            // Check if day is valid number
+            $day = null;
+            if (preg_match('/^\d{1,2}$/', $dayPart)) {
+                $dayNum = (int) $dayPart;
+                if ($dayNum >= 1 && $dayNum <= 31) {
+                    $day = $dayNum;
+                }
+            }
+            
+            if ($year >= 1990 && $year <= 2100) {
+                return [
+                    'complete' => ($month !== null && $day !== null),
+                    'year' => $year,
+                    'month' => $month,
+                    'day' => $day
+                ];
+            }
+        }
+        
+        // Try typo with extra digit: 2014-015-15 -> extract year only
+        if (preg_match('/^(\d{4})-\d{3,}-\d+$/', $value, $matches)) {
+            $year = (int) $matches[1];
+            if ($year >= 1990 && $year <= 2100) {
+                return ['complete' => false, 'year' => $year, 'month' => null, 'day' => null];
+            }
+        }
+        
+        return null;
     }
 
     /**
