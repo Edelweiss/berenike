@@ -374,6 +374,11 @@ class FindUpdateCommand extends Command
             }
         }
 
+        // If the date field in $data was not empty, but could not be fully parsed, append the original value to dateRemarks
+        if (isset($data['date']) && trim($data['date']) !== '' && $fingd->getDate() === null) {
+            $this->appendToDateRemarks($find, $data['date']);
+        }
+
         if (!$dryRun && $updatedFields > 0) {
             $this->entityManager->persist($find);
         }
@@ -402,6 +407,7 @@ class FindUpdateCommand extends Command
         
         if ($dateInfo === null) {
             // Completely invalid date
+            $find->setDate(null);
             if ($io) {
                 $io->writeln(sprintf('<comment>Skipping invalid date value: "%s" for find ID %d</comment>', $value, $find->getId()), OutputInterface::VERBOSITY_VERBOSE);
             }
@@ -420,6 +426,7 @@ class FindUpdateCommand extends Command
             }
         } else {
             // Incomplete date - set year and/or month directly
+            $find->setDate(null);
             if ($dateInfo['year'] !== null) {
                 $find->setYear($dateInfo['year']);
             }
@@ -436,7 +443,23 @@ class FindUpdateCommand extends Command
             }
         }
     }
-    
+
+    /**
+     * Append a value to the dateRemarks field
+     */
+    private function appendToDateRemarks(Find $find, string $value): void
+    {
+        $existing = $find->getDateRemarks();
+        if ($existing === null || trim($existing) === '') {
+            $find->setDateRemarks($value);
+        } else {
+            // Check if value is already present
+            if (stripos($existing, $value) === false) {
+                $find->setDateRemarks($existing . '; ' . $value);
+            }
+        }
+    }
+
     /**
      * Parse a date value and return structured info about what was extracted
      * Returns null if completely invalid, otherwise an array with:
