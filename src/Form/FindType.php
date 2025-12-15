@@ -156,18 +156,7 @@ class FindType extends AbstractType
             ->add('bucket', EntityType::class, [
                 'class' => Bucket::class,
                 'choice_label' => function (Bucket $bucket) {
-                    $site = $bucket->getLocus() && $bucket->getLocus()->getExcavation() 
-                        ? $bucket->getLocus()->getExcavation()->getSite() 
-                        : '';
-                    $season = $bucket->getLocus() && $bucket->getLocus()->getExcavation() 
-                        ? $bucket->getLocus()->getExcavation()->getSeason() 
-                        : '';
-                    $trench = $bucket->getLocus() && $bucket->getLocus()->getExcavation() 
-                        ? $bucket->getLocus()->getExcavation()->getTrench() 
-                        : '';
-                    $locusNumber = $bucket->getLocus() ? $bucket->getLocus()->getNumber() : '';
-                    $bucketNumber = $bucket->getNumber();
-                    return sprintf('%s%s-%s/%s/%s', $site, $season, $trench, $locusNumber, $bucketNumber);
+                    return $bucket . '';
                 },
                 'query_builder' => function ($repository) {
                     return $repository->createQueryBuilder('b')

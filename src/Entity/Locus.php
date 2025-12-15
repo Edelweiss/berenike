@@ -96,4 +96,8 @@ class Locus {
     public function getExcavation() {
         return $this->excavation;
     }
+
+    public function __toString() {
+        return $this->excavation . '/' . $this->number;
+    }
 }

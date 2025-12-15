@@ -90,4 +90,9 @@ class Bucket {
     {
         return $this->finds;
     }
+
+    public function __toString()
+    {
+        return $this->locus . '/' . $this->number;
+    }
 }
