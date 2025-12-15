@@ -192,11 +192,25 @@ class FileMakerController extends BerenikeController
                 // Found the matching record
                 $rawXmlRow = $row->asXML();
                 
-                // Format XML with proper indentation
+                // Format XML with proper indentation and add field name comments
                 $dom = new \DOMDocument('1.0');
                 $dom->preserveWhiteSpace = false;
                 $dom->formatOutput = true;
                 $dom->loadXML($rawXmlRow);
+                
+                // Add comments to identify each COL element by field name
+                $xpath = new \DOMXPath($dom);
+                $colNodes = $xpath->query('//COL | //col');
+                $colIndex = 0;
+                
+                foreach ($colNodes as $colNode) {
+                    if (isset($fieldNames[$colIndex])) {
+                        $comment = $dom->createComment(' ' . $fieldNames[$colIndex] . ' ');
+                        $colNode->parentNode->insertBefore($comment, $colNode);
+                    }
+                    $colIndex++;
+                }
+                
                 $formattedXml = $dom->saveXML();
                 
                 // Build record data as array
