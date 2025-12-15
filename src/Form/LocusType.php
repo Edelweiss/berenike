@@ -21,7 +21,7 @@ class LocusType extends AbstractType
                 'required' => true,
                 'label' => 'Trench',
                 'choice_label' => function(Excavation $excavation) {
-                    return $excavation->getSite() . '-' . $excavation->getTrench();
+                    return $excavation . '';
                 },
                 'query_builder' => function(\Doctrine\ORM\EntityRepository $er) {
                     return $er->createQueryBuilder('e')

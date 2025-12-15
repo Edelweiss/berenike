@@ -79,4 +79,34 @@ class Excavation {
     public function getExcavation() {
         return $this->excavation;
     }
+
+    public function __toString() {
+        $formattedSeason = $this->formatSeason($this->season);
+        return $this->site . $formattedSeason . '-' . $this->trench;
+    }
+
+    private function formatSeason($season) {
+        if (empty($season)) {
+            return '';
+        }
+
+        // Extract all 4-digit years from the season string
+        preg_match_all('/\d{4}/', $season, $matches);
+        $years = $matches[0];
+
+        if (empty($years)) {
+            return $season; // Return as-is if no years found
+        }
+
+        if (count($years) === 1) {
+            // Single year: "2025" -> "25"
+            return substr($years[0], -2);
+        } elseif (count($years) === 2) {
+            // Two years: "2023/2024" -> "23/24"
+            return substr($years[0], -2) . '/' . substr($years[1], -2);
+        } else {
+            // More than two years: "2012/2013/2014" -> "12/…/14"
+            return substr($years[0], -2) . '/…/' . substr($years[count($years) - 1], -2);
+        }
+    }
 }
