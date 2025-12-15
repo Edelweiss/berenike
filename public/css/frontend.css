@@ -140,6 +140,15 @@ a.ui-button:active {
     display: inline-block;
 }
 
+/* Reduced padding for buttons in table cells */
+table a.ui-button,
+table a.ui-button:link,
+table a.ui-button:visited,
+table a.ui-button:hover,
+table a.ui-button:active {
+    padding: 2px;
+}
+
 /* HEADER */
 
 div#header {
