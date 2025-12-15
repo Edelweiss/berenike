@@ -103,14 +103,14 @@ class FindController extends BerenikeController
       if($this->getParameter('_search') == 'true'){
         $prefix = ' WHERE ';
 
-        foreach(['year', 'month', 'object', 'objectNo', 'category', 'categoryNo', 'weight', 'quantity', 
+        foreach(['id', 'year', 'month', 'object', 'objectNo', 'category', 'categoryNo', 'weight', 'quantity', 
                  'dimensions', 'preservation', 'description', 'material', 'materialRemarks', 
                  'datingAbsolute', 'typologyReference', 'publications', 'remarks', 'created', 'modified',
                  'inventoryNumber', 'tm', 'date', 'dateRemarks', 'scaRegister', 'rebuildChanges',
                  'heidiconId', 'heidiconUuid', 'heidiconSystemObjectId'] as $field){
           if(strlen($this->getParameter($field))){
-            $where .= $prefix . 'f.' . $field . ' LIKE :' . $field;
-            $parameters[$field] = '%' . $this->getParameter($field) . '%';
+            $where .= $prefix . 'f.' . $field . ' LIKE :' . $field . '_search';
+            $parameters[$field . '_search'] = '%' . $this->getParameter($field) . '%';
             $prefix = ' AND ';
           }
         }
