@@ -157,6 +157,13 @@ class FindUpdateCommand extends Command
             }
 
             try {
+                // Check if EntityManager is closed and skip if so
+                if (!$this->entityManager->isOpen()) {
+                    $io->writeln(sprintf('<error>EntityManager is closed, skipping find ID %d</error>', $findId));
+                    $stats['errors']++;
+                    continue;
+                }
+                
                 $result = $this->updateFind($findId, $data, $dryRun, $setEmptyToNull, $io);
                 
                 if ($result === 'updated') {
@@ -165,9 +172,16 @@ class FindUpdateCommand extends Command
                     
                     // Flush in batches for better performance
                     if (!$dryRun && $processedInBatch >= $batchSize) {
-                        $this->entityManager->flush();
-                        $this->entityManager->clear();
-                        $processedInBatch = 0;
+                        try {
+                            $this->entityManager->flush();
+                            $this->entityManager->clear();
+                            $processedInBatch = 0;
+                        } catch (\Exception $e) {
+                            $io->writeln(sprintf('<error>Error flushing batch at find ID %d: %s</error>', $findId, $e->getMessage()));
+                            $stats['errors']++;
+                            // EntityManager might be closed, can't continue
+                            throw $e;
+                        }
                     }
                 } elseif ($result === 'not_found') {
                     $io->writeln(sprintf('<comment>Find with ID %d not found in database</comment>', $findId));
@@ -176,6 +190,12 @@ class FindUpdateCommand extends Command
             } catch (\Exception $e) {
                 $io->writeln(sprintf('<error>Error updating find ID %d: %s</error>', $findId, $e->getMessage()));
                 $stats['errors']++;
+                
+                // If EntityManager is closed, we can't continue
+                if (!$this->entityManager->isOpen()) {
+                    $io->error('EntityManager has been closed due to an error. Cannot continue processing.');
+                    break;
+                }
             }
 
             $io->progressAdvance();
@@ -276,6 +296,13 @@ class FindUpdateCommand extends Command
             }
 
             try {
+                // Check if EntityManager is closed and skip if so
+                if (!$this->entityManager->isOpen()) {
+                    $io->writeln(sprintf('<error>EntityManager is closed, skipping find ID %d</error>', $findId));
+                    $stats['errors']++;
+                    continue;
+                }
+                
                 $result = $this->updateFind($findId, $data, $dryRun, $setEmptyToNull, $io);
 
                 if ($result === 'updated') {
@@ -283,9 +310,16 @@ class FindUpdateCommand extends Command
                     $processedInBatch++;
 
                     if (!$dryRun && $processedInBatch >= $batchSize) {
-                        $this->entityManager->flush();
-                        $this->entityManager->clear();
-                        $processedInBatch = 0;
+                        try {
+                            $this->entityManager->flush();
+                            $this->entityManager->clear();
+                            $processedInBatch = 0;
+                        } catch (\Exception $e) {
+                            $io->writeln(sprintf('<error>Error flushing batch at find ID %d: %s</error>', $findId, $e->getMessage()));
+                            $stats['errors']++;
+                            // EntityManager might be closed, can't continue
+                            throw $e;
+                        }
                     }
                 } elseif ($result === 'not_found') {
                     $io->writeln(sprintf('<comment>Find with ID %d not found in database</comment>', $findId));
@@ -294,6 +328,12 @@ class FindUpdateCommand extends Command
             } catch (\Exception $e) {
                 $io->writeln(sprintf('<error>Error updating find ID %d: %s</error>', $findId, $e->getMessage()));
                 $stats['errors']++;
+                
+                // If EntityManager is closed, we can't continue
+                if (!$this->entityManager->isOpen()) {
+                    $io->error('EntityManager has been closed due to an error. Cannot continue processing.');
+                    break;
+                }
             }
 
             $io->progressAdvance();
@@ -351,39 +391,136 @@ class FindUpdateCommand extends Command
             if (method_exists($find, $setterMethod)) {
                 // Handle type conversions
                 if ($isEmpty && $setEmptyToNull) {
-                    // Set to null
-                    $find->$setterMethod(null);
+                    // Set to null only if current value is not null
+                    if (method_exists($find, $getterMethod)) {
+                        $currentValue = $find->$getterMethod();
+                        if ($currentValue !== null) {
+                            $find->$setterMethod(null);
+                            $updatedFields++;
+                        }
+                    } else {
+                        $find->$setterMethod(null);
+                        $updatedFields++;
+                    }
                 } else {
                     if ($appendMode && method_exists($find, $getterMethod)) {
                         // Append mode: get existing value and append new value if not already present
                         $existingValue = $find->$getterMethod();
                         $newValue = $this->appendValue($existingValue, $value);
-                        $find->$setterMethod($newValue);
+                        if ($newValue !== $existingValue) {
+                            $find->$setterMethod($newValue);
+                            $updatedFields++;
+                        }
                     } else {
                         // Special handling for incomplete dates
                         if ($actualFieldName === 'date') {
                             $this->handleDateField($find, $value, $io);
+                            $updatedFields++;
                         } else {
                             // Replace mode: convert and set value
                             $convertedValue = $this->convertValue($actualFieldName, $value);
-                            $find->$setterMethod($convertedValue);
+                            
+                            // Validate and truncate string values if needed
+                            if (is_string($convertedValue)) {
+                                $convertedValue = $this->validateAndTruncateField($actualFieldName, $convertedValue, $findId, $io);
+                            }
+                            
+                            // Only update if value has changed
+                            if (method_exists($find, $getterMethod)) {
+                                $currentValue = $find->$getterMethod();
+                                // Handle DateTime comparison specially
+                                if ($convertedValue instanceof \DateTime && $currentValue instanceof \DateTime) {
+                                    if ($convertedValue->format('Y-m-d H:i:s') !== $currentValue->format('Y-m-d H:i:s')) {
+                                        $find->$setterMethod($convertedValue);
+                                        $updatedFields++;
+                                    }
+                                } elseif ($convertedValue !== $currentValue) {
+                                    $find->$setterMethod($convertedValue);
+                                    $updatedFields++;
+                                }
+                            } else {
+                                $find->$setterMethod($convertedValue);
+                                $updatedFields++;
+                            }
                         }
                     }
                 }
-                $updatedFields++;
             }
         }
 
         // If the date field in $data was not empty, but could not be fully parsed, append the original value to dateRemarks
-        if (isset($data['date']) && trim($data['date']) !== '' && $fingd->getDate() === null) {
+        if (isset($data['date']) && trim($data['date']) !== '' && $find->getDate() === null) {
             $this->appendToDateRemarks($find, $data['date']);
         }
 
         if (!$dryRun && $updatedFields > 0) {
-            $this->entityManager->persist($find);
+            try {
+                $this->entityManager->persist($find);
+            } catch (\Exception $e) {
+                // Re-throw to be handled by the calling method
+                throw new \RuntimeException(sprintf('Failed to persist find ID %d: %s', $findId, $e->getMessage()), 0, $e);
+            }
         }
 
         return 'updated';
+    }
+    
+    /**
+     * Validate and truncate field value if it exceeds the maximum length
+     * Field length limits from Find.orm.xml
+     */
+    private function validateAndTruncateField(string $fieldName, string $value, int $findId, ?SymfonyStyle $io = null): string
+    {
+        // Field length limits from database schema
+        $fieldLengths = [
+            'inventoryNumber' => 255,
+            'heidiconUuid' => 255,
+            'trench' => 10,
+            'dateRemarks' => 255,
+            'scaRegister' => 16,
+            'object' => 64,
+            'objectNo' => 64,
+            'category' => 255,
+            'categoryNo' => 64,
+            'weight' => 64,
+            'quantity' => 64,
+            'dimensions' => 255,
+            'preservation' => 255,
+            'description' => 65535, // TEXT type
+            'material' => 255,
+            'materialRemarks' => 255,
+            'datingAbsolute' => 255,
+            'typologyReference' => 255,
+            'publications' => 65535, // TEXT type
+            'remarks' => 65535, // TEXT type
+            'rebuildChanges' => 65535, // TEXT type
+        ];
+        
+        if (!isset($fieldLengths[$fieldName])) {
+            // Unknown field, return as-is
+            return $value;
+        }
+        
+        $maxLength = $fieldLengths[$fieldName];
+        $actualLength = mb_strlen($value, 'UTF-8');
+        
+        if ($actualLength > $maxLength) {
+            $truncated = mb_substr($value, 0, $maxLength, 'UTF-8');
+            if ($io) {
+                $io->writeln(sprintf(
+                    '<comment>Field "%s" truncated from %d to %d chars for find ID %d: "%s" → "%s"</comment>',
+                    $fieldName,
+                    $actualLength,
+                    $maxLength,
+                    $findId,
+                    mb_substr($value, 0, 50, 'UTF-8') . '...',
+                    mb_substr($truncated, 0, 50, 'UTF-8') . '...'
+                ), OutputInterface::VERBOSITY_VERBOSE);
+            }
+            return $truncated;
+        }
+        
+        return $value;
     }
     
     /**
