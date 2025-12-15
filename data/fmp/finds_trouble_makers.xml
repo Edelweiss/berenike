@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<FMPXMLRESULT xmlns="http://www.filemaker.com/fmpxmlresult">
+    <ERRORCODE>0</ERRORCODE>
+    <PRODUCT BUILD="09-11-2013" NAME="FileMaker" VERSION="Pro 12.0v5"/>
+    <DATABASE DATEFORMAT="D.m.yyyy" LAYOUT="" NAME="Berenike_finds_data.fmp12" RECORDS="29376"
+        TIMEFORMAT="k:mm:ss "/>
+    <METADATA>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="id" TYPE="NUMBER"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="PB_Id" TYPE="NUMBER"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="trench2" TYPE="TEXT"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="date" TYPE="TEXT"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="SCA Register" TYPE="TEXT"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="object id" TYPE="TEXT"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="object no" TYPE="TEXT"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="category" TYPE="TEXT"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="category no" TYPE="TEXT"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="weight" TYPE="TEXT"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="quantity" TYPE="TEXT"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="dimensions" TYPE="TEXT"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="preservation" TYPE="TEXT"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="description" TYPE="TEXT"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="material" TYPE="TEXT"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="material remarks" TYPE="TEXT"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="dating absolute" TYPE="TEXT"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="typology reference" TYPE="TEXT"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="publications" TYPE="TEXT"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="remarks" TYPE="TEXT"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="rebuild_changes" TYPE="TEXT"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="Created" TYPE="TIMESTAMP"/>
+        <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="Modified" TYPE="TIMESTAMP"/>
+    </METADATA>
+    <RESULTSET FOUND="29376">
+        <ROW MODID="8" RECORDID="10500">
+            <COL>
+                <DATA>5111</DATA>
+            </COL>
+            <COL>
+                <DATA>177</DATA>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA>2010-01-27</DATA>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA>lamp</DATA>
+            </COL>
+            <COL>
+                <DATA>BE10-59/002/030</DATA>
+            </COL>
+            <COL>
+                <DATA>gg</DATA>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA>1</DATA>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA>clay</DATA>
+            </COL>
+            <COL>
+                <DATA>fabric 5YR4/4 reddish brown</DATA>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA>2015-02-16 22:20:21</DATA>
+            </COL>
+        </ROW>
+        <ROW MODID="5" RECORDID="10488">
+            <COL>
+                <DATA>5099</DATA>
+            </COL>
+            <COL>
+                <DATA>149</DATA>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA>2010</DATA>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA>bowl, flangeless, tableware</DATA>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA>G</DATA>
+            </COL>
+            <COL>
+                <DATA>G281</DATA>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA>1</DATA>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA>clay</DATA>
+            </COL>
+            <COL>
+                <DATA>marl</DATA>
+            </COL>
+            <COL>
+                <DATA>?Roman</DATA>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA/>
+            </COL>
+            <COL>
+                <DATA>2011-03-09 22:51:12</DATA>
+            </COL>
+        </ROW>
+    </RESULTSET>
+</FMPXMLRESULT>
