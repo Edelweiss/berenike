@@ -128,6 +128,18 @@ a:has(img):active {
     text-decoration: none;
 }
 
+/* Button-styled links - removes default link styling to match jQuery UI buttons */
+a.ui-button,
+a.ui-button:link,
+a.ui-button:visited,
+a.ui-button:hover,
+a.ui-button:active {
+    background-image: none;
+    padding: 6px 14px 6px 14px;
+    text-decoration: none;
+    display: inline-block;
+}
+
 /* HEADER */
 
 div#header {
