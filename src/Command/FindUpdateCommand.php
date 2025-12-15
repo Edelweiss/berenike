@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\Find;
 use App\Repository\FindRepository;
+use App\Repository\BucketRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -19,12 +20,14 @@ class FindUpdateCommand extends Command
     protected static $defaultDescription = 'Update find records from a CSV or FileMaker XML file';
     private EntityManagerInterface $entityManager;
     private FindRepository $findRepository;
+    private BucketRepository $bucketRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, FindRepository $findRepository)
+    public function __construct(EntityManagerInterface $entityManager, FindRepository $findRepository, BucketRepository $bucketRepository)
     {
         parent::__construct();
         $this->entityManager = $entityManager;
         $this->findRepository = $findRepository;
+        $this->bucketRepository = $bucketRepository;
     }
     
     private function getDataDirectory(): string
@@ -40,6 +43,7 @@ class FindUpdateCommand extends Command
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Run without actually persisting changes to the database')
             ->addOption('batch-size', 'b', InputOption::VALUE_REQUIRED, 'Number of records to process before flushing', 20)
             ->addOption('set-empty-to-null', null, InputOption::VALUE_NONE, 'Set empty fields in the CSV/XML to null in the database')
+            ->addOption('create-new', null, InputOption::VALUE_NONE, 'Create new find records if ID not found in database (requires valid bucket ID)')
         ;
     }
 
@@ -50,6 +54,7 @@ class FindUpdateCommand extends Command
         $dryRun = $input->getOption('dry-run');
         $batchSize = (int) $input->getOption('batch-size');
         $setEmptyToNull = $input->getOption('set-empty-to-null');
+        $createNew = $input->getOption('create-new');
 
         // Construct full file path
         $filePath = $this->getDataDirectory() . '/' . $filename;
@@ -69,15 +74,19 @@ class FindUpdateCommand extends Command
         if ($setEmptyToNull) {
             $io->info('Empty fields will be set to NULL in the database');
         }
+        
+        if ($createNew) {
+            $io->info('CREATE NEW MODE - New find records will be created if ID not found (requires valid bucket ID)');
+        }
 
         // Determine file type and process accordingly
         $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
         
         try {
             if ($extension === 'csv') {
-                $stats = $this->processCsvFile($filePath, $io, $dryRun, $batchSize, $setEmptyToNull);
+                $stats = $this->processCsvFile($filePath, $io, $dryRun, $batchSize, $setEmptyToNull, $createNew);
             } elseif ($extension === 'xml') {
-                $stats = $this->processXmlFile($filePath, $io, $dryRun, $batchSize, $setEmptyToNull);
+                $stats = $this->processXmlFile($filePath, $io, $dryRun, $batchSize, $setEmptyToNull, $createNew);
             } else {
                 $io->error(sprintf('Unsupported file format: %s. Only CSV and XML files are supported.', $extension));
                 return Command::FAILURE;
@@ -90,6 +99,7 @@ class FindUpdateCommand extends Command
                 [
                     ['Total records processed', $stats['processed']],
                     ['Records updated', $stats['updated']],
+                    ['Records created', isset($stats['created']) ? $stats['created'] : 0],
                     ['Records not found', $stats['not_found']],
                     ['Records skipped', $stats['skipped']],
                     ['Errors', $stats['errors']],
@@ -104,9 +114,9 @@ class FindUpdateCommand extends Command
         }
     }
 
-    private function processCsvFile(string $filePath, SymfonyStyle $io, bool $dryRun, int $batchSize, bool $setEmptyToNull): array
+    private function processCsvFile(string $filePath, SymfonyStyle $io, bool $dryRun, int $batchSize, bool $setEmptyToNull, bool $createNew): array
     {
-        $stats = ['processed' => 0, 'updated' => 0, 'not_found' => 0, 'skipped' => 0, 'errors' => 0];
+        $stats = ['processed' => 0, 'updated' => 0, 'created' => 0, 'not_found' => 0, 'skipped' => 0, 'errors' => 0];
         
         $handle = fopen($filePath, 'r');
         if ($handle === false) {
@@ -164,7 +174,7 @@ class FindUpdateCommand extends Command
                     continue;
                 }
                 
-                $result = $this->updateFind($findId, $data, $dryRun, $setEmptyToNull, $io);
+                $result = $this->updateOrCreateFind($findId, $data, $dryRun, $setEmptyToNull, $createNew, $io);
                 
                 if ($result === 'updated') {
                     $stats['updated']++;
@@ -183,9 +193,28 @@ class FindUpdateCommand extends Command
                             throw $e;
                         }
                     }
+                } elseif ($result === 'created') {
+                    $stats['created']++;
+                    $processedInBatch++;
+                    
+                    // Flush in batches for better performance
+                    if (!$dryRun && $processedInBatch >= $batchSize) {
+                        try {
+                            $this->entityManager->flush();
+                            $this->entityManager->clear();
+                            $processedInBatch = 0;
+                        } catch (\Exception $e) {
+                            $io->writeln(sprintf('<error>Error flushing batch at find ID %d: %s</error>', $findId, $e->getMessage()));
+                            $stats['errors']++;
+                            // EntityManager might be closed, can't continue
+                            throw $e;
+                        }
+                    }
                 } elseif ($result === 'not_found') {
                     $io->writeln(sprintf('<comment>Find with ID %d not found in database</comment>', $findId));
                     $stats['not_found']++;
+                } elseif ($result === 'skipped_no_bucket') {
+                    $stats['skipped']++;
                 }
             } catch (\Exception $e) {
                 $io->writeln(sprintf('<error>Error updating find ID %d: %s</error>', $findId, $e->getMessage()));
@@ -212,9 +241,9 @@ class FindUpdateCommand extends Command
         return $stats;
     }
 
-    private function processXmlFile(string $filePath, SymfonyStyle $io, bool $dryRun, int $batchSize, bool $setEmptyToNull): array
+    private function processXmlFile(string $filePath, SymfonyStyle $io, bool $dryRun, int $batchSize, bool $setEmptyToNull, bool $createNew): array
     {
-        $stats = ['processed' => 0, 'updated' => 0, 'not_found' => 0, 'skipped' => 0, 'errors' => 0];
+        $stats = ['processed' => 0, 'updated' => 0, 'created' => 0, 'not_found' => 0, 'skipped' => 0, 'errors' => 0];
         
         // Load XML file
         libxml_use_internal_errors(true);
@@ -303,7 +332,7 @@ class FindUpdateCommand extends Command
                     continue;
                 }
                 
-                $result = $this->updateFind($findId, $data, $dryRun, $setEmptyToNull, $io);
+                $result = $this->updateOrCreateFind($findId, $data, $dryRun, $setEmptyToNull, $createNew, $io);
 
                 if ($result === 'updated') {
                     $stats['updated']++;
@@ -321,9 +350,27 @@ class FindUpdateCommand extends Command
                             throw $e;
                         }
                     }
+                } elseif ($result === 'created') {
+                    $stats['created']++;
+                    $processedInBatch++;
+
+                    if (!$dryRun && $processedInBatch >= $batchSize) {
+                        try {
+                            $this->entityManager->flush();
+                            $this->entityManager->clear();
+                            $processedInBatch = 0;
+                        } catch (\Exception $e) {
+                            $io->writeln(sprintf('<error>Error flushing batch at find ID %d: %s</error>', $findId, $e->getMessage()));
+                            $stats['errors']++;
+                            // EntityManager might be closed, can't continue
+                            throw $e;
+                        }
+                    }
                 } elseif ($result === 'not_found') {
                     $io->writeln(sprintf('<comment>Find with ID %d not found in database</comment>', $findId));
                     $stats['not_found']++;
+                } elseif ($result === 'skipped_no_bucket') {
+                    $stats['skipped']++;
                 }
             } catch (\Exception $e) {
                 $io->writeln(sprintf('<error>Error updating find ID %d: %s</error>', $findId, $e->getMessage()));
@@ -349,12 +396,46 @@ class FindUpdateCommand extends Command
         return $stats;
     }
 
-    private function updateFind(int $findId, array $data, bool $dryRun, bool $setEmptyToNull, ?SymfonyStyle $io = null): string
+    private function updateOrCreateFind(int $findId, array $data, bool $dryRun, bool $setEmptyToNull, bool $createNew, ?SymfonyStyle $io = null): string
     {
         $find = $this->findRepository->find($findId);
 
         if (!$find) {
-            return 'not_found';
+            // Find not found in database
+            if (!$createNew) {
+                return 'not_found';
+            }
+            
+            // Check if bucketId is provided
+            if (!isset($data['bucketId']) || trim($data['bucketId']) === '') {
+                if ($io) {
+                    $io->writeln(sprintf('<comment>Cannot create find ID %d: No bucket ID provided</comment>', $findId), OutputInterface::VERBOSITY_VERBOSE);
+                }
+                return 'skipped_no_bucket';
+            }
+            
+            $bucketId = (int) $data['bucketId'];
+            $bucket = $this->bucketRepository->find($bucketId);
+            
+            if (!$bucket) {
+                if ($io) {
+                    $io->writeln(sprintf('<comment>Cannot create find ID %d: Bucket ID %d not found in database</comment>', $findId, $bucketId), OutputInterface::VERBOSITY_VERBOSE);
+                }
+                return 'skipped_no_bucket';
+            }
+            
+            // Create new Find entity
+            $find = new Find();
+            $find->setId($findId);
+            $find->setBucket($bucket);
+            
+            if ($io) {
+                $io->writeln(sprintf('<info>Creating new find ID %d with bucket ID %d</info>', $findId, $bucketId), OutputInterface::VERBOSITY_VERBOSE);
+            }
+            
+            $isNew = true;
+        } else {
+            $isNew = false;
         }
 
         $updatedFields = 0;
@@ -453,7 +534,7 @@ class FindUpdateCommand extends Command
             $this->appendToDateRemarks($find, $data['date']);
         }
 
-        if (!$dryRun && $updatedFields > 0) {
+        if (!$dryRun && ($updatedFields > 0 || $isNew)) {
             try {
                 $this->entityManager->persist($find);
             } catch (\Exception $e) {
@@ -462,7 +543,7 @@ class FindUpdateCommand extends Command
             }
         }
 
-        return 'updated';
+        return $isNew ? 'created' : 'updated';
     }
     
     /**
