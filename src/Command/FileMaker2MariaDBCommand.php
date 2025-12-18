@@ -23,20 +23,18 @@
 namespace App\Command;
 
 use Doctrine\DBAL\Connection;
-use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-#[AsCommand(
-    name: 'filemaker:import',
-    description: 'Import FileMaker XML data into a new MariaDB table'
-)]
 class FileMaker2MariaDBCommand extends Command
 {
-    private Connection $connection;
+    protected static $defaultName = 'filemaker:import';
+    protected static $defaultDescription = 'Import FileMaker XML data into a new MariaDB table';
+    
+    private $connection;
 
     public function __construct(Connection $connection)
     {
@@ -44,7 +42,7 @@ class FileMaker2MariaDBCommand extends Command
         $this->connection = $connection;
     }
 
-    protected function configure(): void
+    protected function configure()
     {
         $this
             ->addArgument('xml-file', InputArgument::REQUIRED, 'Path to FileMaker XML file (relative to data/ directory)')
@@ -52,7 +50,7 @@ class FileMaker2MariaDBCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
         $xmlFile = $input->getArgument('xml-file');
@@ -177,7 +175,7 @@ class FileMaker2MariaDBCommand extends Command
         }
     }
 
-    private function sanitizeColumnName(string $name): string
+    private function sanitizeColumnName($name)
     {
         // Replace spaces and special characters with underscores
         $sanitized = preg_replace('/[^a-zA-Z0-9_]/', '_', $name);
@@ -189,7 +187,7 @@ class FileMaker2MariaDBCommand extends Command
         return $sanitized;
     }
 
-    private function insertBatch(string $tableName, array $batch): void
+    private function insertBatch($tableName, $batch)
     {
         if (empty($batch)) {
             return;
