@@ -215,6 +215,8 @@ class FindUpdateCommand extends Command
                     $stats['not_found']++;
                 } elseif ($result === 'skipped_no_bucket') {
                     $stats['skipped']++;
+                } elseif ($result === 'skipped_no_year') {
+                    $stats['skipped']++;
                 }
             } catch (\Exception $e) {
                 $io->writeln(sprintf('<error>Error updating find ID %d: %s</error>', $findId, $e->getMessage()));
@@ -371,6 +373,8 @@ class FindUpdateCommand extends Command
                     $stats['not_found']++;
                 } elseif ($result === 'skipped_no_bucket') {
                     $stats['skipped']++;
+                } elseif ($result === 'skipped_no_year') {
+                    $stats['skipped']++;
                 }
             } catch (\Exception $e) {
                 $io->writeln(sprintf('<error>Error updating find ID %d: %s</error>', $findId, $e->getMessage()));
@@ -428,6 +432,17 @@ class FindUpdateCommand extends Command
             $find = new Find();
             $find->setId($findId);
             $find->setBucket($bucket);
+            
+            // Set required fields with default values if not present in data
+            // Year is required (NOT NULL in database), so we need to ensure it's set
+            if (!isset($data['year']) && !isset($data['date'])) {
+                // Try to get year from bucket's excavation season
+                $yearFromExcavation = $this->getYearFromBucket($bucket);
+                if ($yearFromExcavation !== null) {
+                    $find->setYear($yearFromExcavation);
+                }
+                // Note: If no year can be set, validation at the end will catch it and skip the record
+            }
             
             if ($io) {
                 $io->writeln(sprintf('<info>Creating new find ID %d with bucket ID %d</info>', $findId, $bucketId), OutputInterface::VERBOSITY_VERBOSE);
@@ -533,6 +548,24 @@ class FindUpdateCommand extends Command
         if (isset($data['date']) && trim($data['date']) !== '' && $find->getDate() === null) {
             $this->appendToDateRemarks($find, $data['date']);
         }
+        
+        // Final validation for new records: ensure year is set
+        if ($isNew && $find->getYear() === null) {
+            // Try one more time to get year from bucket's excavation season
+            $yearFromExcavation = $this->getYearFromBucket($find->getBucket());
+            if ($yearFromExcavation !== null) {
+                $find->setYear($yearFromExcavation);
+                if ($io) {
+                    $io->writeln(sprintf('<comment>Find ID %d: Year set to %d from excavation season</comment>', $findId, $yearFromExcavation), OutputInterface::VERBOSITY_VERBOSE);
+                }
+            } else {
+                // Cannot create record without year - skip it
+                if ($io) {
+                    $io->writeln(sprintf('<comment>Cannot create find ID %d: No year available (no date provided and no excavation season found)</comment>', $findId), OutputInterface::VERBOSITY_VERBOSE);
+                }
+                return 'skipped_no_year';
+            }
+        }
 
         if (!$dryRun && ($updatedFields > 0 || $isNew)) {
             try {
@@ -544,6 +577,43 @@ class FindUpdateCommand extends Command
         }
 
         return $isNew ? 'created' : 'updated';
+    }
+    
+    /**
+     * Extract year from bucket's excavation season
+     * Follows the chain: Bucket -> Locus -> Excavation -> season
+     * @return int|null The extracted year or null if not found
+     */
+    private function getYearFromBucket($bucket): ?int
+    {
+        if (!$bucket) {
+            return null;
+        }
+        
+        $locus = $bucket->getLocus();
+        if (!$locus) {
+            return null;
+        }
+        
+        $excavation = $locus->getExcavation();
+        if (!$excavation) {
+            return null;
+        }
+        
+        $season = $excavation->getSeason();
+        if (empty($season)) {
+            return null;
+        }
+        
+        // Extract 4-digit years from the season string
+        preg_match_all('/^\d{4}$/', $season, $matches);
+        
+        if (!empty($matches[0])) {
+            // Return the first year found
+            return (int) $matches[0][0];
+        }
+        
+        return null;
     }
     
     /**
