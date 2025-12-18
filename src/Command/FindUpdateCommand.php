@@ -433,6 +433,11 @@ class FindUpdateCommand extends Command
             $find->setId($findId);
             $find->setBucket($bucket);
             
+            // Force Doctrine to recognize the manually set ID
+            // This prevents auto-increment from overriding our ID
+            $metadata = $this->entityManager->getClassMetadata(Find::class);
+            $metadata->setIdGeneratorType(\Doctrine\ORM\Mapping\ClassMetadata::GENERATOR_TYPE_NONE);
+
             // Set required fields with default values if not present in data
             // Year is required (NOT NULL in database), so we need to ensure it's set
             if (!isset($data['year']) && !isset($data['date'])) {
