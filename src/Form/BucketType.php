@@ -37,10 +37,9 @@ class BucketType extends AbstractType
                     return $repository->createQueryBuilder('l')
                         ->leftJoin('l.excavation', 'e')
                         ->orderBy('e.site', 'ASC')
-                        ->addOrderBy('LENGTH(e.trench)', 'ASC')
-                        ->addOrderBy('e.trench', 'ASC')
-                        ->addOrderBy('LENGTH(l.number)', 'ASC')
-                        ->addOrderBy('l.number', 'ASC');
+                        ->addOrderBy('SUBSTRING(e.season, LENGTH(e.season) - 3, 4)', 'DESC')
+                        ->addOrderBy('e.trench + 0', 'ASC')
+                        ->addOrderBy('l.number + 0', 'ASC');
                 },
                 'required' => true,
                 'label' => 'Locus'
