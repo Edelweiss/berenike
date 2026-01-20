@@ -232,6 +232,9 @@
         </button>
     </div>
 
+    {# Mark images field as rendered to prevent duplicate output in form_end #}
+    {% do form.images.setRendered() %}
+
     <div style="margin: 1em 0;">
         <button type="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
             <span class="ui-button-text">Save</span>

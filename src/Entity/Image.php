@@ -93,7 +93,10 @@ class Image {
         return $this->find;
     }
 
-    public function addImageSpecialist(\App\Entity\ImageSpecialist $imageSpecialist) {
+    public function addImageSpecialist(?\App\Entity\ImageSpecialist $imageSpecialist) {
+        if ($imageSpecialist === null) {
+            return;
+        }
         if (!$this->imageSpecialists->contains($imageSpecialist)) {
             $this->imageSpecialists[] = $imageSpecialist;
             $imageSpecialist->setImage($this);

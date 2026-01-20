@@ -42,12 +42,13 @@ class ImageType extends AbstractType
                 'required' => true,
                 'label' => 'Path',
             ])
-            ->add('heidiconId', IntegerType::class, [
+            ->add('heidiconId', TextType::class, [
                 'required' => false,
                 'label' => 'HeidICON ID',
                 'attr' => [
-                    'min' => 1,
-                    'placeholder' => 'Enter a positive number or leave empty'
+                    'placeholder' => 'Enter a positive number or leave empty',
+                    'pattern' => '[1-9][0-9]*',
+                    'title' => 'Must be a positive integer (greater than 0)'
                 ]
             ])
             ->add('heidiconUuid', TextType::class, [
@@ -59,12 +60,13 @@ class ImageType extends AbstractType
                     'title' => 'Format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
                 ]
             ])
-            ->add('heidiconSystemObjectId', IntegerType::class, [
+            ->add('heidiconSystemObjectId', TextType::class, [
                 'required' => false,
                 'label' => 'HeidICON System Object ID',
                 'attr' => [
-                    'min' => 1,
-                    'placeholder' => 'Enter a positive number or leave empty'
+                    'placeholder' => 'Enter a positive number or leave empty',
+                    'pattern' => '[1-9][0-9]*',
+                    'title' => 'Must be a positive integer (greater than 0)'
                 ]
             ])
             ->add('imageSpecialists', CollectionType::class, [

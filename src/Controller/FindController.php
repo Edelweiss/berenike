@@ -39,6 +39,9 @@ class FindController extends BerenikeController
       $form->handleRequest($request);
 
       if ($form->isSubmitted() && $form->isValid()) {
+          // Filter out empty/incomplete image entries
+          $this->filterEmptyImages($find);
+          
           $find->setModified(new \DateTime());
           $this->entityManager->flush();
 
@@ -206,6 +209,9 @@ class FindController extends BerenikeController
     if ($this->request->getMethod() == 'POST') {
       $form->handleRequest($this->request);
       if ($form->isValid()) {
+        // Filter out empty/incomplete image entries
+        $this->filterEmptyImages($find);
+        
         $this->entityManager->persist($find);
         $this->entityManager->flush();
 
@@ -249,5 +255,44 @@ class FindController extends BerenikeController
     return $this->render('find/show.html.twig', ['find' => $find]);
   }
   
+  /**
+   * Filter out empty or incomplete image entries from a find.
+   * An image is considered empty if it has no type or no valid image specialists.
+   * A valid image specialist must have a specialist relationship.
+   */
+  private function filterEmptyImages(Find $find): void
+  {
+      $imagesToRemove = [];
+      
+      foreach ($find->getImages() as $image) {
+          // Check if image has type
+          if (!$image->getType()) {
+              $imagesToRemove[] = $image;
+              continue;
+          }
+          
+          // Check if image has at least one valid image specialist
+          $hasValidSpecialist = false;
+          foreach ($image->getImageSpecialists() as $imageSpecialist) {
+              if ($imageSpecialist !== null && $imageSpecialist->getSpecialist() !== null) {
+                  $hasValidSpecialist = true;
+                  break;
+              }
+          }
+          
+          if (!$hasValidSpecialist) {
+              $imagesToRemove[] = $image;
+          }
+      }
+      
+      // Remove empty images
+      foreach ($imagesToRemove as $image) {
+          $find->removeImage($image);
+      }
+      
+      if (count($imagesToRemove) > 0) {
+          $this->logger->info(sprintf('Filtered out %d empty image(s) from find', count($imagesToRemove)));
+      }
+  }
 
 }
