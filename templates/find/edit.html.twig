@@ -109,7 +109,11 @@
 
 {% block body %}
     {{ form_start(form, {'attr': {'class': 'ui-widget'}}) }}
-    <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 1em; margin-bottom: 1em;">
+    <div class="ui-widget" style="margin-bottom: 1em;">
+        <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
+            <h3 style="margin: 0; font-size: 1.1em;">Data</h3>
+        </div>
+        <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1em;">
             {{ form_row(form.inventoryNumber, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
             {{ form_row(form.tm, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
@@ -139,11 +143,15 @@
             {{ form_row(form.remarks, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all', 'rows': 3}}) }}
             {{ form_row(form.bucket, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
         </div>
+        </div>
     </div>
 
     <!-- Images Section -->
-    <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 1em; margin-bottom: 1em;">
-        <h3 style="margin-top: 0;">Images</h3>
+    <div class="ui-widget" style="margin-bottom: 1em;">
+        <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
+            <h3 style="margin: 0; font-size: 1.1em;">Images</h3>
+        </div>
+        <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
         
         {# Specialist prototype template with placeholders #}
         <script type="text/template" id="specialist-prototype-template">
@@ -230,6 +238,7 @@
         <button type="button" id="add-image" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
             <span class="ui-button-text">Add Image</span>
         </button>
+        </div>
     </div>
 
     {# Mark images field as rendered to prevent duplicate output in form_end #}
