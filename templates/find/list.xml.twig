@@ -6,7 +6,7 @@
   {% for find in finds %}
     <row id = '{{ find.id }}'>
       <cell>{{ find.id }}</cell>
-      <cell>{% if find.thumbnailImage() %}<![CDATA[<a href="{{ path('PapyrillioBerenike_FindShow', {'id': find.id}) }}" title="View Find"><img src="https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/{{ find.thumbnailImage().heidiconUuid }}/file/id/{{ find.thumbnailImage().heidiconSystemObjectId }}/file_version/name/small" alt="Thumbnail" style="max-width: 30px; max-height: §0px; border: 1px solid #ccc; border-radius: 4px;" /></a>]]>{% endif %}</cell>    
+      <cell>{% if find.thumbnailImage() %}{% if app.user %}<![CDATA[<a href="{{ path('PapyrillioBerenike_FindShow', {'id': find.id}) }}" title="View Find"><img src="https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/{{ find.thumbnailImage().heidiconUuid }}/file/id/{{ find.thumbnailImage().heidiconSystemObjectId }}/file_version/name/small" alt="Thumbnail" style="max-width: 30px; max-height: 30px; border: 1px solid #ccc; border-radius: 4px;" /></a>]]>{% else %}<![CDATA[<a href="{{ path('PapyrillioBerenike_FindShow', {'id': find.id}) }}" title="View Find"><img src="{{ asset('images/placeholder.png') }}" alt="Placeholder" style="max-width: 30px; max-height: 30px; border: 1px solid #ccc; border-radius: 4px;" /></a>]]>{% endif %}{% endif %}</cell>    
       <cell>{% if find.tm %}<![CDATA[<a href="https://www.trismegistos.org/text/{{ find.tm }}" target="_blank" title="View in Trismegistos">{{ find.tm }}</a>]]>{% endif %}</cell>
       <cell>{{ find.heidiconId }}</cell>
       <cell>{{ find.heidiconUuid }}</cell>
