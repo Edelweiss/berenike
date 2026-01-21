@@ -21,6 +21,9 @@
   <button id="columnsHideShow" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false">
     <span class="ui-button-text">Hide/Show Columns</span>
   </button>
+  <button id="downloadCsv" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false">
+    <span class="ui-button-text">Download CSV</span>
+  </button>
   <a href="{{ path('PapyrillioBerenike_AdminNewFind') }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
     <span class="ui-button-text">Create New Find</span>
   </a>
@@ -97,6 +100,40 @@ $(function(){
 
     $('#columnsHideShow').click(function(){
       $('#list').jqGrid('columnChooser', {shrinkToFit: false, autowidth: false});
+      return false;
+    });
+
+    $('#downloadCsv').click(function(){
+      // Get current grid state
+      var postData = $('#list').jqGrid('getGridParam', 'postData');
+      var sortName = $('#list').jqGrid('getGridParam', 'sortname');
+      var sortOrder = $('#list').jqGrid('getGridParam', 'sortorder');
+      
+      // Get visible columns
+      var colModel = $('#list').jqGrid('getGridParam', 'colModel');
+      var visibleCols = [];
+      for (var i = 0; i < colModel.length; i++) {
+        if (!colModel[i].hidden && colModel[i].name !== 'actions' && colModel[i].name !== 'thumbnail') {
+          visibleCols.push(colModel[i].name);
+        }
+      }
+      
+      // Build URL with parameters
+      var params = [];
+      params.push('sidx=' + encodeURIComponent(sortName));
+      params.push('sord=' + encodeURIComponent(sortOrder));
+      params.push('visible=' + encodeURIComponent(visibleCols.join(';')));
+      params.push('_search=' + (postData._search || 'false'));
+      
+      // Add search filters
+      for (var key in postData) {
+        if (postData.hasOwnProperty(key) && key !== '_search') {
+          params.push(encodeURIComponent(key) + '=' + encodeURIComponent(postData[key]));
+        }
+      }
+      
+      // Trigger download
+      window.location.href = '{{ path('PapyrillioBerenike_FindExportCsv') }}?' + params.join('&');
       return false;
     });
 
