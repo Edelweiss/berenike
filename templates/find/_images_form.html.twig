@@ -10,8 +10,8 @@
         <div class="specialist-item" style="margin-bottom: 1em; padding: 0.5em; background-color: #f0f0f0; border-radius: 4px;">
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5em;">
                 <div>
-                    <label for="find_images_IMAGEINDEX_imageSpecialists_SPECIALISTINDEX_specialist">Specialist</label>
-                    <select id="find_images_IMAGEINDEX_imageSpecialists_SPECIALISTINDEX_specialist" name="find[images][IMAGEINDEX][imageSpecialists][SPECIALISTINDEX][specialist]" class="ui-widget ui-widget-content ui-corner-all">
+                    <label for="find_images_IMAGEINDEX_imageSpecialists_SPECIALISTINDEX_specialist">Specialist <span style="color: red;">*</span></label>
+                    <select id="find_images_IMAGEINDEX_imageSpecialists_SPECIALISTINDEX_specialist" name="find[images][IMAGEINDEX][imageSpecialists][SPECIALISTINDEX][specialist]" class="ui-widget ui-widget-content ui-corner-all" required>
                         <option value="">-- Select Specialist --</option>
                         {% for specialist in form.images.vars.prototype.imageSpecialists.vars.prototype.specialist.vars.choices %}
                             <option value="{{ specialist.value }}">{{ specialist.label }}</option>
@@ -19,16 +19,16 @@
                     </select>
                 </div>
                 <div>
-                    <label for="find_images_IMAGEINDEX_imageSpecialists_SPECIALISTINDEX_speciality">Speciality</label>
-                    <select id="find_images_IMAGEINDEX_imageSpecialists_SPECIALISTINDEX_speciality" name="find[images][IMAGEINDEX][imageSpecialists][SPECIALISTINDEX][speciality]" class="ui-widget ui-widget-content ui-corner-all">
+                    <label for="find_images_IMAGEINDEX_imageSpecialists_SPECIALISTINDEX_speciality">Speciality <span style="color: red;">*</span></label>
+                    <select id="find_images_IMAGEINDEX_imageSpecialists_SPECIALISTINDEX_speciality" name="find[images][IMAGEINDEX][imageSpecialists][SPECIALISTINDEX][speciality]" class="ui-widget ui-widget-content ui-corner-all" required>
                         <option value="">-- Select Speciality --</option>
                         <option value="photographer">Photographer</option>
                         <option value="artist">Artist</option>
                     </select>
                 </div>
                 <div>
-                    <label for="find_images_IMAGEINDEX_imageSpecialists_SPECIALISTINDEX_year">Year</label>
-                    <select id="find_images_IMAGEINDEX_imageSpecialists_SPECIALISTINDEX_year" name="find[images][IMAGEINDEX][imageSpecialists][SPECIALISTINDEX][year]" class="ui-widget ui-widget-content ui-corner-all">
+                    <label for="find_images_IMAGEINDEX_imageSpecialists_SPECIALISTINDEX_year">Year <span style="color: red;">*</span></label>
+                    <select id="find_images_IMAGEINDEX_imageSpecialists_SPECIALISTINDEX_year" name="find[images][IMAGEINDEX][imageSpecialists][SPECIALISTINDEX][year]" class="ui-widget ui-widget-content ui-corner-all" required>
                         <option value="">-- Select Year --</option>
                         {% for year in 1995..('now'|date('Y') + 1) %}
                             <option value="{{ year }}">{{ year }}</option>
@@ -56,7 +56,7 @@
                 <!-- Specialists Subsection -->
                 <div style="margin-top: 1em;">
                     <h4>Specialists</h4>
-                    <div class="specialists-collection">
+                    <div class="image-specialists-collection">
                         {% for specialistForm in imageForm.imageSpecialists %}
                             <div class="specialist-item" style="margin-bottom: 1em; padding: 0.5em; background-color: #f0f0f0; border-radius: 4px;">
                                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5em;">

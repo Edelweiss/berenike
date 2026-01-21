@@ -21,6 +21,9 @@
             var $newImageItem = $(newImageForm);
             $imagesContainer.append($newImageItem);
             
+            // Setup the Add Specialist button for the new image
+            setupSpecialistButtons($newImageItem, imageIndex);
+            
             // Now add one specialist to this new image
             addSpecialistToImage($newImageItem, imageIndex);
             
@@ -51,8 +54,6 @@
         }
 
         function setupSpecialistButtons($imageItem, imageIdx) {
-            var $specialistsContainer = $imageItem.find('.specialists-collection');
-            
             // Add specialist button click handler
             $imageItem.find('.add-specialist').off('click').on('click', function(e) {
                 e.preventDefault();
@@ -81,7 +82,83 @@
     $(document).ready(function() {
         if ($('#images-collection').length > 0) {
             initImageCollectionManager();
+            setupFormValidation();
         }
     });
+
+    /**
+     * Setup form validation for specialist fields
+     */
+    function setupFormValidation() {
+        // Find the form that contains the images collection
+        var $form = $('#images-collection').closest('form');
+        
+        if ($form.length === 0) {
+            return;
+        }
+
+        // Add custom validation on form submit
+        $form.on('submit', function(e) {
+            var isValid = true;
+            var errorMessages = [];
+
+            // Validate all specialist items
+            $('.specialist-item').each(function(index) {
+                var $specialistItem = $(this);
+                var $specialist = $specialistItem.find('select[name*="[specialist]"]');
+                var $speciality = $specialistItem.find('select[name*="[speciality]"]');
+                var $year = $specialistItem.find('select[name*="[year]"]');
+
+                var hasSpecialist = $specialist.val() !== '';
+                var hasSpeciality = $speciality.val() !== '';
+                var hasYear = $year.val() !== '';
+
+                // If any field is filled, all must be filled
+                if (hasSpecialist || hasSpeciality || hasYear) {
+                    if (!hasSpecialist) {
+                        isValid = false;
+                        $specialist.css('border', '2px solid red');
+                        errorMessages.push('Specialist field is required when adding a specialist (Item #' + (index + 1) + ')');
+                    } else {
+                        $specialist.css('border', '');
+                    }
+
+                    if (!hasSpeciality) {
+                        isValid = false;
+                        $speciality.css('border', '2px solid red');
+                        errorMessages.push('Speciality field is required when adding a specialist (Item #' + (index + 1) + ')');
+                    } else {
+                        $speciality.css('border', '');
+                    }
+
+                    if (!hasYear) {
+                        isValid = false;
+                        $year.css('border', '2px solid red');
+                        errorMessages.push('Year field is required when adding a specialist (Item #' + (index + 1) + ')');
+                    } else {
+                        $year.css('border', '');
+                    }
+                } else {
+                    // All fields are empty, which is fine - clear any previous error styling
+                    $specialist.css('border', '');
+                    $speciality.css('border', '');
+                    $year.css('border', '');
+                }
+            });
+
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please fill in all required fields for specialists:\n\n' + errorMessages.join('\n'));
+                return false;
+            }
+
+            return true;
+        });
+
+        // Clear error styling when user changes the value
+        $(document).on('change', '.specialist-item select', function() {
+            $(this).css('border', '');
+        });
+    }
 
 })(jQuery);
