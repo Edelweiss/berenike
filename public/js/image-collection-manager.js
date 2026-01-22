@@ -36,6 +36,12 @@
             $(this).closest('.image-item').remove();
         });
 
+        // Remove specialist
+        $imagesContainer.on('click', '.remove-specialist', function(e) {
+            e.preventDefault();
+            $(this).closest('.specialist-item').remove();
+        });
+
         // Initialize existing images - add specialists functionality
         $('.image-item').each(function() {
             var $imageItem = $(this);

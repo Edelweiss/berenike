@@ -343,6 +343,26 @@ class Find {
         $this->images->removeElement($image);
     }
     
+    public function setImages($images) {
+        // Convert to array if it's a collection for easier comparison
+        $newImages = is_array($images) ? $images : $images->toArray();
+        $existingImages = $this->images->toArray();
+        
+        // Remove images that are no longer in the new collection
+        foreach ($existingImages as $existingImage) {
+            if (!in_array($existingImage, $newImages, true)) {
+                $this->removeImage($existingImage);
+            }
+        }
+
+        // Add new images
+        foreach ($newImages as $image) {
+            if (!in_array($image, $existingImages, true)) {
+                $this->addImage($image);
+            }
+        }
+    }
+    
     public function getImages() {
         return $this->images;
     }

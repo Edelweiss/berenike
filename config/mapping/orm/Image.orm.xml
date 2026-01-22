@@ -25,10 +25,10 @@
         <many-to-one field="find" target-entity="Find" inversed-by="images">
             <join-column name="find_id" referenced-column-name="id" nullable="false"/>
         </many-to-one>
-        <one-to-many field="imageSpecialists" target-entity="ImageSpecialist" mapped-by="image">
+        <one-to-many field="imageSpecialists" target-entity="ImageSpecialist" mapped-by="image" orphan-removal="true"><!-- orphan-removal to delete ImageSpecialists when removed from collection -->
             <cascade>
                 <cascade-persist/>
-                <cascade-remove/>
+                <cascade-remove/><!-- when image is deleted, all associated imageSpecialists are also deleted -->
             </cascade>
             <order-by>
                 <order-by-field name="year" direction="ASC" />

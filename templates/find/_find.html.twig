@@ -124,7 +124,7 @@
     <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
       <h3 style="margin: 0; font-size: 1.1em;">Images</h3>
     </div>
-    
+
     <div class="ui-widget-content ui-corner-bottom" style="padding: 0.5em;">
       <ul style="list-style: none; padding: 0; margin: 0;">
         {% for image in find.images %}
@@ -133,7 +133,7 @@
               {% if image.heidiconUuid and image.heidiconSystemObjectId %}
                 <div style="flex-shrink: 0;">
                   <a href="https://heidicon.ub.uni-heidelberg.de#/detail/{{ image.heidiconSystemObjectId }}" target="heidicon">
-                    <img src="https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/{{ image.heidiconUuid }}/file/id/{{ image.heidiconSystemObjectId }}/file_version/name/small" alt="Image thumbnail" 
+                    <img src="{% if app.user %}https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/{{ image.heidiconUuid }}/file/id/{{ image.heidiconSystemObjectId }}/file_version/name/small{% else %}{{ asset('images/placeholder.png') }}{% endif %}" alt="Image thumbnail" 
                          style="max-width: 150px; height: auto; border: 1px solid #ccc; border-radius: 4px;" />
                   </a>
                 </div>

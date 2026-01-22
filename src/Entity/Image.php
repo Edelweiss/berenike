@@ -107,6 +107,26 @@ class Image {
         $this->imageSpecialists->removeElement($imageSpecialist);
     }
     
+    public function setImageSpecialists($imageSpecialists) {
+        // Convert to array if it's a collection for easier comparison
+        $newSpecialists = is_array($imageSpecialists) ? $imageSpecialists : $imageSpecialists->toArray();
+        $existingSpecialists = $this->imageSpecialists->toArray();
+
+        // Remove specialists that are no longer in the new collection
+        foreach ($this->imageSpecialists->toArray() as $existingSpecialist) {
+            if (!in_array($existingSpecialist, $newSpecialists, true)) {
+                $this->removeImageSpecialist($existingSpecialist);
+            }
+        }
+
+        // Add new specialists if they are not already present
+        foreach ($newSpecialists as $specialist) {
+            if (!in_array($specialist, $existingSpecialists, true)) {
+                $this->addImageSpecialist($specialist);
+            }
+        }
+    }
+    
     public function getImageSpecialists() {
         return $this->imageSpecialists;
     }

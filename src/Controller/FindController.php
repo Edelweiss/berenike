@@ -262,37 +262,12 @@ class FindController extends BerenikeController
    */
   private function filterEmptyImages(Find $find): void
   {
-      $imagesToRemove = [];
-      
-      foreach ($find->getImages() as $image) {
-          // Check if image has type
-          if (!$image->getType()) {
-              $imagesToRemove[] = $image;
-              continue;
-          }
-          
-          // Check if image has at least one valid image specialist
-          $hasValidSpecialist = false;
-          foreach ($image->getImageSpecialists() as $imageSpecialist) {
-              if ($imageSpecialist !== null && $imageSpecialist->getSpecialist() !== null) {
-                  $hasValidSpecialist = true;
-                  break;
-              }
-          }
-          
-          if (!$hasValidSpecialist) {
-              $imagesToRemove[] = $image;
-          }
+    foreach ($find->getImages() as $image) {
+      // Check if image has type
+      if (!$image->getType()) {
+        $find->removeImage($image);
       }
-      
-      // Remove empty images
-      foreach ($imagesToRemove as $image) {
-          $find->removeImage($image);
-      }
-      
-      if (count($imagesToRemove) > 0) {
-          $this->logger->info(sprintf('Filtered out %d empty image(s) from find', count($imagesToRemove)));
-      }
+    }
   }
 
   public function exportCsv(Request $request): Response
