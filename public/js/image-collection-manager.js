@@ -19,6 +19,16 @@
             
             // Append the new image form
             var $newImageItem = $(newImageForm);
+            
+            // Find the specialists collection div and add the "Add Specialist" button if it's not present
+            var $specialistsContainer = $newImageItem.find('.image-specialists-collection');
+            if ($specialistsContainer.length > 0 && $specialistsContainer.next('.add-specialist').length === 0) {
+                var addSpecialistButton = '<button type="button" class="add-specialist ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">' +
+                    '<span class="ui-button-text">Add Specialist</span>' +
+                    '</button>';
+                $specialistsContainer.after(addSpecialistButton);
+            }
+            
             $imagesContainer.append($newImageItem);
             
             // Setup the Add Specialist button for the new image
