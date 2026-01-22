@@ -79,6 +79,19 @@ PapyrillioBerenike_ExcavationEdit:
     controller: App\Controller\ExcavationController::edit
     methods: [GET, POST]
 
+PapyrillioBerenike_SpecialistList:
+    path:  /specialists
+    controller: App\Controller\SpecialistController::list
+
+PapyrillioBerenike_SpecialistShow:
+    path:  /specialist/{id}
+    controller: App\Controller\SpecialistController::show
+
+PapyrillioBerenike_SpecialistEdit:
+    path:  /specialist/{id}/edit
+    controller: App\Controller\SpecialistController::edit
+    methods: [GET, POST]
+
 PapyrillioBerenike_AdminNewFind:
     path:  /admin/new/find
     controller: App\Controller\AdminController::newFind
@@ -99,6 +112,11 @@ PapyrillioBerenike_AdminNewTrench:
     controller: App\Controller\AdminController::newTrench
     methods: [GET, POST]
 
+PapyrillioBerenike_AdminNewSpecialist:
+    path:  /admin/new/specialist
+    controller: App\Controller\AdminController::newSpecialist
+    methods: [GET, POST]
+
 PapyrillioBerenike_AdminDeleteFind:
     path:  /admin/delete/find/{id}
     controller: App\Controller\AdminController::deleteFind
@@ -117,6 +135,11 @@ PapyrillioBerenike_AdminDeleteLocus:
 PapyrillioBerenike_AdminDeleteTrench:
     path:  /admin/delete/trench/{id}
     controller: App\Controller\AdminController::deleteTrench
+    methods: [POST]
+
+PapyrillioBerenike_AdminDeleteSpecialist:
+    path:  /admin/delete/specialist/{id}
+    controller: App\Controller\AdminController::deleteSpecialist
     methods: [POST]
 
 PapyrillioBerenike_Logout:

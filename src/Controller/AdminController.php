@@ -6,14 +6,17 @@ use App\Entity\Find;
 use App\Entity\Bucket;
 use App\Entity\Locus;
 use App\Entity\Excavation;
+use App\Entity\Specialist;
 use App\Form\FindType;
 use App\Form\BucketType;
 use App\Form\LocusType;
 use App\Form\ExcavationType;
+use App\Form\SpecialistType;
 use App\Repository\FindRepository;
 use App\Repository\BucketRepository;
 use App\Repository\LocusRepository;
 use App\Repository\ExcavationRepository;
+use App\Repository\SpecialistRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,6 +30,7 @@ class AdminController extends BerenikeController
     private $bucketRepository;
     private $locusRepository;
     private $excavationRepository;
+    private $specialistRepository;
 
     public function __construct(
         RequestStack $requestStack,
@@ -35,7 +39,8 @@ class AdminController extends BerenikeController
         FindRepository $findRepository,
         BucketRepository $bucketRepository,
         LocusRepository $locusRepository,
-        ExcavationRepository $excavationRepository
+        ExcavationRepository $excavationRepository,
+        SpecialistRepository $specialistRepository
     ) {
         parent::__construct($requestStack, $logger);
         $this->entityManager = $entityManager;
@@ -43,6 +48,7 @@ class AdminController extends BerenikeController
         $this->bucketRepository = $bucketRepository;
         $this->locusRepository = $locusRepository;
         $this->excavationRepository = $excavationRepository;
+        $this->specialistRepository = $specialistRepository;
     }
 
     public function newFind(Request $request): Response
@@ -182,5 +188,39 @@ class AdminController extends BerenikeController
 
         $this->addFlash('success', 'Trench deleted successfully');
         return $this->redirectToRoute('PapyrillioBerenike_ExcavationList');
+    }
+
+    public function newSpecialist(Request $request): Response
+    {
+        $specialist = new Specialist();
+        
+        $form = $this->createForm(SpecialistType::class, $specialist);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->entityManager->persist($specialist);
+            $this->entityManager->flush();
+
+            return $this->redirectToRoute('PapyrillioBerenike_SpecialistShow', ['id' => $specialist->getId()]);
+        }
+
+        return $this->render('admin/newSpecialist.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    public function deleteSpecialist(Request $request, $id): Response
+    {
+        $specialist = $this->specialistRepository->find($id);
+        
+        if (!$specialist) {
+            throw $this->createNotFoundException('Specialist not found');
+        }
+
+        $this->entityManager->remove($specialist);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Specialist deleted successfully');
+        return $this->redirectToRoute('PapyrillioBerenike_SpecialistList');
     }
 }
