@@ -3,7 +3,14 @@ namespace App\Entity;
 
 use App\Repository\BucketRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
+/**
+ * @UniqueEntity(
+ *     fields={"locus", "number"},
+ *     message="This combination of locus and number already exists."
+ * )
+ */
 class Bucket {
     private $id;
     private $number;
