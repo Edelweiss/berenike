@@ -247,9 +247,18 @@ class FindUpdateCommand extends Command
     {
         $stats = ['processed' => 0, 'updated' => 0, 'created' => 0, 'not_found' => 0, 'skipped' => 0, 'errors' => 0];
         
-        // Load XML file
+        // Load and sanitize XML file
+        // FileMaker XML exports may contain invalid characters (control characters, null bytes)
+        $xmlContent = file_get_contents($filePath);
+        
+        // Remove invalid XML control characters
+        // XML 1.0 only allows: tab (0x09), LF (0x0A), CR (0x0D), and characters >= 0x20
+        // Remove all control characters except tab, LF, and CR
+        $xmlContent = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', '', $xmlContent);
+        
+        // Parse sanitized XML
         libxml_use_internal_errors(true);
-        $xml = simplexml_load_file($filePath);
+        $xml = simplexml_load_string($xmlContent);
         
         if ($xml === false) {
             $errors = libxml_get_errors();
