@@ -317,24 +317,6 @@ class FindUpdateCommand extends Command
             }
 
             $findId = (int) $data['id'];
-
-            // Validate tm field if present
-            if (isset($data['tm']) && trim($data['tm']) !== '') {
-                // Check for special values
-                if (stripos($data['tm'], 'SKIPPED') !== false || stripos($data['tm'], 'NOT FOUND') !== false) {
-                    $io->writeln(sprintf('<comment>Skipping find ID %d: Marked as skipped/not found</comment>', $findId));
-                    $stats['skipped']++;
-                    continue;
-                }
-
-                // Check if tm is a valid positive integer
-                if (!ctype_digit(trim($data['tm'])) || (int) $data['tm'] <= 0) {
-                    $io->writeln(sprintf('<comment>Skipping find ID %d: tm value "%s" is not a valid positive integer</comment>', $findId, $data['tm']));
-                    $stats['skipped']++;
-                    continue;
-                }
-            }
-
             try {
                 // Check if EntityManager is closed and skip if so
                 if (!$this->entityManager->isOpen()) {
@@ -342,7 +324,7 @@ class FindUpdateCommand extends Command
                     $stats['errors']++;
                     continue;
                 }
-                
+
                 $result = $this->updateOrCreateFind($findId, $data, $dryRun, $setEmptyToNull, $createNew, $io);
 
                 if ($result === 'updated') {
@@ -497,7 +479,7 @@ class FindUpdateCommand extends Command
             // Convert field name to setter/getter methods
             $setterMethod = 'set' . ucfirst($actualFieldName);
             $getterMethod = 'get' . ucfirst($actualFieldName);
-            
+
             if (method_exists($find, $setterMethod)) {
                 // Handle type conversions
                 if ($isEmpty && $setEmptyToNull) {
