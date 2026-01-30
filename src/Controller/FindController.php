@@ -32,7 +32,8 @@ class FindController extends BerenikeController
   {
       $find = $this->findRepository->find($id);
       if (!$find) {
-          throw $this->createNotFoundException('Find not found');
+          $this->addFlash('warning', 'Find not found');
+          return $this->redirectToRoute('PapyrillioBerenike_FindList');
       }
 
       $form = $this->createForm(FindType::class, $find);
@@ -227,7 +228,8 @@ class FindController extends BerenikeController
     $find = $this->findRepository->find($id);
     
     if (!$find) {
-        throw $this->createNotFoundException('Find not found');
+        $this->addFlash('warning', 'Find not found');
+        return $this->redirectToRoute('PapyrillioBerenike_FindList');
     }
 
     $this->entityManager->remove($find);
@@ -244,7 +246,8 @@ class FindController extends BerenikeController
     
     $find = $this->findRepository->find($id);
     if (!$find) {
-        throw $this->createNotFoundException('Find not found');
+        $this->addFlash('warning', 'Find not found');
+        return $this->redirectToRoute('PapyrillioBerenike_FindList');
     }
 
     // Check which route was used to access this action
