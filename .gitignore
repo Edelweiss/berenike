@@ -16,6 +16,7 @@
 ###< symfony/phpunit-bridge ###
 
 # IDE and OS files
+.*
 .DS_Store
 /.project
 /.settings
