@@ -85,7 +85,7 @@ class FindController extends BerenikeController
       // ODER BY
 
       $orderBy = '';
-      if(in_array($sort, ['year', 'month', 'object', 'objectNo', 'category', 'categoryNo', 'weight', 'quantity', 
+      if(in_array($sort, ['id', 'year', 'month', 'object', 'objectNo', 'category', 'categoryNo', 'weight', 'quantity', 
                           'dimensions', 'preservation', 'description', 'material', 'materialRemarks', 
                           'datingAbsolute', 'typologyReference', 'publications', 'remarks', 'created', 'modified',
                           'inventoryNumber', 'tm', 'date', 'dateRemarks', 'scaRegister', 'rebuildChanges',
