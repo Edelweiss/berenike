@@ -439,14 +439,32 @@ class FindUpdateCommand extends Command
                 }
                 // Note: If no year can be set, validation at the end will catch it and skip the record
             }
-            
+
             if ($io) {
                 $io->writeln(sprintf('<info>Creating new find ID %d with bucket ID %d</info>', $findId, $bucketId), OutputInterface::VERBOSITY_VERBOSE);
             }
-            
+
             $isNew = true;
         } else {
             $isNew = false;
+            
+            // Update bucket for existing records if bucketId is provided and valid
+            if (isset($data['bucketId']) && trim($data['bucketId']) !== '') {
+                $bucketId = (int) $data['bucketId'];
+                $bucket = $this->bucketRepository->find($bucketId);
+                
+                if ($bucket) {
+                    // Only update if the bucket is different
+                    $currentBucket = $find->getBucket();
+                    if ($currentBucket === null || $currentBucket->getId() !== $bucketId) {
+                        $find->setBucket($bucket);
+                        if ($io) {
+                            $io->writeln(sprintf('<info>Updating bucket to ID %d for find ID %d</info>', $bucketId, $findId), OutputInterface::VERBOSITY_VERBOSE);
+                        }
+                    }
+                }
+                // If bucket not found, silently skip (as per requirement)
+            }
         }
 
         $updatedFields = 0;
