@@ -162,5 +162,45 @@
       </div>
     </div>
 
+    <!-- Finds per Year Timeline Tile -->
+    <div class="dashboard-tile ui-widget">
+      <div class="ui-widget-header ui-corner-top" style="padding: 0.5em;">
+        <h3>📅 Finds by Year</h3>
+      </div>
+      <div class="ui-widget-content ui-corner-bottom" style="padding: 0.5em; max-height: 300px; overflow-y: auto;">
+        {% if findsPerYear is not empty %}
+          <ul>
+            {% for item in findsPerYear %}
+              <li>
+                <strong>{{ item.year }}</strong>: {{ item.count }} find{{ item.count > 1 ? 's' : '' }}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="ui-state-disabled" style="font-style: italic; padding: 0.5em;">No year data available</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Finds per Trench Tile -->
+    <div class="dashboard-tile ui-widget">
+      <div class="ui-widget-header ui-corner-top" style="padding: 0.5em;">
+        <h3>🏗️ Finds by Trench</h3>
+      </div>
+      <div class="ui-widget-content ui-corner-bottom" style="padding: 0.5em; max-height: 300px; overflow-y: auto;">
+        {% if findsPerTrench is not empty %}
+          <ul>
+            {% for item in findsPerTrench %}
+              <li>
+                <strong>{{ item.site }} {{ item.trench }}</strong>: {{ item.count }} find{{ item.count > 1 ? 's' : '' }}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="ui-state-disabled" style="font-style: italic; padding: 0.5em;">No trench data available</p>
+        {% endif %}
+      </div>
+    </div>
+
   </div>
 {% endblock %}

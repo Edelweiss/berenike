@@ -30,8 +30,31 @@ class HomeController extends BerenikeController{
         $findIds = [20742, 213, 1110];
         $finds = $this->findRepository->findBy(['id' => $findIds]);
 
+        // Get finds count per year
+        $findsPerYear = $this->entityManager->createQuery(
+            'SELECT f.year, COUNT(f.id) as count
+             FROM App\Entity\Find f
+             WHERE f.year IS NOT NULL
+             GROUP BY f.year
+             ORDER BY f.year ASC'
+        )->getResult();
+
+        // Get finds count per trench
+        $findsPerTrench = $this->entityManager->createQuery(
+            'SELECT e.site, e.trench, COUNT(f.id) as count
+             FROM App\Entity\Find f
+             JOIN f.bucket b
+             JOIN b.locus l
+             JOIN l.excavation e
+             WHERE e.trench IS NOT NULL
+             GROUP BY e.trench
+             ORDER BY e.site, e.trench+0, e.trench ASC'
+        )->getResult();
+
         return $this->render('home/dashboard.html.twig', [
-            'finds' => $finds
+            'finds' => $finds,
+            'findsPerYear' => $findsPerYear,
+            'findsPerTrench' => $findsPerTrench
         ]);
     }
 
