@@ -3,6 +3,9 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                    https://raw.github.com/doctrine/doctrine2/master/doctrine-mapping.xsd">
     <entity name="App\Entity\Locus" table="locus">
+        <unique-constraints>
+            <unique-constraint columns="excavation_id,number" name="unique_locus_excavation_number"/>
+        </unique-constraints>
         <id name="id" type="integer">
             <generator strategy="AUTO"/>
         </id>
