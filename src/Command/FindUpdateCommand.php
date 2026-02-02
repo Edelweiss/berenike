@@ -401,20 +401,12 @@ class FindUpdateCommand extends Command
                 return 'not_found';
             }
             
-            // Check if bucketId is provided
-            if (!isset($data['bucketId']) || trim($data['bucketId']) === '') {
-                if ($io) {
-                    $io->writeln(sprintf('<comment>Cannot create find ID %d: No bucket ID provided</comment>', $findId), OutputInterface::VERBOSITY_VERBOSE);
-                }
-                return 'skipped_no_bucket';
-            }
-            
-            $bucketId = (int) $data['bucketId'];
-            $bucket = $this->bucketRepository->find($bucketId);
+            // Find bucket by criteria (bucket_number, locus_number, excavation_trench, excavation_site, excavation_season)
+            $bucket = $this->findBucketByCriteria($data, $io);
             
             if (!$bucket) {
                 if ($io) {
-                    $io->writeln(sprintf('<comment>Cannot create find ID %d: Bucket ID %d not found in database</comment>', $findId, $bucketId), OutputInterface::VERBOSITY_VERBOSE);
+                    $io->writeln(sprintf('<comment>Cannot create find ID %d: No matching bucket found</comment>', $findId), OutputInterface::VERBOSITY_VERBOSE);
                 }
                 return 'skipped_no_bucket';
             }
@@ -441,30 +433,27 @@ class FindUpdateCommand extends Command
             }
 
             if ($io) {
-                $io->writeln(sprintf('<info>Creating new find ID %d with bucket ID %d</info>', $findId, $bucketId), OutputInterface::VERBOSITY_VERBOSE);
+                $io->writeln(sprintf('<info>Creating new find ID %d with bucket ID %d</info>', $findId, $bucket->getId()), OutputInterface::VERBOSITY_VERBOSE);
             }
 
             $isNew = true;
         } else {
             $isNew = false;
             
-            // Update bucket for existing records if bucketId is provided and valid
-            if (isset($data['bucketId']) && trim($data['bucketId']) !== '') {
-                $bucketId = (int) $data['bucketId'];
-                $bucket = $this->bucketRepository->find($bucketId);
-                
-                if ($bucket) {
-                    // Only update if the bucket is different
-                    $currentBucket = $find->getBucket();
-                    if ($currentBucket === null || $currentBucket->getId() !== $bucketId) {
-                        $find->setBucket($bucket);
-                        if ($io) {
-                            $io->writeln(sprintf('<info>Updating bucket to ID %d for find ID %d</info>', $bucketId, $findId), OutputInterface::VERBOSITY_VERBOSE);
-                        }
+            // Update bucket for existing records if bucket criteria are provided
+            $bucket = $this->findBucketByCriteria($data, $io);
+            
+            if ($bucket) {
+                // Only update if the bucket is different
+                $currentBucket = $find->getBucket();
+                if ($currentBucket === null || $currentBucket->getId() !== $bucket->getId()) {
+                    $find->setBucket($bucket);
+                    if ($io) {
+                        $io->writeln(sprintf('<info>Updating bucket to ID %d for find ID %d</info>', $bucket->getId(), $findId), OutputInterface::VERBOSITY_VERBOSE);
                     }
                 }
-                // If bucket not found, silently skip (as per requirement)
             }
+            // If no matching bucket found, silently skip bucket update (record can still be updated)
         }
 
         $updatedFields = 0;
@@ -631,6 +620,110 @@ class FindUpdateCommand extends Command
     }
     
     /**
+     * Find a bucket by matching criteria from FileMaker data
+     * Matches on: bucket.number, locus.number, excavation.trench, excavation.site, and excavation.season
+     * 
+     * @param array $data The data array containing bucket_number, locus_number, excavation_trench, excavation_site, excavation_season
+     * @param SymfonyStyle|null $io For verbose output
+     * @return \App\Entity\Bucket|null The matching bucket or null if not found
+     */
+    private function findBucketByCriteria(array $data, ?SymfonyStyle $io = null): ?\App\Entity\Bucket
+    {
+        // Check required fields are present
+        $requiredFields = ['bucket_number', 'locus_number', 'excavation_trench', 'excavation_site', 'excavation_season'];
+        foreach ($requiredFields as $field) {
+            if (!isset($data[$field]) || trim($data[$field]) === '') {
+                if ($io) {
+                    $io->writeln(sprintf('<comment>Missing required field "%s" for bucket lookup</comment>', $field), OutputInterface::VERBOSITY_VERBOSE);
+                }
+                return null;
+            }
+        }
+        
+        $bucketNumber = trim($data['bucket_number']);
+        $locusNumberStr = trim($data['locus_number']);
+        $excavationTrench = trim($data['excavation_trench']);
+        $excavationSite = trim($data['excavation_site']);
+        $excavationSeasonAbbrev = trim($data['excavation_season']);
+        
+        // Convert locus_number string to integer
+        // Handle dirty data like '002+004', 'BLOCK', '013a' - these cannot be matched
+        if (!ctype_digit($locusNumberStr)) {
+            if ($io) {
+                $io->writeln(sprintf('<comment>Cannot parse locus_number "%s" as integer - skipping bucket lookup</comment>', $locusNumberStr), OutputInterface::VERBOSITY_VERBOSE);
+            }
+            return null;
+        }
+        $locusNumber = (int) $locusNumberStr;
+        
+        // Convert abbreviated year to full year(s) for matching
+        // '09' -> '2009', '98' -> '1998', '20' -> '2020'
+        $fullYear = $this->abbreviatedYearToFull($excavationSeasonAbbrev);
+        if ($fullYear === null) {
+            if ($io) {
+                $io->writeln(sprintf('<comment>Cannot parse excavation_season "%s" as year abbreviation</comment>', $excavationSeasonAbbrev), OutputInterface::VERBOSITY_VERBOSE);
+            }
+            return null;
+        }
+        
+        // Query for matching bucket
+        // We need to find where the full year is a substring of excavation.season
+        $qb = $this->entityManager->createQueryBuilder();
+        $qb->select('b')
+            ->from(\App\Entity\Bucket::class, 'b')
+            ->join('b.locus', 'l')
+            ->join('l.excavation', 'e')
+            ->where('b.number = :bucketNumber')
+            ->andWhere('l.number = :locusNumber')
+            ->andWhere('e.trench = :excavationTrench')
+            ->andWhere('e.site = :excavationSite')
+            ->andWhere('e.season LIKE :seasonPattern')
+            ->setParameter('bucketNumber', $bucketNumber)
+            ->setParameter('locusNumber', $locusNumber)
+            ->setParameter('excavationTrench', $excavationTrench)
+            ->setParameter('excavationSite', $excavationSite)
+            ->setParameter('seasonPattern', '%' . $fullYear . '%')
+            ->setMaxResults(1);
+        
+        $result = $qb->getQuery()->getOneOrNullResult();
+        
+        if ($result === null && $io) {
+            $io->writeln(sprintf(
+                '<comment>No bucket found matching: bucket=%s, locus=%d, trench=%s, site=%s, season contains %s</comment>',
+                $bucketNumber, $locusNumber, $excavationTrench, $excavationSite, $fullYear
+            ), OutputInterface::VERBOSITY_VERBOSE);
+        }
+        
+        return $result;
+    }
+    
+    /**
+     * Convert an abbreviated year (2 digits) to a full year (4 digits)
+     * Uses threshold of 30: 00-30 -> 2000-2030, 31-99 -> 1931-1999
+     * 
+     * @param string $abbrev The abbreviated year (e.g., '09', '98', '20')
+     * @return string|null The full year as string (e.g., '2009', '1998', '2020') or null if invalid
+     */
+    private function abbreviatedYearToFull(string $abbrev): ?string
+    {
+        $abbrev = trim($abbrev);
+        
+        // Must be 1 or 2 digits
+        if (!preg_match('/^\d{1,2}$/', $abbrev)) {
+            return null;
+        }
+        
+        $yearNum = (int) $abbrev;
+        
+        // Use threshold: 00-30 -> 20xx, 31-99 -> 19xx
+        if ($yearNum <= 30) {
+            return (string) (2000 + $yearNum);
+        } else {
+            return (string) (1900 + $yearNum);
+        }
+    }
+    
+    /**
      * Validate and truncate field value if it exceeds the maximum length
      * Field length limits from Find.orm.xml
      */
@@ -660,15 +753,15 @@ class FindUpdateCommand extends Command
             'remarks' => 65535, // TEXT type
             'rebuildChanges' => 65535, // TEXT type
         ];
-        
+
         if (!isset($fieldLengths[$fieldName])) {
             // Unknown field, return as-is
             return $value;
         }
-        
+
         $maxLength = $fieldLengths[$fieldName];
         $actualLength = mb_strlen($value, 'UTF-8');
-        
+
         if ($actualLength > $maxLength) {
             $truncated = mb_substr($value, 0, $maxLength, 'UTF-8');
             if ($io) {
@@ -684,10 +777,10 @@ class FindUpdateCommand extends Command
             }
             return $truncated;
         }
-        
+
         return $value;
     }
-    
+
     /**
      * Handle date field with support for incomplete dates
      * - Full date: 2009-01-29 -> setDate() (also sets year and month)
@@ -965,7 +1058,12 @@ Modified
         $fileMakerMappings = [
             'trench2' => 'trench',
             'object id' => 'object',
-            'PB_Id' => 'bucketId'
+            'PB_Id' => 'bucketId',
+            'Loci::Site_Id' => 'excavation_site',
+            'Loci::Season_Id' => 'excavation_season',
+            'Loci::Trench_Id' => 'excavation_trench',
+            'Loci::LocusNo' => 'locus_number',
+            'PB::PB_No' => 'bucket_number'
         ];
 
         if (isset($fileMakerMappings[$fieldName])) {
