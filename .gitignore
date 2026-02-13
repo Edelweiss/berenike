@@ -24,6 +24,7 @@
 # Application specific
 /data/*.xml
 /data/*.csv
+/data/mysql_dump
 robots.txt
 *.php~
 
