@@ -43,7 +43,7 @@ class FindUpdateCommand extends Command
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Run without actually persisting changes to the database')
             ->addOption('batch-size', 'b', InputOption::VALUE_REQUIRED, 'Number of records to process before flushing', 20)
             ->addOption('set-empty-to-null', null, InputOption::VALUE_NONE, 'Set empty fields in the CSV/XML to null in the database')
-            ->addOption('create-new', null, InputOption::VALUE_NONE, 'Create new find records if ID not found in database (requires valid bucket ID)')
+            ->addOption('create-new', null, InputOption::VALUE_NONE, 'Create new find records if ID not found in database (site, season, trench, locus criteria must be provided to find bucket)')
         ;
     }
 
@@ -76,7 +76,7 @@ class FindUpdateCommand extends Command
         }
         
         if ($createNew) {
-            $io->info('CREATE NEW MODE - New find records will be created if ID not found (requires valid bucket ID)');
+            $io->info('CREATE NEW MODE - New find records will be created if ID not found (site, season, trench, locus criteria must be provided to find bucket)');
         }
 
         // Determine file type and process accordingly
@@ -640,21 +640,38 @@ class FindUpdateCommand extends Command
             }
         }
         
-        $bucketNumber = trim($data['bucket_number']);
+        $bucketNumberRaw = trim($data['bucket_number']);
         $locusNumberStr = trim($data['locus_number']);
-        $excavationTrench = trim($data['excavation_trench']);
+        $excavationTrenchRaw = trim($data['excavation_trench']);
         $excavationSite = trim($data['excavation_site']);
         $excavationSeasonAbbrev = trim($data['excavation_season']);
         
-        // Convert locus_number string to integer
-        // Handle dirty data like '002+004', 'BLOCK', '013a' - these cannot be matched
-        if (!ctype_digit($locusNumberStr)) {
+        // Normalize trench: strip leading zeros (e.g., "059" -> "59", "08" -> "8")
+        $excavationTrench = ltrim($excavationTrenchRaw, '0');
+        // Handle edge case: if all zeros, keep one zero
+        if ($excavationTrench === '') {
+            $excavationTrench = '0';
+        }
+        
+        // Normalize locus: extract numeric part and optional letter suffix
+        // Examples: "013a" -> number: 13, addendum: "a"; "042" -> number: 42, addendum: null
+        // Pattern: optional leading zeros, digits, optional letter
+        if (preg_match('/^0*(\d+)([a-zA-Z]?)$/', $locusNumberStr, $matches)) {
+            $locusNumber = (int) $matches[1]; // Strips leading zeros automatically
+            $locusAddendum = !empty($matches[2]) ? strtolower($matches[2]) : null;
+        } else {
+            // Handle dirty data like '002+004', 'BLOCK', etc.
             if ($io) {
-                $io->writeln(sprintf('<comment>Cannot parse locus_number "%s" as integer - skipping bucket lookup</comment>', $locusNumberStr), OutputInterface::VERBOSITY_VERBOSE);
+                $io->writeln(sprintf('<comment>Cannot parse locus_number "%s" - expected format: digits with optional letter suffix</comment>', $locusNumberStr), OutputInterface::VERBOSITY_VERBOSE);
             }
             return null;
         }
-        $locusNumber = (int) $locusNumberStr;
+        
+        // Normalize bucket: strip leading zeros (e.g., "0042" -> "42")
+        $bucketNumber = ltrim($bucketNumberRaw, '0');
+        if ($bucketNumber === '') {
+            $bucketNumber = '0';
+        }
         
         // Convert abbreviated year to full year(s) for matching
         // '09' -> '2009', '98' -> '1998', '20' -> '2020'
@@ -666,35 +683,77 @@ class FindUpdateCommand extends Command
             return null;
         }
         
-        // Query for matching bucket
-        // We need to find where the full year is a substring of excavation.season
-        $qb = $this->entityManager->createQueryBuilder();
-        $qb->select('b')
-            ->from(\App\Entity\Bucket::class, 'b')
-            ->join('b.locus', 'l')
-            ->join('l.excavation', 'e')
-            ->where('b.number = :bucketNumber')
-            ->andWhere('l.number = :locusNumber')
-            ->andWhere('e.trench = :excavationTrench')
-            ->andWhere('e.site = :excavationSite')
-            ->andWhere('e.season LIKE :seasonPattern')
-            ->setParameter('bucketNumber', $bucketNumber)
-            ->setParameter('locusNumber', $locusNumber)
-            ->setParameter('excavationTrench', $excavationTrench)
-            ->setParameter('excavationSite', $excavationSite)
-            ->setParameter('seasonPattern', '%' . $fullYear . '%')
-            ->setMaxResults(1);
+        // Query for matching bucket using normalized values
+        // The database stores:
+        // - e.trench: already normalized (no leading zeros)
+        // - l.number: numeric part (no leading zeros)
+        // - l.addendum: optional letter suffix (lowercase)
+        // - b.number: bucket number (may need normalization to match)
+        // - e.season: full season string (e.g., "1998", "2009", "1998/1999")
         
-        $result = $qb->getQuery()->getOneOrNullResult();
+        // We need to match where the FileMaker data (after normalization) equals the database data
+        // Using LOCATE for season to allow partial match (e.g., "98" matches "1998" or "1998/1999")
+        $conn = $this->entityManager->getConnection();
+        $sql = "SELECT b.id 
+                FROM bucket b 
+                JOIN locus l ON b.locus_id = l.id 
+                JOIN excavation e ON l.excavation_id = e.id 
+                WHERE e.site = :site 
+                  AND LOCATE(:season, e.season) > 0
+                  AND e.trench = :trench 
+                  AND l.number = :locusNumber 
+                  AND (l.addendum IS NULL AND :locusAddendum IS NULL OR LOWER(l.addendum) = :locusAddendum)
+                  AND REGEXP_REPLACE(b.number, '^0*(.+)$', '\\\\1') = :bucketNumber";
         
-        if ($result === null && $io) {
+        $stmt = $conn->prepare($sql);
+        $result = $stmt->executeQuery([
+            'site' => $excavationSite,
+            'season' => $fullYear,
+            'trench' => $excavationTrench,
+            'locusNumber' => $locusNumber,
+            'locusAddendum' => $locusAddendum,
+            'bucketNumber' => $bucketNumber,
+        ]);
+        
+        $rows = $result->fetchAllAssociative();
+        
+        if (count($rows) > 1) {
+            // Multiple matches found - this indicates ambiguity in the data
+            $bucketIds = array_column($rows, 'id');
+            if ($io) {
+                $io->writeln(sprintf(
+                    '<error>AMBIGUITY: Found %d matching buckets (IDs: %s) for bucket=%s, locus=%d%s, trench=%s, site=%s, season contains %s. Using first match (ID %d).</error>',
+                    count($rows),
+                    implode(', ', $bucketIds),
+                    $bucketNumber,
+                    $locusNumber,
+                    $locusAddendum ? $locusAddendum : '',
+                    $excavationTrench,
+                    $excavationSite,
+                    $fullYear,
+                    $bucketIds[0]
+                ), OutputInterface::VERBOSITY_NORMAL);
+            }
+            // Use first match despite ambiguity
+            $bucket = $this->entityManager->getRepository(\App\Entity\Bucket::class)->find($rows[0]['id']);
+            return $bucket;
+        } elseif (count($rows) === 1) {
+            // Exactly one match - perfect
+            $bucket = $this->entityManager->getRepository(\App\Entity\Bucket::class)->find($rows[0]['id']);
+            return $bucket;
+        }
+        
+        if ($io) {
             $io->writeln(sprintf(
-                '<comment>No bucket found matching: bucket=%s, locus=%d, trench=%s, site=%s, season contains %s</comment>',
-                $bucketNumber, $locusNumber, $excavationTrench, $excavationSite, $fullYear
+                '<comment>No bucket found matching: bucket=%s (from %s), locus=%d%s (from %s), trench=%s (from %s), site=%s, season contains %s</comment>',
+                $bucketNumber, $bucketNumberRaw, 
+                $locusNumber, $locusAddendum ? $locusAddendum : '', $locusNumberStr,
+                $excavationTrench, $excavationTrenchRaw,
+                $excavationSite, $fullYear
             ), OutputInterface::VERBOSITY_VERBOSE);
         }
         
-        return $result;
+        return null;
     }
     
     /**
