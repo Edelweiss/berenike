@@ -13,12 +13,8 @@ AND f.bucket = b.bucket
 WHERE f.site = 'BE' AND f.season is not null AND f.trench is not null AND f.locus is not null AND f.bucket is not null AND b.excavation_id is NULL
 ORDER BY f.site, f.season, f.trench, f.locus, f.bucket;
 
-Total: 6963
-Unique buckets: 1778 (-5 because of missing trench, season, locus, or bucket number)
-
-Matches: 242
-Unmatches: 3673
-
+-- Total: 6963
+-- Unique buckets: 1778 (-5 because of missing trench, season, locus, or bucket number)
 
 SELECT * FROM
 
