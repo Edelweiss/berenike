@@ -1,7 +1,7 @@
 {% if locus %}
   <div class="ui-widget">
     <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
-      <h3 style="margin: 0; font-size: 1.1em;">Locus {{ locus.excavation.site }}{{ locus.excavation.season }}-{{ locus.excavation.trench }}/{{ locus.number }}</h3>
+      <h3 style="margin: 0; font-size: 1.1em;">Locus {{ locus.excavation.site }}{{ locus.excavation.season }}-{{ locus.excavation.trench }}/{{ locus.number }}{% if locus.addendum %}{{ locus.addendum }}{% endif %}</h3>
     </div>
     
     <div class="ui-widget-content ui-corner-bottom" style="padding: 0.5em;">
@@ -11,6 +11,7 @@
           <div class="ui-helper-clearfix">
             <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">ID:</strong> {{ locus.id }}</p>
             <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Number:</strong> {{ locus.number }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Addendum:</strong> {{ locus.addendum }}</p>
           </div>
         </div>
 

@@ -1,10 +1,10 @@
 {% extends 'frontend.html.twig' %}
 
 {% block top %}
-  <span title="site">{{ locus.excavation.site }}</span><span title="season">{{ locus.excavation.season }}</span>-<span title="trench">{{ locus.excavation.trench }}</span>/<span title="locus">{{ locus.number }}</span>
+  <span title="site">{{ locus.excavation.site }}</span><span title="season">{{ locus.excavation.season }}</span>-<span title="trench">{{ locus.excavation.trench }}</span>/<span title="locus">{{ locus.number }}{% if locus.addendum %}{{ locus.addendum }}{% endif %}</span>
 {% endblock %}
 
-{% block title %}Locus {{ locus.excavation.site }}{{ locus.excavation.season }}-{{ locus.excavation.trench }}/{{ locus.number }} | Berenike.project{% endblock %}
+{% block title %}Locus {{ locus.excavation.site }}{{ locus.excavation.season }}-{{ locus.excavation.trench }}/{{ locus.number }}{% if locus.addendum %}{{ locus.addendum }}{% endif %} | Berenike.project{% endblock %}
 
 {% block body %}
   {% include 'locus/_locus.html.twig' with {'locus': locus} %}

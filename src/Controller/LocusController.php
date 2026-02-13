@@ -44,7 +44,7 @@ class LocusController extends BerenikeController
             // ORDER BY
 
             $orderBy = '';
-            if(in_array($sort, ['number', 'description'])){
+            if(in_array($sort, ['number', 'addendum', 'description'])){
                 $orderBy = ' ORDER BY l.' . $sort . ' ' . $sortDirection;
             } elseif(in_array($sort, ['site', 'season', 'trench'])){
                 $orderBy = ' ORDER BY e.' . $sort . ' ' . $sortDirection;
@@ -60,6 +60,12 @@ class LocusController extends BerenikeController
                 if(strlen($this->getParameter('number'))){
                     $where .= $prefix . 'l.number LIKE :number';
                     $parameters['number'] = '%' . $this->getParameter('number') . '%';
+                    $prefix = ' AND ';
+                }
+
+                if(strlen($this->getParameter('addendum'))){
+                    $where .= $prefix . 'l.addendum LIKE :addendum';
+                    $parameters['addendum'] = '%' . $this->getParameter('addendum') . '%';
                     $prefix = ' AND ';
                 }
 

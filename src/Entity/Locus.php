@@ -19,6 +19,7 @@ class Locus {
     private $season;
     private $trench;
     private $number;
+    private $addendum;
     private $description;
     private $created;
     private $modified;
@@ -62,6 +63,13 @@ class Locus {
     }
     public function getNumber() {
         return $this->number;
+    }
+
+    public function setAddendum($addendum) {
+        $this->addendum = $addendum;
+    }
+    public function getAddendum() {
+        return $this->addendum;
     }
 
     public function setDescription($description) {

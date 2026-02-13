@@ -34,6 +34,11 @@ class LocusType extends AbstractType
                 'required' => true,
                 'label' => 'Number',
             ])
+            ->add('addendum', TextType::class, [
+                'required' => false,
+                'label' => 'Addendum',
+                'attr' => ['maxlength' => 1],
+            ])
             ->add('description', TextareaType::class, [
                 'required' => false,
                 'label' => 'Description',
