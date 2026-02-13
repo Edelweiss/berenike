@@ -35,11 +35,74 @@ class FindUpdateCommand extends Command
         // Get project directory from kernel
         return dirname(__DIR__, 2) . '/data';
     }
+    
+    /**
+     * Load authority list from file
+     * Supports CSV (first column) and plain text (one ID per line)
+     * Returns associative array with IDs as keys for fast lookup
+     * 
+     * @param string $filePath Absolute path to authority list file
+     * @param SymfonyStyle $io For output
+     * @return array|null Array with IDs as keys, or null on error
+     */
+    private function loadAuthorityList(string $filePath, SymfonyStyle $io): ?array
+    {
+        $handle = fopen($filePath, 'r');
+        if ($handle === false) {
+            $io->error('Unable to open authority list file');
+            return null;
+        }
+        
+        $ids = [];
+        $lineCount = 0;
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        
+        while (($line = fgets($handle)) !== false) {
+            $lineCount++;
+            $line = trim($line);
+            
+            // Skip empty lines
+            if ($line === '') {
+                continue;
+            }
+            
+            // Handle CSV format - take first column
+            if ($extension === 'csv') {
+                $parts = str_getcsv($line);
+                if (!empty($parts[0])) {
+                    $id = trim($parts[0]);
+                } else {
+                    continue;
+                }
+            } else {
+                // Plain text - assume one ID per line
+                $id = $line;
+            }
+            
+            // Validate that ID is numeric
+            if (ctype_digit($id)) {
+                $idInt = (int) $id;
+                $ids[$idInt] = true; // Use associative array for O(1) lookup
+            } else {
+                $io->writeln(sprintf('<comment>Skipping invalid ID on line %d: "%s"</comment>', $lineCount, $id), OutputInterface::VERBOSITY_VERBOSE);
+            }
+        }
+        
+        fclose($handle);
+        
+        if (empty($ids)) {
+            $io->error('Authority list file contains no valid IDs');
+            return null;
+        }
+        
+        return $ids;
+    }
 
     protected function configure(): void
     {
         $this
             ->addArgument('filename', InputArgument::REQUIRED, 'The filename (CSV or XML) in the /data directory')
+            ->addArgument('authority-list', InputArgument::OPTIONAL, 'Optional filename in /data directory containing allowed IDs (one per line)')
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Run without actually persisting changes to the database')
             ->addOption('batch-size', 'b', InputOption::VALUE_REQUIRED, 'Number of records to process before flushing', 20)
             ->addOption('set-empty-to-null', null, InputOption::VALUE_NONE, 'Set empty fields in the CSV/XML to null in the database')
@@ -52,6 +115,7 @@ class FindUpdateCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $filename = $input->getArgument('filename');
+        $authorityListFile = $input->getArgument('authority-list');
         $dryRun = $input->getOption('dry-run');
         $batchSize = (int) $input->getOption('batch-size');
         $setEmptyToNull = $input->getOption('set-empty-to-null');
@@ -64,6 +128,24 @@ class FindUpdateCommand extends Command
         if (!file_exists($filePath)) {
             $io->error(sprintf('File not found: %s', $filePath));
             return Command::FAILURE;
+        }
+        
+        // Load authority list if provided
+        $authorityIds = null;
+        if ($authorityListFile !== null) {
+            $authorityListPath = $this->getDataDirectory() . '/' . $authorityListFile;
+            if (!file_exists($authorityListPath)) {
+                $io->error(sprintf('Authority list file not found: %s', $authorityListPath));
+                return Command::FAILURE;
+            }
+            
+            $authorityIds = $this->loadAuthorityList($authorityListPath, $io);
+            if ($authorityIds === null) {
+                $io->error('Failed to load authority list');
+                return Command::FAILURE;
+            }
+            
+            $io->info(sprintf('Loaded authority list with %d IDs from: %s', count($authorityIds), $authorityListFile));
         }
 
         $io->title('Find Update Command');
@@ -90,9 +172,9 @@ class FindUpdateCommand extends Command
         
         try {
             if ($extension === 'csv') {
-                $stats = $this->processCsvFile($filePath, $io, $dryRun, $batchSize, $setEmptyToNull, $createNew, $assignBucket);
+                $stats = $this->processCsvFile($filePath, $io, $dryRun, $batchSize, $setEmptyToNull, $createNew, $assignBucket, $authorityIds);
             } elseif ($extension === 'xml') {
-                $stats = $this->processXmlFile($filePath, $io, $dryRun, $batchSize, $setEmptyToNull, $createNew, $assignBucket);
+                $stats = $this->processXmlFile($filePath, $io, $dryRun, $batchSize, $setEmptyToNull, $createNew, $assignBucket, $authorityIds);
             } else {
                 $io->error(sprintf('Unsupported file format: %s. Only CSV and XML files are supported.', $extension));
                 return Command::FAILURE;
@@ -108,6 +190,7 @@ class FindUpdateCommand extends Command
                     ['Records created', isset($stats['created']) ? $stats['created'] : 0],
                     ['Records not found', $stats['not_found']],
                     ['Records skipped', $stats['skipped']],
+                    ['Records not in authority list', isset($stats['not_in_authority']) ? $stats['not_in_authority'] : 0],
                     ['Errors', $stats['errors']],
                 ]
             );
@@ -120,9 +203,9 @@ class FindUpdateCommand extends Command
         }
     }
 
-    private function processCsvFile(string $filePath, SymfonyStyle $io, bool $dryRun, int $batchSize, bool $setEmptyToNull, bool $createNew, bool $assignBucket): array
+    private function processCsvFile(string $filePath, SymfonyStyle $io, bool $dryRun, int $batchSize, bool $setEmptyToNull, bool $createNew, bool $assignBucket, ?array $authorityIds): array
     {
-        $stats = ['processed' => 0, 'updated' => 0, 'created' => 0, 'not_found' => 0, 'skipped' => 0, 'errors' => 0];
+        $stats = ['processed' => 0, 'updated' => 0, 'created' => 0, 'not_found' => 0, 'skipped' => 0, 'not_in_authority' => 0, 'errors' => 0];
         
         $handle = fopen($filePath, 'r');
         if ($handle === false) {
@@ -164,6 +247,13 @@ class FindUpdateCommand extends Command
             }
 
             $findId = (int) $data['id'];
+            
+            // Check authority list if provided
+            if ($authorityIds !== null && !isset($authorityIds[$findId])) {
+                $io->writeln(sprintf('<comment>Skipping find ID %d: Not in authority list</comment>', $findId), OutputInterface::VERBOSITY_VERBOSE);
+                $stats['not_in_authority']++;
+                continue;
+            }
             
             // Validate tm field if present
             if (isset($data['tm']) && trim($data['tm']) !== '' && (!ctype_digit(trim($data['tm'])) || (int) $data['tm'] <= 0)) {
@@ -249,9 +339,9 @@ class FindUpdateCommand extends Command
         return $stats;
     }
 
-    private function processXmlFile(string $filePath, SymfonyStyle $io, bool $dryRun, int $batchSize, bool $setEmptyToNull, bool $createNew, bool $assignBucket): array
+    private function processXmlFile(string $filePath, SymfonyStyle $io, bool $dryRun, int $batchSize, bool $setEmptyToNull, bool $createNew, bool $assignBucket, ?array $authorityIds): array
     {
-        $stats = ['processed' => 0, 'updated' => 0, 'created' => 0, 'not_found' => 0, 'skipped' => 0, 'errors' => 0];
+        $stats = ['processed' => 0, 'updated' => 0, 'created' => 0, 'not_found' => 0, 'skipped' => 0, 'not_in_authority' => 0, 'errors' => 0];
         
         // Load and sanitize XML file
         // FileMaker XML exports may contain invalid characters (control characters, null bytes)
@@ -323,6 +413,14 @@ class FindUpdateCommand extends Command
             }
 
             $findId = (int) $data['id'];
+            
+            // Check authority list if provided
+            if ($authorityIds !== null && !isset($authorityIds[$findId])) {
+                $io->writeln(sprintf('<comment>Skipping find ID %d: Not in authority list</comment>', $findId), OutputInterface::VERBOSITY_VERBOSE);
+                $stats['not_in_authority']++;
+                continue;
+            }
+            
             try {
                 // Check if EntityManager is closed and skip if so
                 if (!$this->entityManager->isOpen()) {
