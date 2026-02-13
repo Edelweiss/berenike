@@ -44,6 +44,7 @@ class FindUpdateCommand extends Command
             ->addOption('batch-size', 'b', InputOption::VALUE_REQUIRED, 'Number of records to process before flushing', 20)
             ->addOption('set-empty-to-null', null, InputOption::VALUE_NONE, 'Set empty fields in the CSV/XML to null in the database')
             ->addOption('create-new', null, InputOption::VALUE_NONE, 'Create new find records if ID not found in database (site, season, trench, locus criteria must be provided to find bucket)')
+            ->addOption('assign-bucket', null, InputOption::VALUE_NONE, 'Assign/update bucket for existing find records based on site, season, trench, locus criteria')
         ;
     }
 
@@ -55,6 +56,7 @@ class FindUpdateCommand extends Command
         $batchSize = (int) $input->getOption('batch-size');
         $setEmptyToNull = $input->getOption('set-empty-to-null');
         $createNew = $input->getOption('create-new');
+        $assignBucket = $input->getOption('assign-bucket');
 
         // Construct full file path
         $filePath = $this->getDataDirectory() . '/' . $filename;
@@ -78,15 +80,19 @@ class FindUpdateCommand extends Command
         if ($createNew) {
             $io->info('CREATE NEW MODE - New find records will be created if ID not found (site, season, trench, locus criteria must be provided to find bucket)');
         }
+        
+        if ($assignBucket) {
+            $io->info('ASSIGN BUCKET MODE - Buckets will be assigned/updated for existing find records based on site, season, trench, locus criteria');
+        }
 
         // Determine file type and process accordingly
         $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
         
         try {
             if ($extension === 'csv') {
-                $stats = $this->processCsvFile($filePath, $io, $dryRun, $batchSize, $setEmptyToNull, $createNew);
+                $stats = $this->processCsvFile($filePath, $io, $dryRun, $batchSize, $setEmptyToNull, $createNew, $assignBucket);
             } elseif ($extension === 'xml') {
-                $stats = $this->processXmlFile($filePath, $io, $dryRun, $batchSize, $setEmptyToNull, $createNew);
+                $stats = $this->processXmlFile($filePath, $io, $dryRun, $batchSize, $setEmptyToNull, $createNew, $assignBucket);
             } else {
                 $io->error(sprintf('Unsupported file format: %s. Only CSV and XML files are supported.', $extension));
                 return Command::FAILURE;
@@ -114,7 +120,7 @@ class FindUpdateCommand extends Command
         }
     }
 
-    private function processCsvFile(string $filePath, SymfonyStyle $io, bool $dryRun, int $batchSize, bool $setEmptyToNull, bool $createNew): array
+    private function processCsvFile(string $filePath, SymfonyStyle $io, bool $dryRun, int $batchSize, bool $setEmptyToNull, bool $createNew, bool $assignBucket): array
     {
         $stats = ['processed' => 0, 'updated' => 0, 'created' => 0, 'not_found' => 0, 'skipped' => 0, 'errors' => 0];
         
@@ -174,7 +180,7 @@ class FindUpdateCommand extends Command
                     continue;
                 }
                 
-                $result = $this->updateOrCreateFind($findId, $data, $dryRun, $setEmptyToNull, $createNew, $io);
+                $result = $this->updateOrCreateFind($findId, $data, $dryRun, $setEmptyToNull, $createNew, $assignBucket, $io);
                 
                 if ($result === 'updated') {
                     $stats['updated']++;
@@ -243,7 +249,7 @@ class FindUpdateCommand extends Command
         return $stats;
     }
 
-    private function processXmlFile(string $filePath, SymfonyStyle $io, bool $dryRun, int $batchSize, bool $setEmptyToNull, bool $createNew): array
+    private function processXmlFile(string $filePath, SymfonyStyle $io, bool $dryRun, int $batchSize, bool $setEmptyToNull, bool $createNew, bool $assignBucket): array
     {
         $stats = ['processed' => 0, 'updated' => 0, 'created' => 0, 'not_found' => 0, 'skipped' => 0, 'errors' => 0];
         
@@ -325,7 +331,7 @@ class FindUpdateCommand extends Command
                     continue;
                 }
 
-                $result = $this->updateOrCreateFind($findId, $data, $dryRun, $setEmptyToNull, $createNew, $io);
+                $result = $this->updateOrCreateFind($findId, $data, $dryRun, $setEmptyToNull, $createNew, $assignBucket, $io);
 
                 if ($result === 'updated') {
                     $stats['updated']++;
@@ -391,7 +397,7 @@ class FindUpdateCommand extends Command
         return $stats;
     }
 
-    private function updateOrCreateFind(int $findId, array $data, bool $dryRun, bool $setEmptyToNull, bool $createNew, ?SymfonyStyle $io = null): string
+    private function updateOrCreateFind(int $findId, array $data, bool $dryRun, bool $setEmptyToNull, bool $createNew, bool $assignBucket, ?SymfonyStyle $io = null): string
     {
         $find = $this->findRepository->find($findId);
 
@@ -440,20 +446,22 @@ class FindUpdateCommand extends Command
         } else {
             $isNew = false;
             
-            // Update bucket for existing records if bucket criteria are provided
-            $bucket = $this->findBucketByCriteria($data, $io);
-            
-            if ($bucket) {
-                // Only update if the bucket is different
-                $currentBucket = $find->getBucket();
-                if ($currentBucket === null || $currentBucket->getId() !== $bucket->getId()) {
-                    $find->setBucket($bucket);
-                    if ($io) {
-                        $io->writeln(sprintf('<info>Updating bucket to ID %d for find ID %d</info>', $bucket->getId(), $findId), OutputInterface::VERBOSITY_VERBOSE);
+            // Update bucket for existing records only if assignBucket flag is set
+            if ($assignBucket) {
+                $bucket = $this->findBucketByCriteria($data, $io);
+                
+                if ($bucket) {
+                    // Only update if the bucket is different
+                    $currentBucket = $find->getBucket();
+                    if ($currentBucket === null || $currentBucket->getId() !== $bucket->getId()) {
+                        $find->setBucket($bucket);
+                        if ($io) {
+                            $io->writeln(sprintf('<info>Updating bucket to ID %d for find ID %d</info>', $bucket->getId(), $findId), OutputInterface::VERBOSITY_VERBOSE);
+                        }
                     }
                 }
+                // If no matching bucket found, silently skip bucket update (record can still be updated)
             }
-            // If no matching bucket found, silently skip bucket update (record can still be updated)
         }
 
         $updatedFields = 0;
