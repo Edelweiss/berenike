@@ -4,7 +4,7 @@
                    https://raw.github.com/doctrine/doctrine2/master/doctrine-mapping.xsd">
     <entity name="App\Entity\Locus" table="locus">
         <unique-constraints>
-            <unique-constraint columns="excavation_id,number" name="unique_locus_excavation_number"/>
+            <unique-constraint columns="excavation_id,number,addendum" name="unique_locus_excavation_number_addendum"/>
         </unique-constraints>
         <id name="id" type="integer">
             <generator strategy="AUTO"/>

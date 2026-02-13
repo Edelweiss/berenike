@@ -9,8 +9,8 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * @ORM\Entity(repositoryClass=LocusRepository::class)
  * @UniqueEntity(
- *     fields={"excavation", "number"},
- *     message="This combination of excavation and number already exists."
+ *     fields={"excavation", "number", "addendum"},
+ *     message="This combination of excavation, number and addendum already exists."
  * )
  */
 class Locus {
