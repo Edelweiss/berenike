@@ -1,3 +1,9 @@
+-- marina_3 data
+
+SELECT f.loci_site_id as site, concat(IF(f.loci_season_id > 50, '19', '20'), f.loci_season_id) as season, REGEXP_REPLACE(f.loci_trench_id, '^0*(.+)$', '\\1') as trench, CONCAT_WS('', f.loci_locusno+0, LOWER(REGEXP_SUBSTR(f.loci_locusno, '[A-Za-z]'))) as locus, REGEXP_REPLACE(f.pb_pb_no, '^0*(.+)$', '\\1') as bucket, f.id FROM marina_3 f JOIN import on import.id = f.id and authority LIKE 'marina_3%' WHERE f.loci_site_id = 'BE' AND f.loci_season_id is not null AND f.loci_trench_id is not null AND f.loci_locusno is not null AND f.pb_pb_no is not null;
+
+-- check
+
 SELECT * FROM
 
 (SELECT m.loci_site_id, m.loci_season_id, m.loci_trench_id, m.loci_locusno, m.pb_pb_no, count(*) as finds FROM marina_3 m GROUP BY m.loci_site_id, m.loci_season_id, m.loci_trench_id, m.loci_locusno, m.pb_pb_no) m
