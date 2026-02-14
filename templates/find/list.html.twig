@@ -38,6 +38,23 @@
   <script type="text/javascript">
 
 $(function(){
+  // Load saved grid state from session
+  var savedState = {{ gridState|json_encode|raw }};
+  console.log('Saved state:', savedState);
+  
+  // Apply saved settings or use defaults
+  var rowNum = savedState.rows || 100;
+  var sortname = savedState.sidx || 'trench';
+  var sortorder = savedState.sord || 'asc';
+  var searchEnabled = savedState._search === 'true';
+  var savedPage = savedState.page || 1;
+  
+  // Prepare postData with filters and _search flag
+  var postData = savedState.filters || {};
+  if (searchEnabled) {
+    postData._search = 'true';
+  }
+  
   $('#list').jqGrid({
     url: '{{ path('PapyrillioBerenike_FindList') }}',
     datatype: 'xml',
@@ -85,20 +102,63 @@ $(function(){
       {name:'actions',           index:'actions',           width:60, sortable: false, search: false}
     ],
     pager: '#pager',
-    rowNum:100,
+    rowNum: rowNum,
     height:'auto',
     rowList:[10,20,50,100],
-    sortname: 'trench',
-    sortorder: 'asc',
+    sortname: sortname,
+    sortorder: sortorder,
     viewrecords: true,
     gridview: true,
-    caption: null});
+    caption: null,
+    search: searchEnabled,
+    postData: postData,
+    page: savedPage,
+    loadComplete: function() {
+      // Apply saved filter values to the toolbar after grid loads
+      if (savedState.filters && !$('#list')[0].filtersApplied) {
+        for (var field in savedState.filters) {
+          if (savedState.filters.hasOwnProperty(field)) {
+            var inputSelector = '#gs_' + field;
+            $(inputSelector).val(savedState.filters[field]);
+          }
+        }
+        $('#list')[0].filtersApplied = true;
+      }
+    }
+  });
 
-    $('#list').jqGrid('filterToolbar', {});
+  $('#list').jqGrid('filterToolbar', {});
+  
+  // Apply saved column visibility after grid initialization
+  if (savedState.visible) {
+    var visibleCols = savedState.visible.split(';').filter(function(col) { return col !== ''; });
+    var colModel = $('#list').jqGrid('getGridParam', 'colModel');
     
-    $('#list').jqGrid('gridResize', {});
+    // Build a set of visible columns for quick lookup
+    var visibleSet = {};
+    for (var j = 0; j < visibleCols.length; j++) {
+      visibleSet[visibleCols[j]] = true;
+    }
+    
+    // Show/hide columns based on saved state
+    for (var i = 0; i < colModel.length; i++) {
+      var colName = colModel[i].name;
+      // Skip special columns that should always be visible
+      if (colName === 'thumbnail' || colName === 'actions') {
+        continue;
+      }
+      
+      if (visibleSet[colName]) {
+        $('#list').jqGrid('showCol', colName);
+      } else {
+        $('#list').jqGrid('hideCol', colName);
+      }
+    }
+  }
+  
+  $('#list').jqGrid('gridResize', {});
 
-    $('#columnsHideShow').click(function(){
+  $('#columnsHideShow').click(function(){
       $('#list').jqGrid('columnChooser', {shrinkToFit: false, autowidth: false});
       return false;
     });

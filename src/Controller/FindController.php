@@ -69,6 +69,36 @@ class FindController extends BerenikeController
       $sortDirection = $this->getParameter('sord');
       $visible       = explode(';', rtrim($this->getParameter('visible'), ';'));
 
+      // SAVE GRID STATE TO SESSION
+      $session = $request->getSession();
+      $gridState = [
+        'rows' => $limit,
+        'page' => $page,
+        'sidx' => $sort,
+        'sord' => $sortDirection,
+        'visible' => $this->getParameter('visible'),
+        '_search' => $this->getParameter('_search'),
+      ];
+      
+      // Save filter values
+      $filterFields = ['id', 'year', 'month', 'object', 'objectNo', 'category', 'categoryNo', 
+                       'weight', 'quantity', 'dimensions', 'preservation', 'description', 
+                       'material', 'materialRemarks', 'datingAbsolute', 'typologyReference', 
+                       'publications', 'remarks', 'created', 'modified', 'inventoryNumber', 
+                       'tm', 'date', 'dateRemarks', 'scaRegister', 'rebuildChanges',
+                       'heidiconId', 'heidiconUuid', 'heidiconSystemObjectId', 
+                       'trench', 'locus', 'bucket'];
+      
+      $gridState['filters'] = [];
+      foreach ($filterFields as $field) {
+        $value = $this->getParameter($field);
+        if ($value !== null && $value !== '') {
+          $gridState['filters'][$field] = $value;
+        }
+      }
+      
+      $session->set('find_grid_state', $gridState);
+
       // SELECT
 
       $visibleColumns = ['object'];
@@ -196,7 +226,11 @@ class FindController extends BerenikeController
 
       return $this->render('find/list.xml.twig', ['finds' => $finds, 'count' => $count, 'totalPages' => $totalPages, 'page' => $page]);
     } else {
-      return $this->render('find/list.html.twig', ['finds' => $finds]);
+      // LOAD GRID STATE FROM SESSION
+      $session = $request->getSession();
+      $gridState = $session->get('find_grid_state', []);
+      
+      return $this->render('find/list.html.twig', ['finds' => $finds, 'gridState' => $gridState]);
     }
   }
 
