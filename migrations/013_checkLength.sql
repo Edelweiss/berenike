@@ -31,7 +31,7 @@ UNION
 SELECT f.id, f.category, f.category_no, f.dating_absolute, f.description, f.dimensions, f.material, f.material_remarks, f.object_id, f.object_no, f.preservation, f.quantity, f.rebuild_changes, f.sca_register, f.trench2, f.typology_reference, f.weight FROM iwona_3 f JOIN import ON f.id = import.id WHERE import.authority = 'iwona_3') f
 GROUP BY length(object_no) ORDER BY length(object_no) desc;
 
--- check category_no field 
+-- check category_no field
 
 SELECT id, category_no, LENGTH(category_no) FROM
 (SELECT f.id, category_no, object_id, weight FROM marina_3 f JOIN import on import.id = f.id and authority LIKE 'marina_3%' WHERE f.loci_site_id = 'BE' AND f.loci_season_id is not null AND f.loci_trench_id is not null AND f.loci_locusno is not null AND f.pb_pb_no is not null
@@ -40,3 +40,18 @@ SELECT f.id, category_no, object_id, weight FROM iwona_3 f JOIN import on import
 ) f
 WHERE LENGTH(category_no) > 64;
 
+-- check object_id field
+SELECT id, object_id, LENGTH(object_id) FROM
+(SELECT f.id, object_id FROM marina_3 f JOIN import on import.id = f.id and authority LIKE 'marina_3%' WHERE f.loci_site_id = 'BE' AND f.loci_season_id is not null AND f.loci_trench_id is not null AND f.loci_locusno is not null AND f.pb_pb_no is not null
+UNION
+SELECT f.id, object_id FROM iwona_3 f JOIN import on import.id = f.id and authority = 'iwona_3' WHERE f.loci_site_id = 'BE' AND f.loci_season_id is not null AND f.loci_trench_id is not null AND f.loci_locusno is not null AND f.pb_pb_no is not null
+) f
+WHERE LENGTH(object_id) > 64;
+
+-- check weight field
+SELECT id, weight, LENGTH(weight) FROM
+(SELECT f.id, weight FROM marina_3 f JOIN import on import.id = f.id and authority LIKE 'marina_3%' WHERE f.loci_site_id = 'BE' AND f.loci_season_id is not null AND f.loci_trench_id is not null AND f.loci_locusno is not null AND f.pb_pb_no is not null
+UNION
+SELECT f.id, weight FROM iwona_3 f JOIN import on import.id = f.id and authority = 'iwona_3' WHERE f.loci_site_id = 'BE' AND f.loci_season_id is not null AND f.loci_trench_id is not null AND f.loci_locusno is not null AND f.pb_pb_no is not null
+) f
+WHERE LENGTH(weight) > 64;
