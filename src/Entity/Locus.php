@@ -15,9 +15,6 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  */
 class Locus {
     private $id;
-    private $site;
-    private $season;
-    private $trench;
     private $number;
     private $addendum;
     private $description;
@@ -35,27 +32,6 @@ class Locus {
     }
     public function getId() {
         return $this->id;
-    }
-
-    public function setSite($site) {
-        $this->site = $site;
-    }
-    public function getSite() {
-        return $this->site;
-    }
-
-    public function setSeason($season) {
-        $this->season = $season;
-    }
-    public function getSeason() {
-        return $this->season;
-    }
-
-    public function setTrench($trench) {
-        $this->trench = $trench;
-    }
-    public function getTrench() {
-        return $this->trench;
     }
 
     public function setNumber($number) {

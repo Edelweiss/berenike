@@ -9,9 +9,6 @@
         <id name="id" type="integer">
             <generator strategy="AUTO"/>
         </id>
-        <field name="site" type="string" length="64"/>
-        <field name="season" type="integer"/>
-        <field name="trench" type="string" length="64"/>
         <field name="number" type="integer" nullable="false"/>
         <field name="addendum" type="string" length="1" nullable="true"/>
         <field name="description" type="string" nullable="true"/>
