@@ -33,7 +33,7 @@
       <cell>{{ find.materialRemarks }}</cell>
       <cell>{{ find.datingAbsolute }}</cell>
       <cell>{{ find.typologyReference }}</cell>
-      <cell>{{ find.publications }}</cell>
+      <cell>{% if find.tm and find.publications %}<![CDATA[<a href="https://papyri.info/hgv/{{ find.tm }}" target="_blank" title="View in Papyri.info">{{ find.publications }}</a>]]>{% else %}{{ find.publications }}{% endif %}</cell>
       <cell>{{ find.remarks }}</cell>
       <cell>{{ find.created ? find.created|date('d.m.Y H:i:s') : '' }}</cell>
       <cell>{{ find.modified ? find.modified|date('d.m.Y H:i:s') : '' }}</cell>
