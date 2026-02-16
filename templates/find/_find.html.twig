@@ -11,7 +11,7 @@
           <div class="ui-helper-clearfix">
             <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">ID:</strong> {{ find.id }}</p>
             <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Inventory:</strong> {{ find.inventoryNumber }}</p>
-            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">TM:</strong> {{ find.tm }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">TM:</strong> {% if find.tm %} <a href="https://www.trismegistos.org/text/{{ find.tm }}" target="_blank">{{ find.tm }}</a> {% else %} {{ find.tm }} {% endif %}</p>
             {% if find.heidiconId %}
               <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">HeidICON ID:</strong> {{ find.heidiconId }}</p>
             {% endif %}
@@ -73,7 +73,7 @@
           <div class="ui-helper-clearfix">
             <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Dating:</strong> {{ find.datingAbsolute }}</p>
             <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Typology:</strong> {{ find.typologyReference }}</p>
-            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Publications:</strong> {{ find.publications }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Publications:</strong> {% if find.tm %} <a href="https://papyri.info/hgv/{{ find.tm }}" target="_blank">{{ find.publications }}</a> {% else %} {{ find.publications }} {% endif %}</p>
           </div>
         </div>
 
