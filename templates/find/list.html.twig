@@ -24,6 +24,9 @@
   <button id="downloadCsv" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false">
     <span class="ui-button-text">Download CSV</span>
   </button>
+  <button id="resetView" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false">
+    <span class="ui-button-text">Reset View</span>
+  </button>
   <a href="{{ path('PapyrillioBerenike_AdminNewFind') }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
     <span class="ui-button-text">Create New Find</span>
   </a>
@@ -38,6 +41,83 @@
   <script type="text/javascript">
 
 $(function(){
+  // Get saved grid state from session
+  var gridState = {{ gridState|default({})|json_encode|raw }};
+  
+  // Default column visibility
+  var defaultHidden = ['tm', 'heidiconId', 'heidiconUuid', 'heidiconSystemObjectId', 'inventoryNumber', 
+                       'date', 'month', 'dateRemarks', 'scaRegister', 'category', 'categoryNo', 
+                       'weight', 'quantity', 'dimensions', 'preservation', 'description', 'material', 
+                       'materialRemarks', 'datingAbsolute', 'typologyReference', 'publications', 
+                       'remarks', 'created', 'modified'];
+  
+  // Determine visible columns from session
+  var visibleColumns = [];
+  if (gridState.visible) {
+    visibleColumns = gridState.visible.split(';').filter(function(col) { return col !== ''; });
+  }
+  
+  // Build column model with correct visibility
+  var colModel = [ 
+    {name:'id',                index:'id',                width:60},
+    {name:'thumbnail',         index:'thumbnail',         width:60, sortable: false, search: false, align:'center'},
+    {name:'tm',                index:'tm',                width:60, hidden: true},
+    {name:'heidiconId',        index:'heidiconId',        width:90, hidden: true},
+    {name:'heidiconUuid',      index:'heidiconUuid',      width:280, hidden: true},
+    {name:'heidiconSystemObjectId', index:'heidiconSystemObjectId', width:120, hidden: true},
+    {name:'trench',            index:'trench',            width:55, resizable: false},
+    {name:'locus',             index:'locus',             width:55},
+    {name:'bucket',            index:'bucket',            width:55},
+    {name:'inventoryNumber',   index:'inventoryNumber',   width:90, hidden: true},
+    {name:'date',              index:'date',              width:80, formatter:'date', hidden: true},
+    {name:'year',              index:'year',              width:55},
+    {name:'month',             index:'month',             width:55, hidden: true},
+    {name:'dateRemarks',       index:'dateRemarks',       width:100, hidden: true},
+    {name:'scaRegister',       index:'scaRegister',       width:90, hidden: true},
+    {name:'object',            index:'object',            width:128},
+    {name:'objectNo',          index:'objectNo',          width:80},
+    {name:'category',          index:'category',          width:90, hidden: true},
+    {name:'categoryNo',        index:'categoryNo',        width:80, hidden: true},
+    {name:'weight',            index:'weight',            width:70, hidden: true},
+    {name:'quantity',          index:'quantity',          width:70, hidden: true},
+    {name:'dimensions',        index:'dimensions',        width:100, hidden: true},
+    {name:'preservation',      index:'preservation',      width:100, hidden: true},
+    {name:'description',       index:'description',       width:200, hidden: true},
+    {name:'material',          index:'material',          width:100, hidden: true},
+    {name:'materialRemarks',   index:'materialRemarks',   width:120, hidden: true},
+    {name:'datingAbsolute',    index:'datingAbsolute',    width:100, hidden: true},
+    {name:'typologyReference', index:'typologyReference', width:120, hidden: true},
+    {name:'publications',      index:'publications',      width:120, hidden: true},
+    {name:'remarks',           index:'remarks',           width:120, hidden: true},
+    {name:'created',           index:'created',           width:120, hidden: true},
+    {name:'modified',          index:'modified',          width:120, hidden: true},
+    {name:'actions',           index:'actions',           width:60, sortable: false, search: false}
+  ];
+  
+  // Apply saved column visibility
+  if (visibleColumns.length > 0) {
+    for (var i = 0; i < colModel.length; i++) {
+      var colName = colModel[i].name;
+      if (colName !== 'thumbnail' && colName !== 'actions') {
+        // Show column if it's in the visible list, hide otherwise
+        colModel[i].hidden = visibleColumns.indexOf(colName) === -1;
+      }
+    }
+  }
+  
+  // Prepare postData with saved filters for initial load
+  var initialPostData = {};
+  var hasFilters = false;
+  if (gridState.search === 'true' && gridState.filters) {
+    initialPostData._search = 'true';
+    hasFilters = true;
+    for (var key in gridState.filters) {
+      if (gridState.filters.hasOwnProperty(key)) {
+        initialPostData[key] = gridState.filters[key];
+      }
+    }
+  }
+  
   $('#list').jqGrid({
     url: '{{ path('PapyrillioBerenike_FindList') }}',
     datatype: 'xml',
@@ -49,57 +129,58 @@ $(function(){
       'Material', 'Material Remarks', 'Dating Absolute', 'Typology Reference',
       'Publications', 'Remarks', 'Created', 'Modified', 'Actions'
     ],
-    colModel :[ 
-      {name:'id',                index:'id',                width:60},
-      {name:'thumbnail',         index:'thumbnail',         width:60, sortable: false, search: false, align:'center'},
-      {name:'tm',                index:'tm',                width:60, hidden: true},
-      {name:'heidiconId',        index:'heidiconId',        width:90, hidden: true},
-      {name:'heidiconUuid',      index:'heidiconUuid',      width:280, hidden: true},
-      {name:'heidiconSystemObjectId', index:'heidiconSystemObjectId', width:120, hidden: true},
-      {name:'trench',            index:'trench',            width:55, resizable: false},
-      {name:'locus',             index:'locus',             width:55},
-      {name:'bucket',            index:'bucket',            width:55},
-      {name:'inventoryNumber',   index:'inventoryNumber',   width:90, hidden: true},
-      {name:'date',              index:'date',              width:80, formatter:'date', hidden: true},
-      {name:'year',              index:'year',              width:55},
-      {name:'month',             index:'month',             width:55, hidden: true},
-      {name:'dateRemarks',       index:'dateRemarks',       width:100, hidden: true},
-      {name:'scaRegister',       index:'scaRegister',       width:90, hidden: true},
-      {name:'object',            index:'object',            width:128},
-      {name:'objectNo',          index:'objectNo',          width:80},
-      {name:'category',          index:'category',          width:90, hidden: true},
-      {name:'categoryNo',        index:'categoryNo',        width:80, hidden: true},
-      {name:'weight',            index:'weight',            width:70, hidden: true},
-      {name:'quantity',          index:'quantity',          width:70, hidden: true},
-      {name:'dimensions',        index:'dimensions',        width:100, hidden: true},
-      {name:'preservation',      index:'preservation',      width:100, hidden: true},
-      {name:'description',       index:'description',       width:200, hidden: true},
-      {name:'material',          index:'material',          width:100, hidden: true},
-      {name:'materialRemarks',   index:'materialRemarks',   width:120, hidden: true},
-      {name:'datingAbsolute',    index:'datingAbsolute',    width:100, hidden: true},
-      {name:'typologyReference', index:'typologyReference', width:120, hidden: true},
-      {name:'publications',      index:'publications',      width:120, hidden: true},
-      {name:'remarks',           index:'remarks',           width:120, hidden: true},
-      {name:'created',           index:'created',           width:120, hidden: true},
-      {name:'modified',          index:'modified',          width:120, hidden: true},
-      {name:'actions',           index:'actions',           width:60, sortable: false, search: false}
-    ],
+    colModel: colModel,
     pager: '#pager',
-    rowNum:100,
+    rowNum: gridState.rows || 100,
     height:'auto',
     rowList:[10,20,50,100],
-    sortname: 'trench',
-    sortorder: 'asc',
+    sortname: gridState.sidx || 'trench',
+    sortorder: gridState.sord || 'asc',
+    postData: initialPostData,
+    search: hasFilters,
+    page: gridState.page || 1,
     viewrecords: true,
     gridview: true,
-    caption: null});
+    caption: null,
+    beforeRequest: function() {
+      // Add visible columns to every request
+      var colModel = $('#list').jqGrid('getGridParam', 'colModel');
+      var visibleCols = [];
+      for (var i = 0; i < colModel.length; i++) {
+        if (!colModel[i].hidden && colModel[i].name !== 'actions' && colModel[i].name !== 'thumbnail') {
+          visibleCols.push(colModel[i].name);
+        }
+      }
+      var postData = $('#list').jqGrid('getGridParam', 'postData');
+      postData.visible = visibleCols.join(';');
+      $('#list').jqGrid('setGridParam', {postData: postData});
+    }
+  });
 
     $('#list').jqGrid('filterToolbar', {});
+    
+    // Restore filter values in input boxes
+    if (gridState.search === 'true' && gridState.filters) {
+      for (var key in gridState.filters) {
+        if (gridState.filters.hasOwnProperty(key)) {
+          $('#gs_' + key).val(gridState.filters[key]);
+        }
+      }
+    }
     
     $('#list').jqGrid('gridResize', {});
 
     $('#columnsHideShow').click(function(){
-      $('#list').jqGrid('columnChooser', {shrinkToFit: false, autowidth: false});
+      $('#list').jqGrid('columnChooser', {
+        shrinkToFit: false, 
+        autowidth: false,
+        done: function(perm) {
+          if (perm) {
+            // Reload grid to save new column visibility
+            $('#list').trigger('reloadGrid');
+          }
+        }
+      });
       return false;
     });
 
@@ -134,6 +215,12 @@ $(function(){
       
       // Trigger download
       window.location.href = '{{ path('PapyrillioBerenike_FindExportCsv') }}?' + params.join('&');
+      return false;
+    });
+
+    $('#resetView').click(function(){
+      // Clear session and reload page
+      window.location.href = '{{ path('PapyrillioBerenike_FindResetView') }}';
       return false;
     });
 
