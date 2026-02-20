@@ -402,7 +402,7 @@ UPDATE find SET inventory_number = 22001 WHERE id = 15005;
 UPDATE find SET inventory_number = 29010 WHERE id = 553;
 UPDATE find SET inventory_number = 29009 WHERE id = 417;
 
--- publications
+-- publications (212 records)
 
 UPDATE find SET publications = "O.Berenike 1 1" WHERE id = 9;
 UPDATE find SET publications = "O.Berenike 1 1" WHERE id = 14519;
@@ -613,6 +613,6 @@ UPDATE find SET publications = "see O.Berenike 1, p. 72f." WHERE id = 124;
 UPDATE find SET publications = "see O.Berenike 1, p. 72f." WHERE id = 125;
 UPDATE find SET publications = "see O.Berenike 1, p. 72f." WHERE id = 98;
 UPDATE find SET publications = "O.Berenike 1 47" WHERE id = 93;
-UPDATE find SET publications = "Lamp.Berenike 2 260" WHERE id = 15005;
+UPDATE find SET publications = "O.Berenike 2 260" WHERE id = 15005;
 UPDATE find SET publications = "P.Berenike 2 130" WHERE id = 553;
 UPDATE find SET publications = "P.Berenike 2 131" WHERE id = 417;
