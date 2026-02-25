@@ -108,6 +108,7 @@ class FindUpdateCommand extends Command
             ->addOption('set-empty-to-null', null, InputOption::VALUE_NONE, 'Set empty fields in the CSV/XML to null in the database')
             ->addOption('create-new', null, InputOption::VALUE_NONE, 'Create new find records if ID not found in database (site, season, trench, locus criteria must be provided to find bucket)')
             ->addOption('assign-bucket', null, InputOption::VALUE_NONE, 'Assign/update bucket for existing find records based on site, season, trench, locus criteria')
+            ->addOption('create-as-new', null, InputOption::VALUE_NONE, 'Ignore source IDs and create brand new find entries with auto-generated IDs (source ID stored in rebuild_changes field)')
         ;
     }
 
@@ -121,6 +122,7 @@ class FindUpdateCommand extends Command
         $setEmptyToNull = $input->getOption('set-empty-to-null');
         $createNew = $input->getOption('create-new');
         $assignBucket = $input->getOption('assign-bucket');
+        $createAsNew = $input->getOption('create-as-new');
 
         // Construct full file path
         $filePath = $this->getDataDirectory() . '/' . $filename;
@@ -166,15 +168,22 @@ class FindUpdateCommand extends Command
         if ($assignBucket) {
             $io->info('ASSIGN BUCKET MODE - Buckets will be assigned/updated for existing find records based on site, season, trench, locus criteria');
         }
+        
+        if ($createAsNew) {
+            $io->info('CREATE AS NEW MODE - Source IDs will be ignored and brand new find entries will be created with auto-generated IDs (source ID stored in rebuild_changes)');
+        }
 
         // Determine file type and process accordingly
         $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
         
+        // Initialize skipped records tracking
+        $skippedRecords = [];
+        
         try {
             if ($extension === 'csv') {
-                $stats = $this->processCsvFile($filePath, $io, $dryRun, $batchSize, $setEmptyToNull, $createNew, $assignBucket, $authorityIds);
+                $stats = $this->processCsvFile($filePath, $io, $dryRun, $batchSize, $setEmptyToNull, $createNew, $assignBucket, $createAsNew, $authorityIds, $filename, $skippedRecords);
             } elseif ($extension === 'xml') {
-                $stats = $this->processXmlFile($filePath, $io, $dryRun, $batchSize, $setEmptyToNull, $createNew, $assignBucket, $authorityIds);
+                $stats = $this->processXmlFile($filePath, $io, $dryRun, $batchSize, $setEmptyToNull, $createNew, $assignBucket, $createAsNew, $authorityIds, $filename, $skippedRecords);
             } else {
                 $io->error(sprintf('Unsupported file format: %s. Only CSV and XML files are supported.', $extension));
                 return Command::FAILURE;
@@ -194,6 +203,12 @@ class FindUpdateCommand extends Command
                     ['Errors', $stats['errors']],
                 ]
             );
+            
+            // Write skipped records log if any were skipped
+            if (!empty($skippedRecords)) {
+                $logFile = $this->writeSkippedRecordsLog($skippedRecords, $filename);
+                $io->info(sprintf('Skipped records log written to: %s', $logFile));
+            }
 
             return Command::SUCCESS;
         } catch (\Exception $e) {
@@ -203,7 +218,7 @@ class FindUpdateCommand extends Command
         }
     }
 
-    private function processCsvFile(string $filePath, SymfonyStyle $io, bool $dryRun, int $batchSize, bool $setEmptyToNull, bool $createNew, bool $assignBucket, ?array $authorityIds): array
+    private function processCsvFile(string $filePath, SymfonyStyle $io, bool $dryRun, int $batchSize, bool $setEmptyToNull, bool $createNew, bool $assignBucket, bool $createAsNew, ?array $authorityIds, string $filename, array &$skippedRecords): array
     {
         $stats = ['processed' => 0, 'updated' => 0, 'created' => 0, 'not_found' => 0, 'skipped' => 0, 'not_in_authority' => 0, 'errors' => 0];
         
@@ -243,6 +258,12 @@ class FindUpdateCommand extends Command
             if ($data === false || !isset($data['id']) || trim($data['id']) === '') {
                 $io->writeln(sprintf('<comment>Skipping row %d: Invalid data or missing ID</comment>', $stats['processed']));
                 $stats['skipped']++;
+                $skippedRecords[] = [
+                    'id' => 'N/A',
+                    'reason' => 'Invalid data or missing ID',
+                    'file' => $filename,
+                    'row' => $stats['processed']
+                ];
                 continue;
             }
 
@@ -252,6 +273,12 @@ class FindUpdateCommand extends Command
             if ($authorityIds !== null && !isset($authorityIds[$findId])) {
                 $io->writeln(sprintf('<comment>Skipping find ID %d: Not in authority list</comment>', $findId), OutputInterface::VERBOSITY_VERBOSE);
                 $stats['not_in_authority']++;
+                $skippedRecords[] = [
+                    'id' => $findId,
+                    'reason' => 'Not in authority list',
+                    'file' => $filename,
+                    'row' => $stats['processed']
+                ];
                 continue;
             }
             
@@ -259,6 +286,12 @@ class FindUpdateCommand extends Command
             if (isset($data['tm']) && trim($data['tm']) !== '' && (!ctype_digit(trim($data['tm'])) || (int) $data['tm'] <= 0)) {
                 $io->writeln(sprintf('<comment>Skipping find ID %d: tm value "%s" is not a valid positive integer</comment>', $findId, $data['tm']));
                 $stats['skipped']++;
+                $skippedRecords[] = [
+                    'id' => $findId,
+                    'reason' => sprintf('Invalid tm value: "%s"', $data['tm']),
+                    'file' => $filename,
+                    'row' => $stats['processed']
+                ];
                 continue;
             }
 
@@ -270,7 +303,7 @@ class FindUpdateCommand extends Command
                     continue;
                 }
                 
-                $result = $this->updateOrCreateFind($findId, $data, $dryRun, $setEmptyToNull, $createNew, $assignBucket, $io);
+                $result = $this->updateOrCreateFind($findId, $data, $dryRun, $setEmptyToNull, $createNew, $assignBucket, $createAsNew, $filename, $skippedRecords, $stats['processed'], $io);
                 
                 if ($result === 'updated') {
                     $stats['updated']++;
@@ -309,10 +342,18 @@ class FindUpdateCommand extends Command
                 } elseif ($result === 'not_found') {
                     $io->writeln(sprintf('<comment>Find with ID %d not found in database</comment>', $findId));
                     $stats['not_found']++;
+                    $skippedRecords[] = [
+                        'id' => $findId,
+                        'reason' => 'Not found in database',
+                        'file' => $filename,
+                        'row' => $stats['processed']
+                    ];
                 } elseif ($result === 'skipped_no_bucket') {
                     $stats['skipped']++;
+                    // Reason already logged in updateOrCreateFind
                 } elseif ($result === 'skipped_no_year') {
                     $stats['skipped']++;
+                    // Reason already logged in updateOrCreateFind
                 }
             } catch (\Exception $e) {
                 $io->writeln(sprintf('<error>Error updating find ID %d: %s</error>', $findId, $e->getMessage()));
@@ -339,7 +380,7 @@ class FindUpdateCommand extends Command
         return $stats;
     }
 
-    private function processXmlFile(string $filePath, SymfonyStyle $io, bool $dryRun, int $batchSize, bool $setEmptyToNull, bool $createNew, bool $assignBucket, ?array $authorityIds): array
+    private function processXmlFile(string $filePath, SymfonyStyle $io, bool $dryRun, int $batchSize, bool $setEmptyToNull, bool $createNew, bool $assignBucket, bool $createAsNew, ?array $authorityIds, string $filename, array &$skippedRecords): array
     {
         $stats = ['processed' => 0, 'updated' => 0, 'created' => 0, 'not_found' => 0, 'skipped' => 0, 'not_in_authority' => 0, 'errors' => 0];
         
@@ -409,6 +450,12 @@ class FindUpdateCommand extends Command
             if (!isset($data['id']) || trim($data['id']) === '') {
                 $io->writeln(sprintf('<comment>Skipping row %d: Missing ID</comment>', $stats['processed']));
                 $stats['skipped']++;
+                $skippedRecords[] = [
+                    'id' => 'N/A',
+                    'reason' => 'Missing ID',
+                    'file' => $filename,
+                    'row' => $stats['processed']
+                ];
                 continue;
             }
 
@@ -418,6 +465,12 @@ class FindUpdateCommand extends Command
             if ($authorityIds !== null && !isset($authorityIds[$findId])) {
                 $io->writeln(sprintf('<comment>Skipping find ID %d: Not in authority list</comment>', $findId), OutputInterface::VERBOSITY_VERBOSE);
                 $stats['not_in_authority']++;
+                $skippedRecords[] = [
+                    'id' => $findId,
+                    'reason' => 'Not in authority list',
+                    'file' => $filename,
+                    'row' => $stats['processed']
+                ];
                 continue;
             }
             
@@ -429,7 +482,7 @@ class FindUpdateCommand extends Command
                     continue;
                 }
 
-                $result = $this->updateOrCreateFind($findId, $data, $dryRun, $setEmptyToNull, $createNew, $assignBucket, $io);
+                $result = $this->updateOrCreateFind($findId, $data, $dryRun, $setEmptyToNull, $createNew, $assignBucket, $createAsNew, $filename, $skippedRecords, $stats['processed'], $io);
 
                 if ($result === 'updated') {
                     $stats['updated']++;
@@ -465,11 +518,19 @@ class FindUpdateCommand extends Command
                     }
                 } elseif ($result === 'not_found') {
                     $io->writeln(sprintf('<comment>Find with ID %d not found in database</comment>', $findId));
-                    $stats['not_found']++;
+                    $stats['not_found']++; 
+                    $skippedRecords[] = [
+                        'id' => $findId,
+                        'reason' => 'Not found in database',
+                        'file' => $filename,
+                        'row' => $stats['processed']
+                    ];
                 } elseif ($result === 'skipped_no_bucket') {
                     $stats['skipped']++;
+                    // Reason already logged in updateOrCreateFind
                 } elseif ($result === 'skipped_no_year') {
                     $stats['skipped']++;
+                    // Reason already logged in updateOrCreateFind
                 }
             } catch (\Exception $e) {
                 $io->writeln(sprintf('<error>Error updating find ID %d: %s</error>', $findId, $e->getMessage()));
@@ -495,36 +556,34 @@ class FindUpdateCommand extends Command
         return $stats;
     }
 
-    private function updateOrCreateFind(int $findId, array $data, bool $dryRun, bool $setEmptyToNull, bool $createNew, bool $assignBucket, ?SymfonyStyle $io = null): string
+    private function updateOrCreateFind(int $findId, array $data, bool $dryRun, bool $setEmptyToNull, bool $createNew, bool $assignBucket, bool $createAsNew, string $filename, array &$skippedRecords, int $rowNumber, ?SymfonyStyle $io = null): string
     {
-        $find = $this->findRepository->find($findId);
-
-        if (!$find) {
-            // Find not found in database
-            if (!$createNew) {
-                return 'not_found';
-            }
-            
+        // When create-as-new mode is enabled, ignore the source ID and create a brand new find
+        if ($createAsNew) {
             // Find bucket by criteria (bucket_number, locus_number, excavation_trench, excavation_site, excavation_season)
             $bucket = $this->findBucketByCriteria($data, $io);
             
             if (!$bucket) {
                 if ($io) {
-                    $io->writeln(sprintf('<comment>Cannot create find ID %d: No matching bucket found</comment>', $findId), OutputInterface::VERBOSITY_VERBOSE);
+                    $io->writeln(sprintf('<comment>Cannot create new find from source ID %d: No matching bucket found</comment>', $findId), OutputInterface::VERBOSITY_VERBOSE);
                 }
+                $skippedRecords[] = [
+                    'id' => $findId,
+                    'reason' => 'No matching bucket found',
+                    'file' => $filename,
+                    'row' => $rowNumber
+                ];
                 return 'skipped_no_bucket';
             }
             
-            // Create new Find entity
+            // Create new Find entity without setting the ID (let auto-increment handle it)
             $find = new Find();
-            $find->setId($findId);
             $find->setBucket($bucket);
             
-            // Force Doctrine to recognize the manually set ID
-            // This prevents auto-increment from overriding our ID
-            $metadata = $this->entityManager->getClassMetadata(Find::class);
-            $metadata->setIdGeneratorType(\Doctrine\ORM\Mapping\ClassMetadata::GENERATOR_TYPE_NONE);
-
+            // Store the source ID and filename in rebuild_changes field
+            $sourceIdRemark = sprintf('Created from source ID: %d (file: %s)', $findId, $filename);
+            $find->setRebuildChanges($sourceIdRemark);
+            
             // Set required fields with default values if not present in data
             // Year is required (NOT NULL in database), so we need to ensure it's set
             if (!isset($data['year']) && !isset($data['date'])) {
@@ -537,28 +596,80 @@ class FindUpdateCommand extends Command
             }
 
             if ($io) {
-                $io->writeln(sprintf('<info>Creating new find ID %d with bucket ID %d</info>', $findId, $bucket->getId()), OutputInterface::VERBOSITY_VERBOSE);
+                $io->writeln(sprintf('<info>Creating new find from source ID %d with bucket ID %d</info>', $findId, $bucket->getId()), OutputInterface::VERBOSITY_VERBOSE);
             }
 
             $isNew = true;
         } else {
-            $isNew = false;
-            
-            // Update bucket for existing records only if assignBucket flag is set
-            if ($assignBucket) {
+            $find = $this->findRepository->find($findId);
+
+            if (!$find) {
+                // Find not found in database
+                if (!$createNew) {
+                    return 'not_found';
+                }
+                
+                // Find bucket by criteria (bucket_number, locus_number, excavation_trench, excavation_site, excavation_season)
                 $bucket = $this->findBucketByCriteria($data, $io);
                 
-                if ($bucket) {
-                    // Only update if the bucket is different
-                    $currentBucket = $find->getBucket();
-                    if ($currentBucket === null || $currentBucket->getId() !== $bucket->getId()) {
-                        $find->setBucket($bucket);
-                        if ($io) {
-                            $io->writeln(sprintf('<info>Updating bucket to ID %d for find ID %d</info>', $bucket->getId(), $findId), OutputInterface::VERBOSITY_VERBOSE);
+                if (!$bucket) {
+                    if ($io) {
+                        $io->writeln(sprintf('<comment>Cannot create find ID %d: No matching bucket found</comment>', $findId), OutputInterface::VERBOSITY_VERBOSE);
+                    }
+                    $skippedRecords[] = [
+                        'id' => $findId,
+                        'reason' => 'No matching bucket found (create-new mode)',
+                        'file' => $filename,
+                        'row' => $rowNumber
+                    ];
+                    return 'skipped_no_bucket';
+                }
+                
+                // Create new Find entity
+                $find = new Find();
+                $find->setId($findId);
+                $find->setBucket($bucket);
+                
+                // Force Doctrine to recognize the manually set ID
+                // This prevents auto-increment from overriding our ID
+                $metadata = $this->entityManager->getClassMetadata(Find::class);
+                $metadata->setIdGeneratorType(\Doctrine\ORM\Mapping\ClassMetadata::GENERATOR_TYPE_NONE);
+
+                // Set required fields with default values if not present in data
+                // Year is required (NOT NULL in database), so we need to ensure it's set
+                if (!isset($data['year']) && !isset($data['date'])) {
+                    // Try to get year from bucket's excavation season
+                    $yearFromExcavation = $this->getYearFromBucket($bucket);
+                    if ($yearFromExcavation !== null) {
+                        $find->setYear($yearFromExcavation);
+                    }
+                    // Note: If no year can be set, validation at the end will catch it and skip the record
+                }
+
+                if ($io) {
+                    $io->writeln(sprintf('<info>Creating new find ID %d with bucket ID %d</info>', $findId, $bucket->getId()), OutputInterface::VERBOSITY_VERBOSE);
+                }
+
+                $isNew = true;
+            } else {
+                $isNew = false;
+                
+                // Update bucket for existing records only if assignBucket flag is set
+                if ($assignBucket) {
+                    $bucket = $this->findBucketByCriteria($data, $io);
+                    
+                    if ($bucket) {
+                        // Only update if the bucket is different
+                        $currentBucket = $find->getBucket();
+                        if ($currentBucket === null || $currentBucket->getId() !== $bucket->getId()) {
+                            $find->setBucket($bucket);
+                            if ($io) {
+                                $io->writeln(sprintf('<info>Updating bucket to ID %d for find ID %d</info>', $bucket->getId(), $findId), OutputInterface::VERBOSITY_VERBOSE);
+                            }
                         }
                     }
+                    // If no matching bucket found, silently skip bucket update (record can still be updated)
                 }
-                // If no matching bucket found, silently skip bucket update (record can still be updated)
             }
         }
 
@@ -672,6 +783,12 @@ class FindUpdateCommand extends Command
                 if ($io) {
                     $io->writeln(sprintf('<comment>Cannot create find ID %d: No year available (no date provided and no excavation season found)</comment>', $findId), OutputInterface::VERBOSITY_VERBOSE);
                 }
+                $skippedRecords[] = [
+                    'id' => $findId,
+                    'reason' => 'No year available (no date provided and no excavation season found)',
+                    'file' => $filename,
+                    'row' => $rowNumber
+                ];
                 return 'skipped_no_year';
             }
         }
@@ -1306,5 +1423,47 @@ Modified
 
         // Append new value with separator
         return $existingValue . '; ' . $newValue;
+    }
+    
+    /**
+     * Write skipped records log to file
+     * 
+     * @param array $skippedRecords Array of skipped record information
+     * @param string $sourceFilename The source file being processed
+     * @return string Path to the log file
+     */
+    private function writeSkippedRecordsLog(array $skippedRecords, string $sourceFilename): string
+    {
+        $timestamp = date('Y-m-d_H-i-s');
+        $logFilename = sprintf('skipped_records_%s_%s.csv', pathinfo($sourceFilename, PATHINFO_FILENAME), $timestamp);
+        $logPath = $this->getDataDirectory() . '/logs/' . $logFilename;
+        
+        // Create logs directory if it doesn't exist
+        $logsDir = dirname($logPath);
+        if (!is_dir($logsDir)) {
+            mkdir($logsDir, 0777, true);
+        }
+        
+        $handle = fopen($logPath, 'w');
+        if ($handle === false) {
+            throw new \RuntimeException(sprintf('Unable to create skipped records log file: %s', $logPath));
+        }
+        
+        // Write CSV header
+        fputcsv($handle, ['Source ID', 'Row Number', 'Reason', 'Source File']);
+        
+        // Write each skipped record
+        foreach ($skippedRecords as $record) {
+            fputcsv($handle, [
+                $record['id'],
+                $record['row'],
+                $record['reason'],
+                $record['file']
+            ]);
+        }
+        
+        fclose($handle);
+        
+        return $logPath;
     }
 }
