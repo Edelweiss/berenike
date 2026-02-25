@@ -33,3 +33,53 @@ AND f.bucket = b.bucket
 
 WHERE f.site = 'BE' AND f.season is not null AND f.trench is not null AND f.locus is not null AND f.bucket is not null AND b.bucket_id is null
 ORDER BY f.site, f.season, f.trench, f.locus, f.bucket;
+
+
+-- compoare marina_3 and iwona_3
+-- fields that are not doubled are always the same 
+SELECT
+m.id as id,
+m.loci_site_id as site,
+m.loci_season_id as m_season, i.loci_season_id as i_season,
+m.loci_trench_id as m_trench, i.loci_trench_id as i_trench,
+m.loci_locusno as m_locus, i.loci_locusno as i_locus,
+m.pb_pb_no as m_bucket, i.pb_pb_no as i_bucket,
+m.object_id as m_object_id, i.object_id as i_object_id,
+m.object_no as m_object_no, i.object_no as i_object_no,
+m.material as m_material, i.material as i_material,
+m.modified as m_modified, i.modified as i_modified,
+m.date as m_date, i.date as i_date,
+m.category as m_category, i.category as i_category,
+m.category_no as m_category_no, i.category_no as i_category_no
+
+FROM marina_3 m join iwona_3 i ON m.id = i.id
+
+WHERE
+  m.loci_season_id != i.loci_season_id
+  or m.loci_trench_id != i.loci_trench_id
+  or m.loci_locusno != i.loci_locusno
+  or m.pb_pb_no != i.pb_pb_no
+  or m.object_no != i.object_no
+  or m.object_id != i.object_id
+  or m.date != i.date
+  or m.created != i.created
+  or m.modified != i.modified
+  or m.description != i.description
+  or m.material != i.material
+  or m.material_remarks != i.material_remarks
+  or m.date != i.date
+  or m.category != i.category
+  or m.category_no != i.category_no
+  or m.remarks != i.remarks
+  or m.trench2 != i.trench2
+  or m.typology_reference != i.typology_reference
+  or m.quantity != i.quantity
+  or m.dimensions != i.dimensions
+  or m.weight != i.weight 
+  or m.sca_register != i.sca_register
+  or m.photo_author != i.photo_author
+  or m.photo_author_2 != i.photo_author_2
+  or m.drawing_author != i.drawing_author
+  or m.drawing_no != i.drawing_no
+  or m.specialist_id != i.specialist_id
+  or m.specialist_id_copy != i.specialist_id_copy
