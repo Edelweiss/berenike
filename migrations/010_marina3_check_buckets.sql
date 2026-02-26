@@ -119,3 +119,19 @@ WHERE f.site = 'BE' AND f.season is not null AND f.trench is not null AND f.locu
 ORDER BY f.site, f.season, f.trench, f.locus, f.bucket;
 
 -- 23 missing buckets, all with bs and as and xx.s and stuff
+
+-- check fork
+
+SELECT * FROM
+
+(SELECT m.id, m.loci_site_id, m.loci_season_id, m.loci_trench_id, m.loci_locusno, m.pb_pb_no FROM marina_3 m JOIN fork ON fork.id = m.id AND (fork.source = 'marina_3' OR fork.source IS NULL) AND fork.bucket_not_found IS TRUE) m
+
+LEFT JOIN (SELECT e.id excavation_id, e.site, e.season, e.trench, l.number as locus, b.number as bucket FROM bucket b JOIN locus l ON b.locus_id = l.id JOIN excavation e ON l.excavation_id = e.id) l
+ON  m.loci_site_id = l.site
+AND l.season LIKE concat('%', IF(m.loci_season_id > 50, '19', '20'), m.loci_season_id, '%')
+AND m.loci_trench_id = l.trench
+AND m.loci_locusno = l.locus
+AND m.pb_pb_no+0 = l.bucket+0
+
+WHERE m.loci_site_id = 'BE' AND m.loci_season_id AND m.loci_trench_id AND m.loci_locusno AND m.pb_pb_no AND l.excavation_id is not NULL
+ORDER BY m.loci_site_id, m.loci_season_id, m.loci_trench_id, m.loci_locusno, m.pb_pb_no;
