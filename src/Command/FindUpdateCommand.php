@@ -561,7 +561,8 @@ class FindUpdateCommand extends Command
         // When create-as-new mode is enabled, ignore the source ID and create a brand new find
         if ($createAsNew) {
             // Find bucket by criteria (bucket_number, locus_number, excavation_trench, excavation_site, excavation_season)
-            $bucket = $this->findBucketByCriteria($data, $io);
+            $bucketNotes = [];
+            $bucket = $this->findBucketByCriteria($data, $io, $bucketNotes);
             
             if (!$bucket) {
                 if ($io) {
@@ -582,13 +583,17 @@ class FindUpdateCommand extends Command
             
             // Store the source ID and filename in rebuild_changes field
             $sourceIdRemark = sprintf('Created from source ID: %d (file: %s)', $findId, $filename);
+            // Append bucket/locus notes if any
+            if (!empty($bucketNotes)) {
+                $sourceIdRemark .= '; ' . implode('; ', $bucketNotes);
+            }
             $find->setRebuildChanges($sourceIdRemark);
             
             // Set required fields with default values if not present in data
             // Year is required (NOT NULL in database), so we need to ensure it's set
             if (!isset($data['year']) && !isset($data['date'])) {
-                // Try to get year from bucket's excavation season
-                $yearFromExcavation = $this->getYearFromBucket($bucket);
+                // Try to get year from data fields (Season_Id) or bucket's excavation season
+                $yearFromExcavation = $this->extractYearFromData($data, $bucket, $io);
                 if ($yearFromExcavation !== null) {
                     $find->setYear($yearFromExcavation);
                 }
@@ -610,7 +615,8 @@ class FindUpdateCommand extends Command
                 }
                 
                 // Find bucket by criteria (bucket_number, locus_number, excavation_trench, excavation_site, excavation_season)
-                $bucket = $this->findBucketByCriteria($data, $io);
+                $bucketNotes = [];
+                $bucket = $this->findBucketByCriteria($data, $io, $bucketNotes);
                 
                 if (!$bucket) {
                     if ($io) {
@@ -630,6 +636,11 @@ class FindUpdateCommand extends Command
                 $find->setId($findId);
                 $find->setBucket($bucket);
                 
+                // Store bucket/locus notes in rebuild_changes field if any
+                if (!empty($bucketNotes)) {
+                    $find->setRebuildChanges(implode('; ', $bucketNotes));
+                }
+                
                 // Force Doctrine to recognize the manually set ID
                 // This prevents auto-increment from overriding our ID
                 $metadata = $this->entityManager->getClassMetadata(Find::class);
@@ -638,8 +649,8 @@ class FindUpdateCommand extends Command
                 // Set required fields with default values if not present in data
                 // Year is required (NOT NULL in database), so we need to ensure it's set
                 if (!isset($data['year']) && !isset($data['date'])) {
-                    // Try to get year from bucket's excavation season
-                    $yearFromExcavation = $this->getYearFromBucket($bucket);
+                    // Try to get year from data fields (Season_Id) or bucket's excavation season
+                    $yearFromExcavation = $this->extractYearFromData($data, $bucket, $io);
                     if ($yearFromExcavation !== null) {
                         $find->setYear($yearFromExcavation);
                     }
@@ -656,7 +667,8 @@ class FindUpdateCommand extends Command
                 
                 // Update bucket for existing records only if assignBucket flag is set
                 if ($assignBucket) {
-                    $bucket = $this->findBucketByCriteria($data, $io);
+                    $bucketNotes = [];
+                    $bucket = $this->findBucketByCriteria($data, $io, $bucketNotes);
                     
                     if ($bucket) {
                         // Only update if the bucket is different
@@ -666,6 +678,13 @@ class FindUpdateCommand extends Command
                             if ($io) {
                                 $io->writeln(sprintf('<info>Updating bucket to ID %d for find ID %d</info>', $bucket->getId(), $findId), OutputInterface::VERBOSITY_VERBOSE);
                             }
+                        }
+                        
+                        // Append bucket/locus notes to rebuild_changes if any
+                        if (!empty($bucketNotes)) {
+                            $existingRebuildChanges = $find->getRebuildChanges();
+                            $newRebuildChanges = $this->appendValue($existingRebuildChanges, implode('; ', $bucketNotes));
+                            $find->setRebuildChanges($newRebuildChanges);
                         }
                     }
                     // If no matching bucket found, silently skip bucket update (record can still be updated)
@@ -771,21 +790,21 @@ class FindUpdateCommand extends Command
         
         // Final validation for new records: ensure year is set
         if ($isNew && $find->getYear() === null) {
-            // Try one more time to get year from bucket's excavation season
-            $yearFromExcavation = $this->getYearFromBucket($find->getBucket());
+            // Try one more time to get year from data fields or bucket's excavation season
+            $yearFromExcavation = $this->extractYearFromData($data, $find->getBucket(), $io);
             if ($yearFromExcavation !== null) {
                 $find->setYear($yearFromExcavation);
                 if ($io) {
-                    $io->writeln(sprintf('<comment>Find ID %d: Year set to %d from excavation season</comment>', $findId, $yearFromExcavation), OutputInterface::VERBOSITY_VERBOSE);
+                    $io->writeln(sprintf('<comment>Find ID %d: Year set to %d</comment>', $findId, $yearFromExcavation), OutputInterface::VERBOSITY_VERBOSE);
                 }
             } else {
                 // Cannot create record without year - skip it
                 if ($io) {
-                    $io->writeln(sprintf('<comment>Cannot create find ID %d: No year available (no date provided and no excavation season found)</comment>', $findId), OutputInterface::VERBOSITY_VERBOSE);
+                    $io->writeln(sprintf('<comment>Cannot create find ID %d: No year available (no date, season_id, or excavation season found)</comment>', $findId), OutputInterface::VERBOSITY_VERBOSE);
                 }
                 $skippedRecords[] = [
                     'id' => $findId,
-                    'reason' => 'No year available (no date provided and no excavation season found)',
+                    'reason' => 'No year available (no date, season_id, or excavation season found)',
                     'file' => $filename,
                     'row' => $rowNumber
                 ];
@@ -806,11 +825,50 @@ class FindUpdateCommand extends Command
     }
     
     /**
-     * Extract year from bucket's excavation season
-     * Follows the chain: Bucket -> Locus -> Excavation -> season
+     * Extract year from multiple sources: data fields, then bucket's excavation season
+     * Tries in order:
+     * 1. Loci::Season_Id field (excavation_season) - 2-digit year like "22" or "97"
+     * 2. lociSeasonId field (alternative normalized name)
+     * 3. seasonId field (alternative normalized name)
+     * 4. Bucket's excavation season (from database via Bucket -> Locus -> Excavation -> season)
+     * 
+     * @param array $data The data array that may contain season/year fields
+     * @param $bucket The bucket entity to extract year from if data fields not available
+     * @param SymfonyStyle|null $io For verbose output
      * @return int|null The extracted year or null if not found
      */
-    private function getYearFromBucket($bucket): ?int
+    private function extractYearFromData(array $data, $bucket, ?SymfonyStyle $io = null): ?int
+    {
+        // Try to get year from various season_id fields in the data
+        // Note: Loci::Season_Id gets mapped to 'excavation_season' in normalizeFieldName
+        $seasonIdFields = ['excavation_season', 'lociSeasonId', 'seasonId'];
+        
+        foreach ($seasonIdFields as $fieldName) {
+            if (isset($data[$fieldName]) && trim($data[$fieldName]) !== '') {
+                $seasonValue = trim($data[$fieldName]);
+                $fullYear = $this->abbreviatedYearToFull($seasonValue);
+                
+                if ($fullYear !== null) {
+                    if ($io) {
+                        $io->writeln(sprintf('<comment>Year %s extracted from field "%s" (value: "%s")</comment>', $fullYear, $fieldName, $seasonValue), OutputInterface::VERBOSITY_VERBOSE);
+                    }
+                    return (int) $fullYear;
+                }
+            }
+        }
+        
+        // Fall back to bucket's excavation season
+        return $this->getYearFromBucket($bucket, $io);
+    }
+    
+    /**
+     * Extract year from bucket's excavation season
+     * Follows the chain: Bucket -> Locus -> Excavation -> season
+     * @param $bucket The bucket entity
+     * @param SymfonyStyle|null $io For verbose output
+     * @return int|null The extracted year or null if not found
+     */
+    private function getYearFromBucket($bucket, ?SymfonyStyle $io = null): ?int
     {
         if (!$bucket) {
             return null;
@@ -836,10 +894,37 @@ class FindUpdateCommand extends Command
         
         if (!empty($matches[0])) {
             // Return the first year found
+            if ($io) {
+                $io->writeln(sprintf('<comment>Year %d extracted from bucket\'s excavation season</comment>', (int) $matches[0][0]), OutputInterface::VERBOSITY_VERBOSE);
+            }
             return (int) $matches[0][0];
         }
         
         return null;
+    }
+    
+    /**
+     * Parse a complex number pattern like "002+004" or "028-035"
+     * Returns the first number and the original value if it was complex
+     * 
+     * @param string $value The value to parse
+     * @return array Array with keys: 'value' (the first number), 'original' (original value if complex, null otherwise)
+     */
+    private function parseComplexNumber(string $value): array
+    {
+        // Check for patterns like "002+004" or "028-035"
+        if (preg_match('/^(\d+)\s*[+\-]\s*\d+/', $value, $matches)) {
+            return [
+                'value' => $matches[1],
+                'original' => $value
+            ];
+        }
+        
+        // Not a complex pattern, return as-is
+        return [
+            'value' => $value,
+            'original' => null
+        ];
     }
     
     /**
@@ -848,9 +933,10 @@ class FindUpdateCommand extends Command
      * 
      * @param array $data The data array containing bucket_number, locus_number, excavation_trench, excavation_site, excavation_season
      * @param SymfonyStyle|null $io For verbose output
+     * @param array &$notes Output parameter - array of notes about transformations applied
      * @return \App\Entity\Bucket|null The matching bucket or null if not found
      */
-    private function findBucketByCriteria(array $data, ?SymfonyStyle $io = null): ?\App\Entity\Bucket
+    private function findBucketByCriteria(array $data, ?SymfonyStyle $io = null, array &$notes = []): ?\App\Entity\Bucket
     {
         // Check required fields are present
         $requiredFields = ['bucket_number', 'locus_number', 'excavation_trench', 'excavation_site', 'excavation_season'];
@@ -876,22 +962,53 @@ class FindUpdateCommand extends Command
             $excavationTrench = '0';
         }
         
+        // Special handling for "BLOCK" bucket number - treat as 8888
+        if (strtoupper($bucketNumberRaw) === 'BLOCK') {
+            $bucketNumberProcessed = '8888';
+            $notes[] = 'bucket BLOCK';
+            if ($io) {
+                $io->writeln(sprintf('<comment>Bucket number "BLOCK" mapped to 8888</comment>'), OutputInterface::VERBOSITY_VERBOSE);
+            }
+        } else {
+            // Parse bucket number for complex patterns like "002+004" or "028-035"
+            $bucketParsed = $this->parseComplexNumber($bucketNumberRaw);
+            if ($bucketParsed['original'] !== null) {
+                // Complex pattern detected, add note
+                $notes[] = sprintf('bucket %s', $bucketParsed['original']);
+                if ($io) {
+                    $io->writeln(sprintf('<comment>Bucket number "%s" contains complex pattern, using first number</comment>', $bucketParsed['original']), OutputInterface::VERBOSITY_VERBOSE);
+                }
+            }
+            $bucketNumberProcessed = $bucketParsed['value'];
+        }
+        
+        // Parse locus number for complex patterns
+        $locusParsed = $this->parseComplexNumber($locusNumberStr);
+        if ($locusParsed['original'] !== null) {
+            // Complex pattern detected, add note
+            $notes[] = sprintf('locus %s', $locusParsed['original']);
+            if ($io) {
+                $io->writeln(sprintf('<comment>Locus number "%s" contains complex pattern, using first number</comment>', $locusParsed['original']), OutputInterface::VERBOSITY_VERBOSE);
+            }
+        }
+        $locusNumberProcessed = $locusParsed['value'];
+        
         // Normalize locus: extract numeric part and optional letter suffix
         // Examples: "013a" -> number: 13, addendum: "a"; "042" -> number: 42, addendum: null
         // Pattern: optional leading zeros, digits, optional letter
-        if (preg_match('/^0*(\d+)([a-zA-Z]?)$/', $locusNumberStr, $matches)) {
+        if (preg_match('/^0*(\d+)([a-zA-Z]?)$/', $locusNumberProcessed, $matches)) {
             $locusNumber = (int) $matches[1]; // Strips leading zeros automatically
             $locusAddendum = !empty($matches[2]) ? strtolower($matches[2]) : null;
         } else {
-            // Handle dirty data like '002+004', 'BLOCK', etc.
+            // Handle dirty data like 'BLOCK', etc. (complex patterns already handled above)
             if ($io) {
-                $io->writeln(sprintf('<comment>Cannot parse locus_number "%s" - expected format: digits with optional letter suffix</comment>', $locusNumberStr), OutputInterface::VERBOSITY_VERBOSE);
+                $io->writeln(sprintf('<comment>Cannot parse locus_number "%s" - expected format: digits with optional letter suffix</comment>', $locusNumberProcessed), OutputInterface::VERBOSITY_VERBOSE);
             }
             return null;
         }
         
         // Normalize bucket: strip leading zeros (e.g., "0042" -> "42")
-        $bucketNumber = ltrim($bucketNumberRaw, '0');
+        $bucketNumber = ltrim($bucketNumberProcessed, '0');
         if ($bucketNumber === '') {
             $bucketNumber = '0';
         }
