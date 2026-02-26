@@ -135,3 +135,4 @@ AND m.pb_pb_no+0 = l.bucket+0
 
 WHERE m.loci_site_id = 'BE' AND m.loci_season_id AND m.loci_trench_id AND m.loci_locusno AND m.pb_pb_no AND l.excavation_id is not NULL
 ORDER BY m.loci_site_id, m.loci_season_id, m.loci_trench_id, m.loci_locusno, m.pb_pb_no;
+
