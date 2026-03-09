@@ -151,6 +151,10 @@ class FindType extends AbstractType
                 'required' => false,
                 'label' => 'Publications',
             ])
+            ->add('literature', TextareaType::class, [
+                'required' => false,
+                'label' => 'Literature',
+            ])
             ->add('remarks', TextareaType::class, [
                 'required' => false,
                 'label' => 'Remarks',

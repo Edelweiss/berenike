@@ -85,7 +85,7 @@ class FindController extends BerenikeController
       // Store filter values
       foreach(['id', 'year', 'month', 'object', 'objectNo', 'category', 'categoryNo', 'weight', 'quantity', 
                'dimensions', 'preservation', 'description', 'material', 'materialRemarks', 
-               'datingAbsolute', 'typologyReference', 'publications', 'remarks', 'created', 'modified',
+               'datingAbsolute', 'typologyReference', 'publications', 'literature', 'remarks', 'created', 'modified',
                'inventoryNumber', 'tm', 'date', 'dateRemarks', 'scaRegister', 'rebuildChanges',
                'heidiconId', 'heidiconUuid', 'heidiconSystemObjectId', 'trench', 'locus', 'bucket'] as $field) {
         $value = $this->getParameter($field);
@@ -114,7 +114,7 @@ class FindController extends BerenikeController
       $orderBy = '';
       if(in_array($sort, ['id', 'year', 'month', 'object', 'objectNo', 'category', 'categoryNo', 'weight', 'quantity', 
                           'dimensions', 'preservation', 'description', 'material', 'materialRemarks', 
-                          'datingAbsolute', 'typologyReference', 'publications', 'remarks', 'created', 'modified',
+                          'datingAbsolute', 'typologyReference', 'publications', 'literature', 'remarks', 'created', 'modified',
                           'inventoryNumber', 'tm', 'date', 'dateRemarks', 'scaRegister', 'rebuildChanges',
                           'heidiconId', 'heidiconUuid', 'heidiconSystemObjectId'])){
         $orderBy = ' ORDER BY f.' . $sort . ' ' . $sortDirection;
@@ -136,7 +136,7 @@ class FindController extends BerenikeController
 
         foreach(['id', 'year', 'month', 'object', 'objectNo', 'category', 'categoryNo', 'weight', 'quantity', 
                  'dimensions', 'preservation', 'description', 'material', 'materialRemarks', 
-                 'datingAbsolute', 'typologyReference', 'publications', 'remarks', 'created', 'modified',
+                 'datingAbsolute', 'typologyReference', 'publications', 'literature', 'remarks', 'created', 'modified',
                  'inventoryNumber', 'tm', 'date', 'dateRemarks', 'scaRegister', 'rebuildChanges',
                  'heidiconId', 'heidiconUuid', 'heidiconSystemObjectId'] as $field){
           if(strlen($this->getParameter($field))){
@@ -331,7 +331,7 @@ class FindController extends BerenikeController
       $orderBy = '';
       if(in_array($sort, ['year', 'month', 'object', 'objectNo', 'category', 'categoryNo', 'weight', 'quantity', 
                           'dimensions', 'preservation', 'description', 'material', 'materialRemarks', 
-                          'datingAbsolute', 'typologyReference', 'publications', 'remarks', 'created', 'modified',
+                          'datingAbsolute', 'typologyReference', 'publications', 'literature', 'remarks', 'created', 'modified',
                           'inventoryNumber', 'tm', 'date', 'dateRemarks', 'scaRegister', 'rebuildChanges',
                           'heidiconId', 'heidiconUuid', 'heidiconSystemObjectId'])){
         $orderBy = ' ORDER BY f.' . $sort . ' ' . $sortDirection;
@@ -351,7 +351,7 @@ class FindController extends BerenikeController
 
         foreach(['id', 'year', 'month', 'object', 'objectNo', 'category', 'categoryNo', 'weight', 'quantity', 
                  'dimensions', 'preservation', 'description', 'material', 'materialRemarks', 
-                 'datingAbsolute', 'typologyReference', 'publications', 'remarks', 'created', 'modified',
+                 'datingAbsolute', 'typologyReference', 'publications', 'literature', 'remarks', 'created', 'modified',
                  'inventoryNumber', 'tm', 'date', 'dateRemarks', 'scaRegister', 'rebuildChanges',
                  'heidiconId', 'heidiconUuid', 'heidiconSystemObjectId'] as $field){
           $value = $request->query->get($field);
@@ -433,6 +433,7 @@ class FindController extends BerenikeController
         'datingAbsolute' => 'Dating Absolute',
         'typologyReference' => 'Typology Reference',
         'publications' => 'Publications',
+        'literature' => 'Literature',
         'remarks' => 'Remarks',
         'created' => 'Created',
         'modified' => 'Modified',
@@ -538,6 +539,9 @@ class FindController extends BerenikeController
               break;
             case 'publications':
               $value = $find->getPublications();
+              break;
+            case 'literature':
+              $value = $find->getLiterature();
               break;
             case 'remarks':
               $value = $find->getRemarks();

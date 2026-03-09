@@ -58,6 +58,7 @@ class Find {
     private $datingAbsolute;
     private $typologyReference;
     private $publications;
+    private $literature;
     private $remarks;
     private $rebuildChanges;
     private $created;
@@ -248,6 +249,13 @@ class Find {
     }
     public function getPublications() {
         return $this->publications;
+    }
+
+    public function setLiterature($literature) {
+        $this->literature = $literature;
+    }
+    public function getLiterature() {
+        return $this->literature;
     }
 
     public function setRemarks($remarks) {

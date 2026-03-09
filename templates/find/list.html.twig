@@ -49,7 +49,7 @@ $(function(){
                        'date', 'month', 'dateRemarks', 'scaRegister', 'category', 'categoryNo', 
                        'weight', 'quantity', 'dimensions', 'preservation', 'description', 'material', 
                        'materialRemarks', 'datingAbsolute', 'typologyReference', 'publications', 
-                       'remarks', 'created', 'modified'];
+                       'literature', 'remarks', 'created', 'modified'];
   
   // Determine visible columns from session
   var visibleColumns = [];
@@ -88,6 +88,7 @@ $(function(){
     {name:'datingAbsolute',    index:'datingAbsolute',    width:100, hidden: true},
     {name:'typologyReference', index:'typologyReference', width:120, hidden: true},
     {name:'publications',      index:'publications',      width:120, hidden: true},
+    {name:'literature',        index:'literature',        width:120, hidden: true},
     {name:'remarks',           index:'remarks',           width:120, hidden: true},
     {name:'created',           index:'created',           width:120, hidden: true},
     {name:'modified',          index:'modified',          width:120, hidden: true},
@@ -127,7 +128,7 @@ $(function(){
       'SCA Register', 'Object', 'Object No', 'Category', 'Category No',
       'Weight', 'Quantity', 'Dimensions', 'Preservation', 'Description',
       'Material', 'Material Remarks', 'Dating Absolute', 'Typology Reference',
-      'Publications', 'Remarks', 'Created', 'Modified', 'Actions'
+      'Publications', 'Literature', 'Remarks', 'Created', 'Modified', 'Actions'
     ],
     colModel: colModel,
     pager: '#pager',

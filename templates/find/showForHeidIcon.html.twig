@@ -228,15 +228,25 @@
   {% endif %}
 
   <!-- Publikation -->
-  {% if find.publications %}
+  {% if find.publications or find.literature %}
   <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em; margin-bottom: 0.5em;">
     <h3 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.5em -0.5em 0.5em -0.5em;">Publikation</h3>
+    {% if find.publications %}
     <p>
       <strong>Titel der Publikation:</strong> {{ find.publications }}
       <button onclick="copyToClipboard('{{ find.publications|e('js') }}', this)" class="ui-button ui-widget ui-state-default ui-corner-all" style="padding: 0.2em 0.4em; margin-left: 0.5em; font-size: 0.8em;">
         <span class="ui-button-text">Copy</span>
       </button>
     </p>
+    {% endif %}
+    {% if find.literature %}
+    <p>
+      <strong>Literatur:</strong> {{ find.literature }}
+      <button onclick="copyToClipboard('{{ find.literature|e('js') }}', this)" class="ui-button ui-widget ui-state-default ui-corner-all" style="padding: 0.2em 0.4em; margin-left: 0.5em; font-size: 0.8em;">
+        <span class="ui-button-text">Copy</span>
+      </button>
+    </p>
+    {% endif %}
   </div>
   {% endif %}
 

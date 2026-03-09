@@ -51,6 +51,7 @@
         <field name="datingAbsolute" type="text" length="512" nullable="true"/>
         <field name="typologyReference" type="text" length="512" nullable="true"/>
         <field name="publications" type="text" length="512" nullable="true"/>
+        <field name="literature" type="text" length="512" nullable="true"/>
         <field name="remarks" type="text" nullable="true"/>
         <field name="rebuildChanges" type="text" nullable="true"/>
         <field name="created" type="datetime"/>
