@@ -5,8 +5,8 @@
 {% endblock %}
 
 {% block top %}
-  <span title="site">{{ find.bucket.locus.excavation.site }}</span><span title="season">{{ find.bucket.locus.excavation.season }}</span>-<span title="trench">{{ find.bucket.locus.excavation.trench }}</span>/<span title="locus">{{ find.bucket.locus.number }}</span>/<span title="bucket">{{ find.bucket.number }}</span>
-  <span title="objectNo">{{ find.objectNo }}</span>
+  <span title="site">{{ find.bucket.locus.excavation.site }}</span><span title="season">{{ find.year|slice(-2) }}</span>-<span title="trench">{{ find.bucket.locus.excavation.trench }}</span>/<span title="locus">{% if find.bucket.locus.number == '999' %}Surface{% else %}{{ find.bucket.locus.number }}{% endif %}</span>/<span title="bucket">{% if find.bucket.number == '888' %}Block{% else %}{% if find.bucket.number == '999' %}Surface{% else %}{{ find.bucket.number }}{% endif %}{% endif %}</span>
+  <small title="objectNo">{{ find.objectNo }}</small>
 {% endblock %}
 
 {% block body %}

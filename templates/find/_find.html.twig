@@ -133,7 +133,7 @@
             <div style="display: flex; align-items: flex-start; gap: 1em;">
               {% if image.heidiconUuid and image.heidiconSystemObjectId %}
                 <div style="flex-shrink: 0;">
-                  <a href="https://heidicon.ub.uni-heidelberg.de#/detail/{{ image.heidiconSystemObjectId }}" target="heidicon">
+                  <a href="https://heidicon.ub.uni-heidelberg.de#/detail/{{ image.heidiconId }}" target="heidicon">
                     <img src="{% if app.user %}https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/{{ image.heidiconUuid }}/file/id/{{ image.heidiconSystemObjectId }}/file_version/name/small{% else %}{{ asset('images/placeholder.png') }}{% endif %}" alt="Image thumbnail" 
                          style="max-width: 150px; height: auto; border: 1px solid #ccc; border-radius: 4px;" />
                   </a>
