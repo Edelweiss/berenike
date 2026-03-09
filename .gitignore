@@ -22,6 +22,7 @@
 /.settings
 
 # Application specific
+/data/logs
 /data/*.xml
 /data/*.csv
 /data/mysql_dump
