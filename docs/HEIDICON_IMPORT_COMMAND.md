@@ -9,9 +9,13 @@ For each XML file it:
 
 1. Iterates **every** `<objekte>` element (a file may hold one to several hundred) and finds the matching `find` record (by the URL in `obj_beschreibung_link`).
 2. Stores `heidicon_id`, `heidicon_uuid` and `heidicon_system_object_id` on the find.
-3. Builds an in-memory map `eas-id → find` from each resolved `<objekte>`'s `_standard-eas/files/file/eas-id` list.
-4. Upserts one `image` row per `<ressourcen>` element (keyed on `heidicon_id`), linked to the find whose objekte owns the ressourcen's eas-id.
-5. Links the photographer (looked up by GND URI on `specialist.gnd`)
+3. On the first encounter of a find within a run, deletes **all** existing
+   `image` rows of that find (and their `image_specialist` rows via
+   cascade-remove). The heidICON XML is the authoritative source: anything
+   not described in the current export is removed.
+4. Builds an in-memory map `eas-id → find` from each resolved `<objekte>`'s `_standard-eas/files/file/eas-id` list.
+5. Inserts one `image` row per `<ressourcen>` element (keyed on `heidicon_id` = the asset's eas-id, scoped per find), linked to the find whose objekte owns the ressourcen's eas-id.
+6. Links the photographer (looked up by GND URI on `specialist.gnd`)
    via the `image_specialist` table with `speciality = 'photographer'`.
 
 The full data-mapping specification lives in
@@ -92,9 +96,14 @@ counted under `<ressourcen> orphaned`.
 
 ### Image upsert
 
-Each `<ressourcen>` element becomes one `image` row, keyed by `heidicon_id`
-(= `ressourcen/_id`). If a row already exists it is updated in place;
-otherwise it is inserted. Fields written:
+Each `<ressourcen>` element becomes one `image` row, keyed by
+`(heidicon_id, find_id)` where `heidicon_id` is the asset's **eas-id**
+(`<ressourcen>/<_standard-eas>/files/file/eas-id`, not `ressourcen/_id`).
+Because every matched find has its existing images wiped first (see the
+introduction above), each ressourcen always becomes a fresh insert. The
+same eas-id may appear on several finds at once (Sammelbilder — a single
+heidICON asset depicting several finds): each find gets its own image row.
+Fields written:
 
 | Column                    | Source                                                    |
 | ------------------------- | --------------------------------------------------------- |
@@ -103,7 +112,7 @@ otherwise it is inserted. Fields written:
 | `size`                    | `<width>,<height>` from `asset/files/file/technical_metadata` |
 | `file`                    | `asset/files/file/original_filename`                      |
 | `path`                    | empty string (column is `NOT NULL`)                       |
-| `heidicon_id`             | `ressourcen/_id`                                          |
+| `heidicon_id`             | `ressourcen/_standard-eas/files/file/eas-id` (asset eas-id) |
 | `heidicon_uuid`           | `ressourcen/_uuid`                                        |
 | `heidicon_system_object_id` | `ressourcen/_system_object_id`                          |
 
@@ -148,8 +157,9 @@ A summary table is printed at the end:
 | XML files with errors | Files dropped entirely (invalid XML or no `<objekte>` element).   |
 | `<objekte>` skipped   | `<objekte>` branches skipped because the find could not be resolved (no URL, malformed URL, or find not in DB). |
 | Finds updated         | `berenike.find` rows whose heidICON identifiers were set.         |
+| Images deleted        | Pre-existing `berenike.image` rows removed before re-inserting (one wipe per matched find per run; cascades to `image_specialist`). |
 | Images inserted       | New rows in `berenike.image`.                                     |
-| Images updated        | Existing `berenike.image` rows updated.                           |
+| Images updated        | Existing `berenike.image` rows updated (normally `0` after the wipe-and-replace; non-zero only if multiple objekte in the same run target the same `(eas-id, find)` pair). |
 | Specialist links set  | `image_specialist` rows written for photographers.                |
 | `<ressourcen>` orphaned | `<ressourcen>` whose `eas-id` was not owned by any `<objekte>` in the same file (skipped). |
 | Warnings              | Total warnings collected during the run.                          |
