@@ -131,10 +131,10 @@
         {% for image in find.images %}
           <li style="margin-bottom: 1em; padding: 0.5em; background-color: #f9f9f9; border-radius: 4px;">
             <div style="display: flex; align-items: flex-start; gap: 1em;">
-              {% if image.heidiconUuid and image.heidiconSystemObjectId %}
+              {% if image.heidiconUuid and image.heidiconId %}
                 <div style="flex-shrink: 0;">
-                  <a href="https://heidicon.ub.uni-heidelberg.de#/detail/{{ image.heidiconSystemObjectId }}" target="heidicon">
-                    <img src="{% if app.user %}https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/{{ image.heidiconUuid }}/file/id/{{ image.heidiconId }}/file_version/name/small{% else %}{{ asset('images/placeholder.png') }}{% endif %}" alt="Image thumbnail" 
+                  <a href="{{ path('PapyrillioBerenike_ImageShow', {'id': image.id}) }}" title="View image">
+                    <img src="{% if app.user %}https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/{{ image.heidiconUuid }}/file/id/{{ image.heidiconId }}/file_version/name/small{% else %}{{ asset('images/placeholder.png') }}{% endif %}" alt="Image thumbnail"
                          style="max-width: 150px; height: auto; border: 1px solid #ccc; border-radius: 4px;" />
                   </a>
                 </div>
@@ -152,8 +152,14 @@
                 {% if image.number %}
                   <p style="margin: 0.2em 0; font-size: 0.9em; color: #666;">Number: {{ image.number }}</p>
                 {% endif %}
+                {% if image.size %}
+                  <p style="margin: 0.2em 0; font-size: 0.9em; color: #666;">Size: {{ image.size }}</p>
+                {% endif %}
                 {% if image.file %}
                   <p style="margin: 0.2em 0; font-size: 0.9em; color: #666;">File: {{ image.file }}</p>
+                {% endif %}
+                {% if image.heidiconUuid and image.heidiconSystemObjectId %}
+                  <p style="margin: 0.2em 0; font-size: 0.9em; color: #666;"><a href="https://heidicon.ub.uni-heidelberg.de#/detail/{{ image.heidiconSystemObjectId }}" target="heidicon">heidICON</a></p>
                 {% endif %}
               </div>
             </div>

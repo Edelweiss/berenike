@@ -45,6 +45,12 @@ PapyrillioBerenike_FindEdit:
     controller: App\Controller\FindController::edit
     methods: [GET, POST]
 
+PapyrillioBerenike_ImageShow:
+    path:  /image/{id}
+    controller: App\Controller\ImageController::show
+    requirements:
+        id: '\d+'
+
 PapyrillioBerenike_BucketList:
     path:  /buckets
     controller: App\Controller\BucketController::list

@@ -1,0 +1,283 @@
+{% extends 'frontend.html.twig' %}
+
+{% block title %}
+  Image {{ image.id }}{% if image.find %} — Find {{ image.find.inventoryNumber }}{% endif %}
+{% endblock %}
+
+{% block top %}
+  Image <small>{{ image.type|default('') }}{% if image.number %} — {{ image.number }}{% endif %}</small>
+{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <style>
+    .image-viewer {
+      position: relative;
+      width: 100%;
+      height: 600px;
+      background: #1a1a1a;
+      border: 1px solid #444;
+      border-radius: 4px;
+      overflow: hidden;
+      touch-action: none;
+    }
+    .image-viewer .viewer-stage {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+    }
+    .image-viewer .viewer-stage:active { cursor: grabbing; }
+    .image-viewer img.viewer-img {
+      max-width: 100%;
+      max-height: 100%;
+      user-select: none;
+      -webkit-user-drag: none;
+      transform-origin: 0 0;
+      transition: transform 0.05s linear;
+      display: block;
+    }
+    .image-viewer .viewer-controls {
+      position: absolute;
+      top: 0.5em;
+      right: 0.5em;
+      display: flex;
+      gap: 0.25em;
+      background: rgba(0,0,0,0.5);
+      padding: 0.25em;
+      border-radius: 4px;
+      z-index: 10;
+    }
+    .image-viewer .viewer-controls button,
+    .image-viewer .viewer-controls a {
+      background: #fff;
+      color: #222;
+      border: 1px solid #888;
+      padding: 0.25em 0.6em;
+      font-size: 0.95em;
+      cursor: pointer;
+      border-radius: 3px;
+      text-decoration: none;
+      line-height: 1.2;
+    }
+    .image-viewer .viewer-controls button:hover,
+    .image-viewer .viewer-controls a:hover { background: #eee; }
+    .image-viewer .viewer-loading {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      color: #ccc;
+      font-size: 0.9em;
+    }
+    .image-meta dt { font-weight: bold; display: inline-block; width: 9em; }
+    .image-meta dd { display: inline; margin: 0; }
+    .image-meta dl > div { margin: 0.25em 0; }
+    .image-heidicon-link { margin-top: 1em; font-size: 0.9em; text-align: right; }
+  </style>
+{% endblock %}
+
+{% block body %}
+  <div class="ui-widget">
+    <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
+      <h3 style="margin: 0; font-size: 1.1em;">
+        Image {{ image.id }}
+        {% if image.find %}
+          — <a href="{{ path('PapyrillioBerenike_FindShow', {'id': image.find.id}) }}">Find {{ image.find.inventoryNumber|default(image.find.id) }}</a>
+        {% endif %}
+      </h3>
+    </div>
+
+    <div class="ui-widget-content ui-corner-bottom" style="padding: 0.5em;">
+      {% if image.heidiconUuid and image.heidiconId %}
+        {% set urlSmall    = 'https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/' ~ image.heidiconUuid ~ '/file/id/' ~ image.heidiconId ~ '/file_version/name/small' %}
+        {% set urlPreview  = 'https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/' ~ image.heidiconUuid ~ '/file/id/' ~ image.heidiconId ~ '/file_version/name/preview' %}
+        {% set urlHuge     = 'https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/' ~ image.heidiconUuid ~ '/file/id/' ~ image.heidiconId ~ '/file_version/name/huge' %}
+        {% set urlFull     = 'https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/' ~ image.heidiconUuid ~ '/file/id/' ~ image.heidiconId ~ '/file_version/name/full' %}
+        {% set urlOriginal = 'https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/' ~ image.heidiconUuid ~ '/file/id/' ~ image.heidiconId ~ '/file_version/name/original' %}
+
+        {% if app.user %}
+          <div class="image-viewer" id="imageViewer">
+            <div class="viewer-loading">Loading image…</div>
+            <div class="viewer-stage" id="viewerStage">
+              <img id="viewerImg" class="viewer-img"
+                   src="{{ urlPreview }}"
+                   data-src-huge="{{ urlHuge }}"
+                   alt="Image {{ image.id }}" />
+            </div>
+            <div class="viewer-controls">
+              <button type="button" id="zoomOut" title="Zoom out">−</button>
+              <button type="button" id="zoomReset" title="Reset view">⟲</button>
+              <button type="button" id="zoomIn" title="Zoom in">+</button>
+              <button type="button" id="zoomFit" title="Fit to view">⤢</button>
+              <a href="{{ urlOriginal }}" download title="Download original">⬇</a>
+            </div>
+          </div>
+
+          <div style="margin-top: 0.5em; font-size: 0.85em; color: #555;">
+            Download:
+            <a href="{{ urlPreview }}" target="_blank">1000px</a> ·
+            <a href="{{ urlHuge }}" target="_blank">2000px</a> ·
+            <a href="{{ urlFull }}" target="_blank">Full</a> ·
+            <a href="{{ urlOriginal }}" target="_blank">Original</a>
+          </div>
+        {% else %}
+          <div class="image-viewer">
+            <div class="viewer-stage">
+              <img class="viewer-img" src="{{ asset('images/placeholder.png') }}" alt="Login required" />
+            </div>
+          </div>
+          <div style="margin-top: 0.5em; font-size: 0.9em; color: #555;">
+            Please <a href="{{ path('PapyrillioBerenike_Login') }}">log in</a> to view the image.
+          </div>
+        {% endif %}
+      {% else %}
+        <p class="ui-state-disabled" style="padding: 0.5em;">No heidICON image data available for this record.</p>
+      {% endif %}
+
+      <div class="image-meta" style="margin-top: 1em;">
+        <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; font-size: 0.95em;">Metadata</h4>
+        <dl>
+          <div><dt>ID:</dt> <dd>{{ image.id }}</dd></div>
+          {% if image.type %}<div><dt>Type:</dt> <dd>{{ image.type|capitalize }}</dd></div>{% endif %}
+          {% if image.number %}<div><dt>Number:</dt> <dd>{{ image.number }}</dd></div>{% endif %}
+          {% if image.size %}<div><dt>Size:</dt> <dd>{{ image.size }}</dd></div>{% endif %}
+          {% if image.file %}<div><dt>File:</dt> <dd>{{ image.file }}</dd></div>{% endif %}
+          {% if image.path %}<div><dt>Path:</dt> <dd>{{ image.path }}</dd></div>{% endif %}
+          {% if image.heidiconId %}<div><dt>heidICON ID:</dt> <dd>{{ image.heidiconId }}</dd></div>{% endif %}
+          {% if image.heidiconUuid %}<div><dt>heidICON UUID:</dt> <dd>{{ image.heidiconUuid }}</dd></div>{% endif %}
+          {% if image.heidiconSystemObjectId %}<div><dt>heidICON Sys ID:</dt> <dd>{{ image.heidiconSystemObjectId }}</dd></div>{% endif %}
+          {% if image.find %}<div><dt>Find:</dt> <dd><a href="{{ path('PapyrillioBerenike_FindShow', {'id': image.find.id}) }}">{{ image.find.inventoryNumber|default(image.find.id) }}</a></dd></div>{% endif %}
+        </dl>
+
+        <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; font-size: 0.95em; margin-top: 0.5em;">Photographers / Specialists</h4>
+        {% if image.imageSpecialists|length > 0 %}
+          <ul style="list-style: none; padding: 0; margin: 0.25em 0;">
+            {% for is in image.imageSpecialists %}
+              <li style="margin: 0.2em 0;">
+                {{ is.specialist.name }}{% if is.year %} <span style="color:#666;">({{ is.year }})</span>{% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="ui-state-disabled" style="margin: 0.25em 0; padding: 0.2em;">No photographer recorded</p>
+        {% endif %}
+      </div>
+
+      {% if image.heidiconSystemObjectId %}
+        <div class="image-heidicon-link">
+          <a href="https://heidicon.ub.uni-heidelberg.de#/detail/{{ image.heidiconSystemObjectId }}" target="heidicon">View on heidICON ↗</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="actions" style="margin-top: 1em;">
+    {% if image.find %}
+      <a href="{{ path('PapyrillioBerenike_FindShow', {'id': image.find.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+        <span class="ui-button-text">Back to Find</span>
+      </a>
+    {% endif %}
+    <a href="{{ path('PapyrillioBerenike_FindList') }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+      <span class="ui-button-text">Back to Finds</span>
+    </a>
+  </div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  {% if app.user and image.heidiconUuid and image.heidiconId %}
+  <script type="text/javascript">
+    (function(){
+      var viewer  = document.getElementById('imageViewer');
+      if(!viewer) return;
+      var stage   = document.getElementById('viewerStage');
+      var img     = document.getElementById('viewerImg');
+      var loading = viewer.querySelector('.viewer-loading');
+
+      var scale = 1, minScale = 1, maxScale = 16;
+      var tx = 0, ty = 0;
+      var isPanning = false, startX = 0, startY = 0;
+
+      function apply(){
+        img.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
+      }
+      function reset(){
+        scale = 1; tx = 0; ty = 0;
+        img.style.maxWidth = '100%';
+        img.style.maxHeight = '100%';
+        apply();
+      }
+      function zoomAt(factor, cx, cy){
+        var newScale = Math.min(maxScale, Math.max(minScale, scale * factor));
+        if(newScale === scale) return;
+        var rect = img.getBoundingClientRect();
+        var ox = cx - rect.left;
+        var oy = cy - rect.top;
+        var ratio = newScale / scale;
+        tx -= ox * (ratio - 1);
+        ty -= oy * (ratio - 1);
+        scale = newScale;
+        apply();
+      }
+
+      // Wheel zoom
+      viewer.addEventListener('wheel', function(e){
+        e.preventDefault();
+        var factor = e.deltaY < 0 ? 1.15 : 1/1.15;
+        zoomAt(factor, e.clientX, e.clientY);
+      }, { passive: false });
+
+      // Pan
+      stage.addEventListener('mousedown', function(e){
+        isPanning = true; startX = e.clientX - tx; startY = e.clientY - ty;
+        e.preventDefault();
+      });
+      window.addEventListener('mousemove', function(e){
+        if(!isPanning) return;
+        tx = e.clientX - startX; ty = e.clientY - startY;
+        apply();
+      });
+      window.addEventListener('mouseup', function(){ isPanning = false; });
+
+      // Double click to zoom in
+      stage.addEventListener('dblclick', function(e){
+        zoomAt(2, e.clientX, e.clientY);
+      });
+
+      // Controls
+      document.getElementById('zoomIn').addEventListener('click', function(){
+        var r = viewer.getBoundingClientRect();
+        zoomAt(1.4, r.left + r.width/2, r.top + r.height/2);
+      });
+      document.getElementById('zoomOut').addEventListener('click', function(){
+        var r = viewer.getBoundingClientRect();
+        zoomAt(1/1.4, r.left + r.width/2, r.top + r.height/2);
+      });
+      document.getElementById('zoomReset').addEventListener('click', reset);
+      document.getElementById('zoomFit').addEventListener('click', reset);
+
+      // Swap to high-res once available
+      var hires = img.getAttribute('data-src-huge');
+      if(hires){
+        var pre = new Image();
+        pre.onload = function(){
+          img.src = hires;
+          if(loading) loading.style.display = 'none';
+        };
+        pre.onerror = function(){
+          if(loading) loading.style.display = 'none';
+        };
+        pre.src = hires;
+      } else if(loading){
+        loading.style.display = 'none';
+      }
+
+      img.addEventListener('load', function(){
+        if(loading) loading.style.display = 'none';
+      });
+    })();
+  </script>
+  {% endif %}
+{% endblock %}
