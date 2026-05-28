@@ -6,6 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Specialist {
     private $id;
     private $name;
+    private $gnd;
     private $findSpecialists;
     private $imageSpecialists;
 
@@ -26,6 +27,13 @@ class Specialist {
     }
     public function getName() {
         return $this->name;
+    }
+
+    public function setGnd($gnd) {
+        $this->gnd = $gnd;
+    }
+    public function getGnd() {
+        return $this->gnd;
     }
 
     public function addFindSpecialist(\App\Entity\FindSpecialist $findSpecialist) {

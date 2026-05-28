@@ -17,6 +17,10 @@ class SpecialistType extends AbstractType
                 'required' => true,
                 'label' => 'Name',
             ])
+            ->add('gnd', TextType::class, [
+                'required' => false,
+                'label' => 'GND',
+            ])
         ;
     }
 

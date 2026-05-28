@@ -38,9 +38,10 @@ $(function(){
     url: '{{ path('PapyrillioBerenike_SpecialistList') }}',
     datatype: 'xml',
     mtype: 'POST',
-    colNames:['Name', 'Actions'],
+    colNames:['Name', 'GND', 'Actions'],
     colModel :[ 
-      {name:'name',     index:'name',     width:300},
+      {name:'name',     index:'name',     width:250},
+      {name:'gnd',      index:'gnd',      width:150},
       {name:'actions',  index:'actions',  width:60, sortable: false, search: false}
     ],
     pager: '#pager',

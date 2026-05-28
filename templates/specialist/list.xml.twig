@@ -6,6 +6,7 @@
   {% for specialist in specialists %}
     <row id = '{{ specialist.id }}'>
       <cell>{{ specialist.name }}</cell>
+      <cell>{{ specialist.gnd }}</cell>
       <cell><![CDATA[<a href="{{ path('PapyrillioBerenike_SpecialistShow', {'id': specialist.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">View</span></a>{% if app.user %}<a href="{{ path('PapyrillioBerenike_SpecialistEdit', {'id': specialist.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">Edit</span></a>{% endif %}]]></cell>
     </row>
   {% endfor %}
