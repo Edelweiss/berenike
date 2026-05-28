@@ -98,14 +98,17 @@ class HeidIconImportCommand extends Command
             'images_updated'      => 0,
             'specialists_linked'  => 0,
             'ressourcen_orphaned' => 0,
+            'images_deleted'      => 0,
             'warnings'            => 0,
         ];
         $warnings = [];
         $opCount = 0;
+        /** @var array<int,true> $clearedFinds find id → true (images wiped once per run) */
+        $clearedFinds = [];
 
         foreach ($xmlFiles as $xmlFile) {
             try {
-                $fileStats = $this->processFile($xmlFile, $io, $dryRun, $warnings);
+                $fileStats = $this->processFile($xmlFile, $io, $dryRun, $warnings, $clearedFinds);
             } catch (\Throwable $e) {
                 $stats['files_with_errors']++;
                 $warnings[] = sprintf('[ERROR] %s: %s', $this->relativePath($projectRoot, $xmlFile), $e->getMessage());
@@ -124,6 +127,7 @@ class HeidIconImportCommand extends Command
             $stats['images_updated']     += $fileStats['images_updated'];
             $stats['specialists_linked'] += $fileStats['specialists_linked'];
             $stats['ressourcen_orphaned']+= $fileStats['ressourcen_orphaned'];
+            $stats['images_deleted']     += $fileStats['images_deleted'];
 
             $opCount += $fileStats['images_inserted'] + $fileStats['images_updated'];
             if (!$dryRun && $opCount >= $batchSize) {
@@ -147,6 +151,7 @@ class HeidIconImportCommand extends Command
                 ['XML files with errors',   $stats['files_with_errors']],
                 ['<objekte> skipped',       $stats['objekte_skipped']],
                 ['Finds updated',           $stats['finds_updated']],
+                ['Images deleted',          $stats['images_deleted']],
                 ['Images inserted',         $stats['images_inserted']],
                 ['Images updated',          $stats['images_updated']],
                 ['Specialist links set',    $stats['specialists_linked']],
@@ -187,7 +192,7 @@ class HeidIconImportCommand extends Command
      *
      * @return array<string,int>|null
      */
-    private function processFile(string $xmlFile, SymfonyStyle $io, bool $dryRun, array &$warnings): ?array
+    private function processFile(string $xmlFile, SymfonyStyle $io, bool $dryRun, array &$warnings, array &$clearedFinds): ?array
     {
         $stats = [
             'objekte_skipped'     => 0,
@@ -196,6 +201,7 @@ class HeidIconImportCommand extends Command
             'images_updated'      => 0,
             'specialists_linked'  => 0,
             'ressourcen_orphaned' => 0,
+            'images_deleted'      => 0,
         ];
 
         $dom = new \DOMDocument();
@@ -270,6 +276,26 @@ class HeidIconImportCommand extends Command
             }
             $stats['finds_updated']++;
 
+            // heidICON XML is the source of truth: on first encounter of
+            // this find in the current run, wipe every existing image (and
+            // its image_specialist rows, via cascade-remove) so only what
+            // the current XML describes remains attached.
+            if (!isset($clearedFinds[$findId])) {
+                $clearedFinds[$findId] = true;
+                $imageRepoForWipe = $this->entityManager->getRepository(Image::class);
+                $existing = $imageRepoForWipe->findBy(['find' => $find]);
+                foreach ($existing as $oldImg) {
+                    if (!$dryRun) {
+                        $this->entityManager->remove($oldImg);
+                    }
+                    $stats['images_deleted']++;
+                }
+                if (!$dryRun && !empty($existing)) {
+                    // Flush deletes before re-inserting so unique constraints don't trip.
+                    $this->entityManager->flush();
+                }
+            }
+
             // Register every eas-id owned by this objekte against its find.
             $easNodes = $xpath->query('eb:_standard-eas/eb:files/eb:file/eb:eas-id', $objekte);
             foreach ($easNodes as $easNode) {
@@ -305,10 +331,11 @@ class HeidIconImportCommand extends Command
                 continue;
             }
             $find = $easToFind[$resEasId];
+            $resEasIdInt = (int) $resEasId;
 
             // --- Upsert Image ---------------------------------------------
             $imageRepo = $this->entityManager->getRepository(Image::class);
-            $image = $imageRepo->findOneBy(['heidiconId' => $resHeidiconId]);
+            $image = $imageRepo->findOneBy(['heidiconId' => $resEasIdInt, 'find' => $find]);
             $isNew = false;
             if ($image === null) {
                 $image = new Image();
@@ -317,7 +344,7 @@ class HeidIconImportCommand extends Command
 
             $image->setFind($find);
             $image->setType(self::IMAGE_TYPE_PHOTO);
-            $image->setHeidiconId($resHeidiconId);
+            $image->setHeidiconId($resEasIdInt);
             $image->setHeidiconUuid($this->stringOrNull($xpath, 'eb:_uuid', $res));
             $image->setHeidiconSystemObjectId($this->intOrNull($xpath, 'eb:_system_object_id', $res));
 
