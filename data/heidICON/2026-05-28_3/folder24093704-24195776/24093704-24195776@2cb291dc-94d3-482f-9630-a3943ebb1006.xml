@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects xmlns="https://schema.easydb.de/EASYDB/1.0/objects/" instance="easydb" uuid="2cb291dc-94d3-482f-9630-a3943ebb1006" base-schema="276" user-schema="502" timestamp="2026-05-28T12:20:17+02:00">
+<objects xmlns="https://schema.easydb.de/EASYDB/1.0/objects/" instance="easydb" uuid="2cb291dc-94d3-482f-9630-a3943ebb1006" base-schema="276" user-schema="502" timestamp="2026-05-28T12:51:08+02:00">
   <objekte>
     <_id>942472</_id>
     <_system_object_id>24093704</_system_object_id>
@@ -162,7 +162,7 @@
           <original_filename>ID20742_Reconstruction 2 - Location Variants.tiff</original_filename>
           <compiled/>
           <eas_parent_id/>
-          <date_inserted>2025-12-17T19:24:11Z</date_inserted>
+          <date_inserted>2026-05-28T10:49:00Z</date_inserted>
           <date_created/>
           <date_uploaded>2025-11-03T13:02:07Z</date_uploaded>
           <filesize>10550756</filesize>
@@ -199,7 +199,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:07+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:50:59+02:00</_exported_at>
     <_mask>objekte_standard_maske</_mask>
     <_last_modified>2026-05-27T20:27:29Z</_last_modified>
     <tags/>
@@ -306,7 +306,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:08+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:50:59+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-28T10:04:05Z</_last_modified>
     <tags/>
@@ -536,7 +536,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:08+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:50:59+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2025-12-17T19:24:11Z</_last_modified>
     <tags/>
@@ -766,7 +766,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:08+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:00+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-28T10:03:39Z</_last_modified>
     <tags/>
@@ -931,210 +931,6 @@
         <res_autor_lok type="text_oneline">Szymon Popławski</res_autor_lok>
       </ressourcen__res_autoren_lok>
     </_nested__ressourcen__res_autoren_lok>
-  </ressourcen>
-  <ressourcen>
-    <_id>1039120</_id>
-    <_system_object_id>24101282</_system_object_id>
-    <_version>9</_version>
-    <_uuid>7999b01a-424e-488b-bcb4-bf0e1277690b</_uuid>
-    <_objecttype>ressourcen</_objecttype>
-    <_global_object_id>24101282@2cb291dc-94d3-482f-9630-a3943ebb1006</_global_object_id>
-    <pool id="627">
-      <de-DE>Berenike Project - Uni Heidelberg</de-DE>
-    </pool>
-    <_standard>
-      <de-DE>statue, seated official</de-DE>
-      <en-US>statue, seated official</en-US>
-    </_standard>
-    <_standard-eas>
-      <files>
-        <file>
-          <eas-id>1272257</eas-id>
-          <preferred>true</preferred>
-          <status>done</status>
-          <class>image</class>
-          <extension>tif</extension>
-          <name/>
-          <original_filename>ID20742_Reconstruction 2 - Location Variants.tiff</original_filename>
-          <compiled/>
-          <eas_parent_id/>
-          <date_inserted>2025-12-17T19:24:11Z</date_inserted>
-          <date_created/>
-          <date_uploaded>2025-11-03T13:02:07Z</date_uploaded>
-          <filesize>10550756</filesize>
-          <technical_metadata>
-            <file_sha224_checksum>56673cee0b21a4a9acecf002ff5a5d032f5a89b7ba7112e9e3ca6a14</file_sha224_checksum>
-            <orientation>1</orientation>
-            <width>2480</width>
-            <height>1417</height>
-            <dpi>300</dpi>
-            <max_dimension>2480</max_dimension>
-            <format>landscape</format>
-            <aspect_ratio>1.7501764290755117</aspect_ratio>
-            <colordepth>24</colordepth>
-            <colorspace>rgb</colorspace>
-            <colorprofile>sRGB IEC61966-2.1</colorprofile>
-          </technical_metadata>
-          <versions>
-            <version name="small">
-              <filesize>42400</filesize>
-              <height>250</height>
-              <has_more_jobs>0</has_more_jobs>
-              <class>image</class>
-              <width>438</width>
-              <url>https://heidicon.ub.uni-heidelberg.de/eas/partitions-inline/6/1/1272000/1272257/4d18faec411dd7cdd75dd765d67f57f89b1a392c/image/png</url>
-              <status>done</status>
-              <extension>png</extension>
-              <aspect_ratio>1.7519999742507935</aspect_ratio>
-              <dpi>299</dpi>
-              <download_url>https://heidicon.ub.uni-heidelberg.de/eas/partitions/6/1/1272000/1272257/4d18faec411dd7cdd75dd765d67f57f89b1a392c/image/png/ID20742_Reconstruction%202%20-%20Location%20Variants-small.png</download_url>
-              <_download_allowed>0</_download_allowed>
-              <deep_link_url>https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/7999b01a-424e-488b-bcb4-bf0e1277690b/file/id/1272257/file_version/name/small/disposition/inline</deep_link_url>
-            </version>
-          </versions>
-        </file>
-      </files>
-    </_standard-eas>
-    <_exported_at>2026-05-28T12:20:08+02:00</_exported_at>
-    <_mask>ressourcen__all_fields</_mask>
-    <_last_modified>2025-12-17T19:24:11Z</_last_modified>
-    <tags/>
-    <asset>
-      <files>
-        <file>
-          <eas-id>1272257</eas-id>
-          <preferred>true</preferred>
-          <status>done</status>
-          <class>image</class>
-          <extension>tif</extension>
-          <name/>
-          <original_filename>ID20742_Reconstruction 2 - Location Variants.tiff</original_filename>
-          <compiled>tif image, 2480 x 1417 @ 24 bit, 10.06 MB</compiled>
-          <eas_parent_id/>
-          <date_inserted>2025-12-17T19:24:11Z</date_inserted>
-          <date_created>2018-04-16T00:23:38Z</date_created>
-          <date_uploaded>2025-11-03T13:02:07Z</date_uploaded>
-          <filesize>10550756</filesize>
-          <technical_metadata>
-            <file_sha224_checksum>56673cee0b21a4a9acecf002ff5a5d032f5a89b7ba7112e9e3ca6a14</file_sha224_checksum>
-            <orientation>1</orientation>
-            <width>2480</width>
-            <height>1417</height>
-            <dpi>300</dpi>
-            <max_dimension>2480</max_dimension>
-            <format>landscape</format>
-            <aspect_ratio>1.7501764290755117</aspect_ratio>
-            <colordepth>24</colordepth>
-            <colorspace>rgb</colorspace>
-            <colorprofile>sRGB IEC61966-2.1</colorprofile>
-          </technical_metadata>
-          <versions>
-            <version name="preview">
-              <filesize>165871</filesize>
-              <height>571</height>
-              <has_more_jobs>0</has_more_jobs>
-              <class>image</class>
-              <width>1000</width>
-              <url>https://heidicon.ub.uni-heidelberg.de/eas/partitions-inline/6/1/1272000/1272257/9c602b9aa6aaf41c4fd4716a80a0a6d48835c9b1/image/png</url>
-              <status>done</status>
-              <extension>png</extension>
-              <aspect_ratio>1.7510000467300415</aspect_ratio>
-              <dpi>299</dpi>
-              <zoom_url>https://heidicon.ub.uni-heidelberg.de/eas/zoomer/1272257/90272f5630349225d46ccde56f643078?instance=easydb-unib-heidelberg</zoom_url>
-              <download_url>https://heidicon.ub.uni-heidelberg.de/eas/partitions/6/1/1272000/1272257/9c602b9aa6aaf41c4fd4716a80a0a6d48835c9b1/image/png/ID20742_Reconstruction%202%20-%20Location%20Variants-preview.png</download_url>
-              <_download_allowed>1</_download_allowed>
-              <deep_link_url>https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/7999b01a-424e-488b-bcb4-bf0e1277690b/file/id/1272257/file_version/name/preview/disposition/inline</deep_link_url>
-            </version>
-            <version name="small">
-              <filesize>42400</filesize>
-              <height>250</height>
-              <has_more_jobs>0</has_more_jobs>
-              <class>image</class>
-              <width>438</width>
-              <url>https://heidicon.ub.uni-heidelberg.de/eas/partitions-inline/6/1/1272000/1272257/4d18faec411dd7cdd75dd765d67f57f89b1a392c/image/png</url>
-              <status>done</status>
-              <extension>png</extension>
-              <aspect_ratio>1.7519999742507935</aspect_ratio>
-              <dpi>299</dpi>
-              <download_url>https://heidicon.ub.uni-heidelberg.de/eas/partitions/6/1/1272000/1272257/4d18faec411dd7cdd75dd765d67f57f89b1a392c/image/png/ID20742_Reconstruction%202%20-%20Location%20Variants-small.png</download_url>
-              <_download_allowed>1</_download_allowed>
-              <deep_link_url>https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/7999b01a-424e-488b-bcb4-bf0e1277690b/file/id/1272257/file_version/name/small/disposition/inline</deep_link_url>
-            </version>
-            <version name="original">
-              <filesize>10550756</filesize>
-              <height>1417</height>
-              <status>done</status>
-              <has_more_jobs>0</has_more_jobs>
-              <download_url>https://heidicon.ub.uni-heidelberg.de/eas/partitions/5/1/1272000/1272257/173108fd6b8d7bcee70d23a77756d9562a739789/image/tiff/ID20742_Reconstruction%202%20-%20Location%20Variants.tif</download_url>
-              <aspect_ratio>1.75</aspect_ratio>
-              <class>image</class>
-              <width>2480</width>
-              <url>https://heidicon.ub.uni-heidelberg.de/eas/partitions-inline/5/1/1272000/1272257/173108fd6b8d7bcee70d23a77756d9562a739789/image/tiff</url>
-              <date_created>2018-04-16T00:23:38Z</date_created>
-              <extension>tif</extension>
-              <dpi>300</dpi>
-              <compiled>tif image, 2480 x 1417 @ 24 bit, 10.06 MB</compiled>
-              <_download_allowed>1</_download_allowed>
-              <deep_link_url>https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/7999b01a-424e-488b-bcb4-bf0e1277690b/file/id/1272257/file_version/name/original/disposition/inline</deep_link_url>
-            </version>
-            <version name="huge">
-              <filesize>523953</filesize>
-              <height>1143</height>
-              <has_more_jobs>0</has_more_jobs>
-              <class>image</class>
-              <width>2000</width>
-              <url>https://heidicon.ub.uni-heidelberg.de/eas/partitions-inline/6/1/1272000/1272257/32281e3a172d659d63f6cc6bd48a971179524c14/image/png</url>
-              <status>done</status>
-              <extension>png</extension>
-              <aspect_ratio>1.7489999532699585</aspect_ratio>
-              <dpi>299</dpi>
-              <zoom_url>https://heidicon.ub.uni-heidelberg.de/eas/zoomer/1272257/b591887cdd6948084c1ca9299d07bf74?instance=easydb-unib-heidelberg</zoom_url>
-              <download_url>https://heidicon.ub.uni-heidelberg.de/eas/partitions/6/1/1272000/1272257/32281e3a172d659d63f6cc6bd48a971179524c14/image/png/ID20742_Reconstruction%202%20-%20Location%20Variants-huge.png</download_url>
-              <_download_allowed>1</_download_allowed>
-              <deep_link_url>https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/7999b01a-424e-488b-bcb4-bf0e1277690b/file/id/1272257/file_version/name/huge/disposition/inline</deep_link_url>
-            </version>
-            <version name="full">
-              <filesize>809973</filesize>
-              <height>1417</height>
-              <has_more_jobs>0</has_more_jobs>
-              <class>image</class>
-              <width>2480</width>
-              <url>https://heidicon.ub.uni-heidelberg.de/eas/partitions-inline/6/1/1272000/1272257/ef16c71ab29ee8b37b14d976b17d8424ad6c9794/image/png</url>
-              <status>done</status>
-              <extension>png</extension>
-              <aspect_ratio>1.75</aspect_ratio>
-              <dpi>299</dpi>
-              <zoom_url>https://heidicon.ub.uni-heidelberg.de/eas/zoomer/1272257/23d3d2a61b06ecaa4fe82788311b2105?instance=easydb-unib-heidelberg</zoom_url>
-              <download_url>https://heidicon.ub.uni-heidelberg.de/eas/partitions/6/1/1272000/1272257/ef16c71ab29ee8b37b14d976b17d8424ad6c9794/image/png/ID20742_Reconstruction%202%20-%20Location%20Variants-full.png</download_url>
-              <_download_allowed>1</_download_allowed>
-              <deep_link_url>https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/7999b01a-424e-488b-bcb4-bf0e1277690b/file/id/1272257/file_version/name/full/disposition/inline</deep_link_url>
-            </version>
-          </versions>
-        </file>
-      </files>
-    </asset>
-    <res_repro_typ>
-      <reproduktions_typ>
-        <_id>1</_id>
-        <_system_object_id>17</_system_object_id>
-        <_version>1</_version>
-        <_uuid>e08055af-3461-4752-941d-80453513a100</_uuid>
-        <_objecttype>reproduktions_typ</_objecttype>
-        <_global_object_id>17@2cb291dc-94d3-482f-9630-a3943ebb1006</_global_object_id>
-        <_standard>
-          <de-DE>Digitales Bild</de-DE>
-          <en-US>Digital image</en-US>
-        </_standard>
-        <typ type="text_l10n_oneline">
-          <de-DE>Digitales Bild</de-DE>
-          <en-US>Digital image</en-US>
-        </typ>
-      </reproduktions_typ>
-    </res_repro_typ>
-    <res_relationstyp type="text_oneline">Reconstruction</res_relationstyp>
-    <res_beschreibung type="text_l10n_oneline">
-      <en-US>Location Variants</en-US>
-    </res_beschreibung>
   </ressourcen>
   <objekte>
     <_id>944538</_id>
@@ -1335,7 +1131,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:08+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:00+02:00</_exported_at>
     <_mask>objekte_standard_maske</_mask>
     <_last_modified>2026-05-27T20:27:29Z</_last_modified>
     <tags/>
@@ -1441,7 +1237,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:08+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:00+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:30:01Z</_last_modified>
     <tags/>
@@ -1671,7 +1467,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:08+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:00+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:30:01Z</_last_modified>
     <tags/>
@@ -1903,7 +1699,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:08+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:00+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:30:01Z</_last_modified>
     <tags/>
@@ -2135,7 +1931,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:08+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:00+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:30:01Z</_last_modified>
     <tags/>
@@ -2368,7 +2164,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:08+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:00+02:00</_exported_at>
     <_mask>objekte_standard_maske</_mask>
     <_last_modified>2026-03-03T17:00:35Z</_last_modified>
     <tags/>
@@ -2455,7 +2251,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:09+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:00+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-28T10:18:45Z</_last_modified>
     <tags/>
@@ -2691,7 +2487,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:09+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:00+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:16:29Z</_last_modified>
     <tags/>
@@ -2915,7 +2711,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:09+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:01+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:26:34Z</_last_modified>
     <tags/>
@@ -3139,7 +2935,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:09+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:01+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:16:09Z</_last_modified>
     <tags/>
@@ -3363,7 +3159,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:09+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:01+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:21:02Z</_last_modified>
     <tags/>
@@ -3587,7 +3383,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:09+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:01+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:17:42Z</_last_modified>
     <tags/>
@@ -3810,7 +3606,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:09+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:01+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:19:30Z</_last_modified>
     <tags/>
@@ -4001,7 +3797,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:09+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:01+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:17:24Z</_last_modified>
     <tags/>
@@ -4225,7 +4021,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:09+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:01+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:21:39Z</_last_modified>
     <tags/>
@@ -4450,7 +4246,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:09+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:01+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:26:55Z</_last_modified>
     <tags/>
@@ -4674,7 +4470,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:09+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:01+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:26:44Z</_last_modified>
     <tags/>
@@ -4897,7 +4693,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:10+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:01+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:17:41Z</_last_modified>
     <tags/>
@@ -5120,7 +4916,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:10+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:01+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:19:03Z</_last_modified>
     <tags/>
@@ -5344,7 +5140,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:10+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:02+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:20:20Z</_last_modified>
     <tags/>
@@ -5569,7 +5365,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:10+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:02+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:20:51Z</_last_modified>
     <tags/>
@@ -5794,7 +5590,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:10+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:02+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:23:24Z</_last_modified>
     <tags/>
@@ -6018,7 +5814,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:10+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:02+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:18:32Z</_last_modified>
     <tags/>
@@ -6242,7 +6038,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:10+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:02+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:27:30Z</_last_modified>
     <tags/>
@@ -6466,7 +6262,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:10+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:02+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:21:46Z</_last_modified>
     <tags/>
@@ -6690,7 +6486,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:10+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:02+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:21:42Z</_last_modified>
     <tags/>
@@ -6915,7 +6711,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:11+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:02+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:23:26Z</_last_modified>
     <tags/>
@@ -7139,7 +6935,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:11+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:02+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:21:00Z</_last_modified>
     <tags/>
@@ -7363,7 +7159,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:11+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:02+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:21:36Z</_last_modified>
     <tags/>
@@ -7588,7 +7384,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:11+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:02+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:22:39Z</_last_modified>
     <tags/>
@@ -7813,7 +7609,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:11+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:02+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:20:24Z</_last_modified>
     <tags/>
@@ -8037,7 +7833,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:11+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:03+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:18:00Z</_last_modified>
     <tags/>
@@ -8261,7 +8057,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:11+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:03+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-26T08:52:37Z</_last_modified>
     <tags/>
@@ -8485,7 +8281,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:11+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:03+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:22:33Z</_last_modified>
     <tags/>
@@ -8708,7 +8504,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:11+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:03+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:22:28Z</_last_modified>
     <tags/>
@@ -8932,7 +8728,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:11+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:03+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:16:21Z</_last_modified>
     <tags/>
@@ -9157,7 +8953,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:12+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:03+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:20:34Z</_last_modified>
     <tags/>
@@ -9382,7 +9178,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:12+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:03+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:18:09Z</_last_modified>
     <tags/>
@@ -9606,7 +9402,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:12+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:03+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:20:22Z</_last_modified>
     <tags/>
@@ -9829,7 +9625,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:12+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:03+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:16:36Z</_last_modified>
     <tags/>
@@ -10053,7 +9849,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:12+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:03+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:27:17Z</_last_modified>
     <tags/>
@@ -10278,7 +10074,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:12+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:03+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:17:30Z</_last_modified>
     <tags/>
@@ -10503,7 +10299,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:12+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:04+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:21:18Z</_last_modified>
     <tags/>
@@ -10727,7 +10523,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:12+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:04+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:27:18Z</_last_modified>
     <tags/>
@@ -10951,7 +10747,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:12+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:04+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:22:05Z</_last_modified>
     <tags/>
@@ -11176,7 +10972,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:12+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:04+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:19:57Z</_last_modified>
     <tags/>
@@ -11401,7 +11197,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:13+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:04+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:18:59Z</_last_modified>
     <tags/>
@@ -11626,7 +11422,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:13+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:04+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:21:37Z</_last_modified>
     <tags/>
@@ -11850,7 +11646,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:13+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:04+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:19:49Z</_last_modified>
     <tags/>
@@ -12073,7 +11869,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:13+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:04+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:18:53Z</_last_modified>
     <tags/>
@@ -12297,7 +12093,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:13+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:04+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:19:47Z</_last_modified>
     <tags/>
@@ -12522,7 +12318,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:13+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:04+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:21:03Z</_last_modified>
     <tags/>
@@ -12747,7 +12543,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:13+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:04+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:16:27Z</_last_modified>
     <tags/>
@@ -12972,7 +12768,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:13+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:05+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-26T08:52:38Z</_last_modified>
     <tags/>
@@ -13197,7 +12993,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:13+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:05+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:17:51Z</_last_modified>
     <tags/>
@@ -13421,7 +13217,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:13+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:05+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:22:07Z</_last_modified>
     <tags/>
@@ -13644,7 +13440,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:14+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:05+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:27:03Z</_last_modified>
     <tags/>
@@ -13868,7 +13664,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:14+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:05+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:20:53Z</_last_modified>
     <tags/>
@@ -14093,7 +13889,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:14+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:05+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:21:41Z</_last_modified>
     <tags/>
@@ -14318,7 +14114,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:14+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:05+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:22:10Z</_last_modified>
     <tags/>
@@ -14543,7 +14339,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:14+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:05+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-26T08:52:41Z</_last_modified>
     <tags/>
@@ -14768,7 +14564,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:14+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:05+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:21:05Z</_last_modified>
     <tags/>
@@ -14992,7 +14788,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:14+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:05+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:17:50Z</_last_modified>
     <tags/>
@@ -15216,7 +15012,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:14+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:05+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:20:30Z</_last_modified>
     <tags/>
@@ -15441,7 +15237,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:15+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:06+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:23:40Z</_last_modified>
     <tags/>
@@ -15666,7 +15462,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:15+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:06+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:17:48Z</_last_modified>
     <tags/>
@@ -15891,7 +15687,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:15+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:06+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:27:07Z</_last_modified>
     <tags/>
@@ -16115,7 +15911,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:15+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:06+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:18:35Z</_last_modified>
     <tags/>
@@ -16339,7 +16135,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:15+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:06+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:27:35Z</_last_modified>
     <tags/>
@@ -16564,7 +16360,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:15+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:06+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:21:34Z</_last_modified>
     <tags/>
@@ -16789,7 +16585,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:15+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:06+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:21:15Z</_last_modified>
     <tags/>
@@ -17013,7 +16809,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:15+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:06+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:22:44Z</_last_modified>
     <tags/>
@@ -17237,7 +17033,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:15+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:06+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:22:49Z</_last_modified>
     <tags/>
@@ -17462,7 +17258,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:15+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:06+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:23:03Z</_last_modified>
     <tags/>
@@ -17686,7 +17482,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:16+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:07+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:19:50Z</_last_modified>
     <tags/>
@@ -17909,7 +17705,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:16+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:07+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:22:42Z</_last_modified>
     <tags/>
@@ -18133,7 +17929,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:16+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:07+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-26T08:52:29Z</_last_modified>
     <tags/>
@@ -18357,7 +18153,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:16+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:07+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:18:05Z</_last_modified>
     <tags/>
@@ -18581,7 +18377,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:16+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:07+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:22:46Z</_last_modified>
     <tags/>
@@ -18806,7 +18602,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:16+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:07+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:20:32Z</_last_modified>
     <tags/>
@@ -19031,7 +18827,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:16+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:07+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:27:40Z</_last_modified>
     <tags/>
@@ -19255,7 +19051,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:16+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:07+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:17:02Z</_last_modified>
     <tags/>
@@ -19478,7 +19274,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:16+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:07+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:18:14Z</_last_modified>
     <tags/>
@@ -19702,7 +19498,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:16+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:07+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:27:05Z</_last_modified>
     <tags/>
@@ -19927,7 +19723,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:17+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:07+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:16:57Z</_last_modified>
     <tags/>
@@ -20151,7 +19947,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:17+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:08+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:16:59Z</_last_modified>
     <tags/>
@@ -20358,7 +20154,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:17+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:08+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:17:57Z</_last_modified>
     <tags/>
@@ -20582,7 +20378,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:17+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:08+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:23:05Z</_last_modified>
     <tags/>
@@ -20806,7 +20602,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:17+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:08+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:20:25Z</_last_modified>
     <tags/>
@@ -21030,7 +20826,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:17+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:08+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:16:07Z</_last_modified>
     <tags/>
@@ -21254,7 +21050,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:17+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:08+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:17:22Z</_last_modified>
     <tags/>
@@ -21478,7 +21274,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:17+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:08+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:22:37Z</_last_modified>
     <tags/>
@@ -21702,7 +21498,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:17+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:08+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:22:17Z</_last_modified>
     <tags/>
@@ -21925,7 +21721,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:17+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:08+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:16:52Z</_last_modified>
     <tags/>
@@ -22148,7 +21944,7 @@
         </file>
       </files>
     </_standard-eas>
-    <_exported_at>2026-05-28T12:20:18+02:00</_exported_at>
+    <_exported_at>2026-05-28T12:51:08+02:00</_exported_at>
     <_mask>ressourcen__all_fields</_mask>
     <_last_modified>2026-05-22T15:27:34Z</_last_modified>
     <tags/>
@@ -22261,6 +22057,231 @@
               <download_url>https://heidicon.ub.uni-heidelberg.de/eas/partitions/6/1/1382000/1382767/f733411b491a1e7b92cfb78d78072e7b7c971f86/image/jpeg/432_57187-BE09_0056-A-056%2b0071-A-071%2b0089-A-089_a-full.jpg</download_url>
               <_download_allowed>1</_download_allowed>
               <deep_link_url>https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/d20235d3-c45d-4338-affd-214f2b552bb4/file/id/1382767/file_version/name/full/disposition/inline</deep_link_url>
+            </version>
+          </versions>
+        </file>
+      </files>
+    </asset>
+    <res_repro_typ>
+      <reproduktions_typ>
+        <_id>1</_id>
+        <_system_object_id>17</_system_object_id>
+        <_version>1</_version>
+        <_uuid>e08055af-3461-4752-941d-80453513a100</_uuid>
+        <_objecttype>reproduktions_typ</_objecttype>
+        <_global_object_id>17@2cb291dc-94d3-482f-9630-a3943ebb1006</_global_object_id>
+        <_standard>
+          <de-DE>Digitales Bild</de-DE>
+          <en-US>Digital image</en-US>
+        </_standard>
+        <typ type="text_l10n_oneline">
+          <de-DE>Digitales Bild</de-DE>
+          <en-US>Digital image</en-US>
+        </typ>
+      </reproduktions_typ>
+    </res_repro_typ>
+    <_nested__ressourcen__res_autoren>
+      <ressourcen__res_autoren>
+        <custom name="res_autor_gnd" type="custom:base.custom-data-type-ubhdgnd.ubhdgnd">
+          <string name="conceptURI">https://d-nb.info/gnd/1020326514</string>
+          <object name="_fulltext">
+            <string name="string">https://d-nb.info/gnd/1020326514</string>
+            <string name="text">Ast, Rodney  </string>
+          </object>
+          <object name="_standard">
+            <string name="text">Ast, Rodney</string>
+          </object>
+          <string name="conceptName">Ast, Rodney</string>
+          <object name="conceptDetails">
+            <array name="placeOfBusiness"/>
+            <array name="professionOrOccupation">
+              <string index="0">Papyrologe</string>
+            </array>
+          </object>
+          <string name="conceptType">DifferentiatedPerson</string>
+          <array name="conceptSeeAlso"/>
+        </custom>
+      </ressourcen__res_autoren>
+    </_nested__ressourcen__res_autoren>
+  </ressourcen>
+  <ressourcen>
+    <_id>1104915</_id>
+    <_system_object_id>24195776</_system_object_id>
+    <_version>3</_version>
+    <_uuid>e20cbd8a-d343-446b-a50d-183fff628e01</_uuid>
+    <_objecttype>ressourcen</_objecttype>
+    <_global_object_id>24195776@2cb291dc-94d3-482f-9630-a3943ebb1006</_global_object_id>
+    <pool id="627">
+      <de-DE>Berenike Project - Uni Heidelberg</de-DE>
+    </pool>
+    <_standard>
+      <de-DE>ostracon</de-DE>
+      <en-US>ostracon</en-US>
+    </_standard>
+    <_standard-eas>
+      <files>
+        <file>
+          <eas-id>1382769</eas-id>
+          <preferred>true</preferred>
+          <status>done</status>
+          <class>image</class>
+          <extension>tif</extension>
+          <name/>
+          <original_filename>285_57012_gray.tif</original_filename>
+          <compiled/>
+          <eas_parent_id/>
+          <date_inserted>2026-05-22T15:20:48Z</date_inserted>
+          <date_created/>
+          <date_uploaded>2026-03-23T15:54:01Z</date_uploaded>
+          <filesize>6045376</filesize>
+          <technical_metadata>
+            <file_sha224_checksum>a071f0501db98b91fbcbb8f7a7e16a41afc97663bdd05b797468a33c</file_sha224_checksum>
+            <orientation>1</orientation>
+            <camera_scanner>NIKON D40</camera_scanner>
+            <width>3008</width>
+            <height>2000</height>
+            <dpi>240</dpi>
+            <max_dimension>3008</max_dimension>
+            <format>landscape</format>
+            <aspect_ratio>1.504</aspect_ratio>
+            <colordepth>8</colordepth>
+            <colorspace>grayscale</colorspace>
+            <colorprofile>Dot Gain 20%</colorprofile>
+          </technical_metadata>
+          <versions>
+            <version name="small">
+              <filesize>102126</filesize>
+              <height>250</height>
+              <has_more_jobs>0</has_more_jobs>
+              <class>image</class>
+              <width>376</width>
+              <url>https://heidicon.ub.uni-heidelberg.de/eas/partitions-inline/6/1/1382000/1382769/6c9c45b0b08ac7c70ab5162fd2fc460bdadae243/image/png</url>
+              <status>done</status>
+              <extension>png</extension>
+              <aspect_ratio>1.5039999485015869</aspect_ratio>
+              <dpi>240</dpi>
+              <download_url>https://heidicon.ub.uni-heidelberg.de/eas/partitions/6/1/1382000/1382769/6c9c45b0b08ac7c70ab5162fd2fc460bdadae243/image/png/285_57012_gray-small.png</download_url>
+              <_download_allowed>0</_download_allowed>
+              <deep_link_url>https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/e20cbd8a-d343-446b-a50d-183fff628e01/file/id/1382769/file_version/name/small/disposition/inline</deep_link_url>
+            </version>
+          </versions>
+        </file>
+      </files>
+    </_standard-eas>
+    <_exported_at>2026-05-28T12:51:08+02:00</_exported_at>
+    <_mask>ressourcen__all_fields</_mask>
+    <_last_modified>2026-05-22T15:20:48Z</_last_modified>
+    <tags/>
+    <asset>
+      <files>
+        <file>
+          <eas-id>1382769</eas-id>
+          <preferred>true</preferred>
+          <status>done</status>
+          <class>image</class>
+          <extension>tif</extension>
+          <name/>
+          <original_filename>285_57012_gray.tif</original_filename>
+          <compiled>tif image, 3008 x 2000 @ 8 bit, 5.77 MB</compiled>
+          <eas_parent_id/>
+          <date_inserted>2026-05-22T15:20:48Z</date_inserted>
+          <date_created>2009-02-07T10:38:24Z</date_created>
+          <date_uploaded>2026-03-23T15:54:01Z</date_uploaded>
+          <filesize>6045376</filesize>
+          <technical_metadata>
+            <file_sha224_checksum>a071f0501db98b91fbcbb8f7a7e16a41afc97663bdd05b797468a33c</file_sha224_checksum>
+            <orientation>1</orientation>
+            <camera_scanner>NIKON D40</camera_scanner>
+            <width>3008</width>
+            <height>2000</height>
+            <dpi>240</dpi>
+            <max_dimension>3008</max_dimension>
+            <format>landscape</format>
+            <aspect_ratio>1.504</aspect_ratio>
+            <colordepth>8</colordepth>
+            <colorspace>grayscale</colorspace>
+            <colorprofile>Dot Gain 20%</colorprofile>
+          </technical_metadata>
+          <versions>
+            <version name="preview">
+              <filesize>751829</filesize>
+              <height>665</height>
+              <has_more_jobs>0</has_more_jobs>
+              <class>image</class>
+              <width>1000</width>
+              <url>https://heidicon.ub.uni-heidelberg.de/eas/partitions-inline/6/1/1382000/1382769/abff938a27643bd1e6bda7b52f4f6a1df3bd4b59/image/png</url>
+              <status>done</status>
+              <extension>png</extension>
+              <aspect_ratio>1.503000020980835</aspect_ratio>
+              <dpi>240</dpi>
+              <zoom_url>https://heidicon.ub.uni-heidelberg.de/eas/zoomer/1382769/9a23527e64423ee0b06520e9e32e2eb8?instance=easydb-unib-heidelberg</zoom_url>
+              <download_url>https://heidicon.ub.uni-heidelberg.de/eas/partitions/6/1/1382000/1382769/abff938a27643bd1e6bda7b52f4f6a1df3bd4b59/image/png/285_57012_gray-preview.png</download_url>
+              <_download_allowed>1</_download_allowed>
+              <deep_link_url>https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/e20cbd8a-d343-446b-a50d-183fff628e01/file/id/1382769/file_version/name/preview/disposition/inline</deep_link_url>
+            </version>
+            <version name="small">
+              <filesize>102126</filesize>
+              <height>250</height>
+              <has_more_jobs>0</has_more_jobs>
+              <class>image</class>
+              <width>376</width>
+              <url>https://heidicon.ub.uni-heidelberg.de/eas/partitions-inline/6/1/1382000/1382769/6c9c45b0b08ac7c70ab5162fd2fc460bdadae243/image/png</url>
+              <status>done</status>
+              <extension>png</extension>
+              <aspect_ratio>1.5039999485015869</aspect_ratio>
+              <dpi>240</dpi>
+              <download_url>https://heidicon.ub.uni-heidelberg.de/eas/partitions/6/1/1382000/1382769/6c9c45b0b08ac7c70ab5162fd2fc460bdadae243/image/png/285_57012_gray-small.png</download_url>
+              <_download_allowed>1</_download_allowed>
+              <deep_link_url>https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/e20cbd8a-d343-446b-a50d-183fff628e01/file/id/1382769/file_version/name/small/disposition/inline</deep_link_url>
+            </version>
+            <version name="original">
+              <filesize>6045376</filesize>
+              <height>2000</height>
+              <status>done</status>
+              <has_more_jobs>0</has_more_jobs>
+              <download_url>https://heidicon.ub.uni-heidelberg.de/eas/partitions/5/1/1382000/1382769/76d8c6949a68f7e2bc544e702ba662b8316126cb/image/tiff/285_57012_gray.tif</download_url>
+              <aspect_ratio>1.5039999485015869</aspect_ratio>
+              <class>image</class>
+              <width>3008</width>
+              <url>https://heidicon.ub.uni-heidelberg.de/eas/partitions-inline/5/1/1382000/1382769/76d8c6949a68f7e2bc544e702ba662b8316126cb/image/tiff</url>
+              <date_created>2009-02-07T10:38:24Z</date_created>
+              <extension>tif</extension>
+              <dpi>240</dpi>
+              <compiled>tif image, 3008 x 2000 @ 8 bit, 5.77 MB</compiled>
+              <_download_allowed>1</_download_allowed>
+              <deep_link_url>https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/e20cbd8a-d343-446b-a50d-183fff628e01/file/id/1382769/file_version/name/original/disposition/inline</deep_link_url>
+            </version>
+            <version name="huge">
+              <filesize>2675059</filesize>
+              <height>1330</height>
+              <has_more_jobs>0</has_more_jobs>
+              <class>image</class>
+              <width>2000</width>
+              <url>https://heidicon.ub.uni-heidelberg.de/eas/partitions-inline/6/1/1382000/1382769/91e65aafe9950d1fdb080a48a5762133ac675d6f/image/png</url>
+              <status>done</status>
+              <extension>png</extension>
+              <aspect_ratio>1.503000020980835</aspect_ratio>
+              <dpi>240</dpi>
+              <zoom_url>https://heidicon.ub.uni-heidelberg.de/eas/zoomer/1382769/c59cb98b4a18882665272a586f11a3e4?instance=easydb-unib-heidelberg</zoom_url>
+              <download_url>https://heidicon.ub.uni-heidelberg.de/eas/partitions/6/1/1382000/1382769/91e65aafe9950d1fdb080a48a5762133ac675d6f/image/png/285_57012_gray-huge.png</download_url>
+              <_download_allowed>1</_download_allowed>
+              <deep_link_url>https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/e20cbd8a-d343-446b-a50d-183fff628e01/file/id/1382769/file_version/name/huge/disposition/inline</deep_link_url>
+            </version>
+            <version name="full">
+              <filesize>5295394</filesize>
+              <height>2000</height>
+              <has_more_jobs>0</has_more_jobs>
+              <class>image</class>
+              <width>3008</width>
+              <url>https://heidicon.ub.uni-heidelberg.de/eas/partitions-inline/6/1/1382000/1382769/58ae40972839565158c2be0d37869326cc9bf07a/image/png</url>
+              <status>done</status>
+              <extension>png</extension>
+              <aspect_ratio>1.5039999485015869</aspect_ratio>
+              <dpi>240</dpi>
+              <zoom_url>https://heidicon.ub.uni-heidelberg.de/eas/zoomer/1382769/8a93bbf4a4f5e3ee0de6ebaee65acd04?instance=easydb-unib-heidelberg</zoom_url>
+              <download_url>https://heidicon.ub.uni-heidelberg.de/eas/partitions/6/1/1382000/1382769/58ae40972839565158c2be0d37869326cc9bf07a/image/png/285_57012_gray-full.png</download_url>
+              <_download_allowed>1</_download_allowed>
+              <deep_link_url>https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/e20cbd8a-d343-446b-a50d-183fff628e01/file/id/1382769/file_version/name/full/disposition/inline</deep_link_url>
             </version>
           </versions>
         </file>

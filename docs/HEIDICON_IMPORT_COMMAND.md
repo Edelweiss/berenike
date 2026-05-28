@@ -7,10 +7,11 @@ from heidICON (easydb) XML exports into the berenike database.
 
 For each XML file it:
 
-1. Finds the matching `find` record (by the URL in `obj_beschreibung_link`).
+1. Iterates **every** `<objekte>` element (a file may hold one to several hundred) and finds the matching `find` record (by the URL in `obj_beschreibung_link`).
 2. Stores `heidicon_id`, `heidicon_uuid` and `heidicon_system_object_id` on the find.
-3. Upserts one `image` row per `<ressourcen>` element (keyed on `heidicon_id`).
-4. Links the photographer (looked up by GND URI on `specialist.gnd`)
+3. Builds an in-memory map `eas-id → find` from each resolved `<objekte>`'s `_standard-eas/files/file/eas-id` list.
+4. Upserts one `image` row per `<ressourcen>` element (keyed on `heidicon_id`), linked to the find whose objekte owns the ressourcen's eas-id.
+5. Links the photographer (looked up by GND URI on `specialist.gnd`)
    via the `image_specialist` table with `speciality = 'photographer'`.
 
 The full data-mapping specification lives in
@@ -59,15 +60,35 @@ php bin/console heidicon:import data/heidICON -b 200
 
 ### Find lookup
 
-The find ID is extracted from the URL stored in:
+A single XML file may contain **multiple `<objekte>` elements**; each is
+processed independently. For every `<objekte>` the find ID is extracted from
+the URL stored in:
 
 ```
 <objekte>/<custom name="obj_beschreibung_link">/<string name="url">
 ```
 
 The integer at the end of the URL (`…/find/<id>`) is used to load
-`berenike.find`. If the find does not exist, **the entire XML file is skipped**
-and a warning is recorded.
+`berenike.find`. If the URL is missing, malformed, or the find does not
+exist in the database, **only that `<objekte>` branch is skipped** — together
+with every `<ressourcen>` that would have been linked to it. The XML file
+itself still counts as processed and other `<objekte>` in the same file are
+still imported. The condition is reported as a warning and counted under
+`<objekte> skipped`.
+
+### Image-to-find linking via `eas-id`
+
+`<ressourcen>` are siblings of `<objekte>` under `<objects>`, not nested.
+Each `<ressourcen>` carries a single `eas-id` at
+`_standard-eas/files/file/eas-id`. Each `<objekte>` declares the eas-ids it
+owns at the same path. The command builds a per-file map of
+`eas-id → find` from all successfully resolved `<objekte>` and uses it to
+attach every `<ressourcen>` to its rightful find.
+
+A `<ressourcen>` whose eas-id is not present in the current file's map
+(either because its owning `<objekte>` was skipped, or because that objekte
+lives in a different export file) is itself skipped with a warning and
+counted under `<ressourcen> orphaned`.
 
 ### Image upsert
 
@@ -109,26 +130,29 @@ or `NULL` if `<date_created/>` is empty.
 
 | Situation                                                         | Action                                                                 |
 | ----------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `obj_beschreibung_link` URL is missing or malformed               | Skip the file; record a warning.                                       |
-| Find ID does not exist in `berenike.find`                         | Skip the file; record a warning.                                       |
+| `obj_beschreibung_link` URL missing or malformed                  | Skip the `<objekte>` branch; warn.                                     |
+| Find ID does not exist in `berenike.find`                         | Skip the `<objekte>` branch; warn.                                     |
+| `<ressourcen>` eas-id not owned by any `<objekte>` in the same file | Skip the `<ressourcen>`; warn; counted under `<ressourcen> orphaned`.  |
 | `<ressourcen>` without `_nested__ressourcen__res_autoren`         | Upsert the image; skip the specialist link; warn with the plain-text name from `_nested__ressourcen__res_autoren_lok` (if present). |
 | GND URI not registered in `berenike.specialist`                   | Upsert the image; skip the specialist link; warn with the GND URI.     |
 | `<date_created/>` is empty                                        | `year` set to `NULL`.                                                  |
-| Malformed XML                                                     | Skip the file; record a warning.                                       |
+| Malformed XML / no `<objekte>` element at all                     | Skip the whole file; warn (counted under `XML files with errors`).     |
 
 ## Output
 
 A summary table is printed at the end:
 
-| Metric                | Description                                              |
-| --------------------- | -------------------------------------------------------- |
-| XML files processed   | Files that yielded a matching find and were processed.   |
-| XML files skipped     | Files dropped due to errors or missing find lookup.      |
-| Finds updated         | `berenike.find` rows whose heidICON identifiers were set.|
-| Images inserted       | New rows in `berenike.image`.                            |
-| Images updated        | Existing `berenike.image` rows updated.                  |
-| Specialist links set  | `image_specialist` rows written for photographers.       |
-| Warnings              | Total warnings collected during the run.                 |
+| Metric                | Description                                                       |
+| --------------------- | ----------------------------------------------------------------- |
+| XML files processed   | Files that were successfully read and parsed.                     |
+| XML files with errors | Files dropped entirely (invalid XML or no `<objekte>` element).   |
+| `<objekte>` skipped   | `<objekte>` branches skipped because the find could not be resolved (no URL, malformed URL, or find not in DB). |
+| Finds updated         | `berenike.find` rows whose heidICON identifiers were set.         |
+| Images inserted       | New rows in `berenike.image`.                                     |
+| Images updated        | Existing `berenike.image` rows updated.                           |
+| Specialist links set  | `image_specialist` rows written for photographers.                |
+| `<ressourcen>` orphaned | `<ressourcen>` whose `eas-id` was not owned by any `<objekte>` in the same file (skipped). |
+| Warnings              | Total warnings collected during the run.                          |
 
 All warnings are then listed individually.
 
