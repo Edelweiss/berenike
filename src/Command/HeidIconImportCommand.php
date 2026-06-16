@@ -106,34 +106,197 @@ class HeidIconImportCommand extends Command
         /** @var array<int,true> $clearedFinds find id → true (images wiped once per run) */
         $clearedFinds = [];
 
+        // ============================================================
+        // Phase 1 — parse every XML file, build global indexes:
+        //   - $objektes:  every <objekte> across all files
+        //   - $easToRes:  eas-id → entry (DOM node + xpath + sourceFile)
+        //                 for every <ressourcen> across all files
+        // The DOMDocuments are kept alive in $docs so the cached DOM
+        // nodes remain valid for phase 2 / 3.
+        // ============================================================
+        $docs      = [];
+        $objektes  = [];
+        $easToRes  = [];
+
         foreach ($xmlFiles as $xmlFile) {
-            try {
-                $fileStats = $this->processFile($xmlFile, $io, $dryRun, $warnings, $clearedFinds);
-            } catch (\Throwable $e) {
-                $stats['files_with_errors']++;
-                $warnings[] = sprintf('[ERROR] %s: %s', $this->relativePath($projectRoot, $xmlFile), $e->getMessage());
-                continue;
-            }
-
-            if ($fileStats === null) {
+            $dom = new \DOMDocument();
+            $dom->preserveWhiteSpace = false;
+            if (!@$dom->load($xmlFile)) {
+                $warnings[] = sprintf('[WARNING] %s: invalid XML, file skipped', basename($xmlFile));
                 $stats['files_with_errors']++;
                 continue;
             }
+            $docs[] = $dom;
+            $xpath = new \DOMXPath($dom);
+            $xpath->registerNamespace(self::NS_PREFIX, self::NS);
 
+            $hasObjekte    = false;
+            $hasRessourcen = false;
+            foreach ($xpath->query('/eb:objects/eb:objekte') as $objekte) {
+                $hasObjekte = true;
+                $objektes[] = [
+                    'node'       => $objekte,
+                    'xpath'      => $xpath,
+                    'sourceFile' => $xmlFile,
+                ];
+            }
+            foreach ($xpath->query('/eb:objects/eb:ressourcen') as $res) {
+                $hasRessourcen = true;
+                $resHeidiconId = $this->intOrNull($xpath, 'eb:_id', $res);
+                $easId = $this->stringOrNull($xpath, 'eb:_standard-eas/eb:files/eb:file/eb:eas-id', $res);
+                if ($easId === null) {
+                    $warnings[] = sprintf(
+                        '[WARNING] %s: <ressourcen> _id=%s without eas-id, skipped',
+                        basename($xmlFile),
+                        $resHeidiconId ?? '?'
+                    );
+                    $stats['ressourcen_orphaned']++;
+                    continue;
+                }
+                if (isset($easToRes[$easId])) {
+                    $warnings[] = sprintf(
+                        '[WARNING] %s: duplicate eas-id %s (first seen in %s); using first occurrence',
+                        basename($xmlFile),
+                        $easId,
+                        basename($easToRes[$easId]['sourceFile'])
+                    );
+                    continue;
+                }
+                $easToRes[$easId] = [
+                    'node'       => $res,
+                    'xpath'      => $xpath,
+                    'sourceFile' => $xmlFile,
+                ];
+            }
+
+            if (!$hasObjekte && !$hasRessourcen) {
+                $warnings[] = sprintf('[WARNING] %s: no <objekte> and no <ressourcen>; file skipped', basename($xmlFile));
+                $stats['files_with_errors']++;
+                continue;
+            }
             $stats['files_processed']++;
-            $stats['objekte_skipped']    += $fileStats['objekte_skipped'];
-            $stats['finds_updated']      += $fileStats['finds_updated'];
-            $stats['images_inserted']    += $fileStats['images_inserted'];
-            $stats['images_updated']     += $fileStats['images_updated'];
-            $stats['specialists_linked'] += $fileStats['specialists_linked'];
-            $stats['ressourcen_orphaned']+= $fileStats['ressourcen_orphaned'];
-            $stats['images_deleted']     += $fileStats['images_deleted'];
+        }
 
-            $opCount += $fileStats['images_inserted'] + $fileStats['images_updated'];
-            if (!$dryRun && $opCount >= $batchSize) {
-                $this->entityManager->flush();
-                $opCount = 0;
+        $io->info(sprintf(
+            'Indexed %d <objekte> and %d <ressourcen> across %d file(s)',
+            count($objektes),
+            count($easToRes),
+            $stats['files_processed']
+        ));
+
+        // ============================================================
+        // Phase 2 — for every <objekte>: resolve find from URL, wipe
+        // existing images on first encounter, then upsert each owned
+        // <ressourcen> looked up via the GLOBAL eas-id index (so
+        // ressourcen living in other XML files of the same run are
+        // resolved correctly).
+        // ============================================================
+        $imageRepo  = $this->entityManager->getRepository(Image::class);
+        $claimedRes = []; // eas-id → true
+
+        foreach ($objektes as $info) {
+            /** @var \DOMElement $objekte */
+            $objekte    = $info['node'];
+            /** @var \DOMXPath $xpath */
+            $xpath      = $info['xpath'];
+            $sourceFile = $info['sourceFile'];
+            $objHeidiconId = $this->intOrNull($xpath, 'eb:_id', $objekte);
+            $objLabel = sprintf('<objekte> _id=%s (%s)', $objHeidiconId ?? '?', basename($sourceFile));
+
+            $urlNode = $xpath->query(
+                'eb:custom[@name="obj_beschreibung_link"]/eb:string[@name="url"]',
+                $objekte
+            )->item(0);
+            if ($urlNode === null) {
+                $warnings[] = sprintf('[WARNING] %s: no obj_beschreibung_link URL; skipping branch', $objLabel);
+                $stats['objekte_skipped']++;
+                continue;
             }
+            $url = trim($urlNode->textContent);
+            if (!preg_match('#/find/(\d+)$#', $url, $m)) {
+                $warnings[] = sprintf('[WARNING] %s: cannot extract find ID from URL "%s"; skipping branch', $objLabel, $url);
+                $stats['objekte_skipped']++;
+                continue;
+            }
+            $findId = (int) $m[1];
+
+            $find = $this->findRepository->find($findId);
+            if ($find === null) {
+                $warnings[] = sprintf('[WARNING] %s: find ID %d not found in database; skipping branch', $objLabel, $findId);
+                $stats['objekte_skipped']++;
+                continue;
+            }
+
+            // heidICON XML is the source of truth: on first encounter of
+            // this find in the current run, wipe every existing image (and
+            // its image_specialist rows, via cascade-remove).
+            if (!isset($clearedFinds[$findId])) {
+                $clearedFinds[$findId] = true;
+                $existing = $imageRepo->findBy(['find' => $find]);
+                foreach ($existing as $oldImg) {
+                    if (!$dryRun) {
+                        $this->entityManager->remove($oldImg);
+                    }
+                    $stats['images_deleted']++;
+                }
+                if (!$dryRun && !empty($existing)) {
+                    // Flush deletes before re-inserting so unique constraints don't trip.
+                    $this->entityManager->flush();
+                }
+            }
+
+            $find->setHeidiconId($objHeidiconId);
+            $find->setHeidiconUuid($this->stringOrNull($xpath, 'eb:_uuid', $objekte));
+            $find->setHeidiconSystemObjectId($this->intOrNull($xpath, 'eb:_system_object_id', $objekte));
+            if (!$dryRun) {
+                $this->entityManager->persist($find);
+            }
+            $stats['finds_updated']++;
+
+            // Resolve every eas-id this objekte owns via the global index
+            // and upsert one image per ressourcen.
+            foreach ($xpath->query('eb:_standard-eas/eb:files/eb:file/eb:eas-id', $objekte) as $easNode) {
+                $easId = trim($easNode->textContent);
+                if ($easId === '' || !isset($easToRes[$easId])) {
+                    continue;
+                }
+                $entry = $easToRes[$easId];
+                $claimedRes[$easId] = true;
+                $this->upsertRessourcen(
+                    $entry['xpath'],
+                    $entry['node'],
+                    $find,
+                    (int) $easId,
+                    $entry['sourceFile'],
+                    $dryRun,
+                    $imageRepo,
+                    $warnings,
+                    $stats
+                );
+                $opCount++;
+                if (!$dryRun && $opCount >= $batchSize) {
+                    $this->entityManager->flush();
+                    $opCount = 0;
+                }
+            }
+        }
+
+        // ============================================================
+        // Phase 3 — any <ressourcen> not claimed by any matched objekte
+        // is an orphan: warn and count.
+        // ============================================================
+        foreach ($easToRes as $easId => $entry) {
+            if (isset($claimedRes[$easId])) {
+                continue;
+            }
+            $resHeidiconId = $this->intOrNull($entry['xpath'], 'eb:_id', $entry['node']);
+            $warnings[] = sprintf(
+                '[WARNING] %s: ressourcen _id=%s (eas-id=%s) not owned by any matched <objekte>; skipped',
+                basename($entry['sourceFile']),
+                $resHeidiconId ?? '?',
+                $easId
+            );
+            $stats['ressourcen_orphaned']++;
         }
 
         if (!$dryRun) {
@@ -177,266 +340,120 @@ class HeidIconImportCommand extends Command
     }
 
     /**
-     * Process one heidICON XML file.
+     * Upsert one <ressourcen> as an Image (and image_specialist) on $find.
      *
-     * A file contains one or more <objekte> (each linked to one berenike find)
-     * and zero or more <ressourcen>. Each <ressourcen> carries a single eas-id;
-     * each <objekte> lists one or more eas-ids it owns. A ressourcen is
-     * attached to the find of the objekte whose eas-id list contains it.
-     *
-     * Returns null only for file-level failures (unreadable / malformed XML,
-     * no <objekte> element at all). When an individual <objekte> branch cannot
-     * be matched to a find in the database, only that branch is skipped (its
-     * eas-ids are not added to the lookup map, so the corresponding
-     * <ressourcen> become orphans and are skipped too).
-     *
-     * @return array<string,int>|null
+     * @param \Doctrine\Persistence\ObjectRepository $imageRepo
+     * @param array<string,int> $stats  modified in place
      */
-    private function processFile(string $xmlFile, SymfonyStyle $io, bool $dryRun, array &$warnings, array &$clearedFinds): ?array
-    {
-        $stats = [
-            'objekte_skipped'     => 0,
-            'finds_updated'       => 0,
-            'images_inserted'     => 0,
-            'images_updated'      => 0,
-            'specialists_linked'  => 0,
-            'ressourcen_orphaned' => 0,
-            'images_deleted'      => 0,
-        ];
+    private function upsertRessourcen(
+        \DOMXPath $xpath,
+        \DOMElement $res,
+        \App\Entity\Find $find,
+        int $easId,
+        string $xmlFile,
+        bool $dryRun,
+        $imageRepo,
+        array &$warnings,
+        array &$stats
+    ): void {
+        $resHeidiconId = $this->intOrNull($xpath, 'eb:_id', $res);
 
-        $dom = new \DOMDocument();
-        $dom->preserveWhiteSpace = false;
-        if (!@$dom->load($xmlFile)) {
-            $warnings[] = sprintf('[WARNING] %s: invalid XML, file skipped', basename($xmlFile));
-            return null;
+        $image = $imageRepo->findOneBy(['heidiconId' => $easId, 'find' => $find]);
+        $isNew = false;
+        if ($image === null) {
+            $image = new Image();
+            $isNew = true;
         }
 
-        $xpath = new \DOMXPath($dom);
-        $xpath->registerNamespace(self::NS_PREFIX, self::NS);
+        $image->setFind($find);
+        $image->setType(self::IMAGE_TYPE_PHOTO);
+        $image->setHeidiconId($easId);
+        $image->setHeidiconUuid($this->stringOrNull($xpath, 'eb:_uuid', $res));
+        $image->setHeidiconSystemObjectId($this->intOrNull($xpath, 'eb:_system_object_id', $res));
 
-        $objekteNodes = $xpath->query('/eb:objects/eb:objekte');
-        if ($objekteNodes->length === 0) {
-            $warnings[] = sprintf('[WARNING] %s: no <objekte> element, file skipped', basename($xmlFile));
-            return null;
+        $width  = $this->stringOrNull($xpath, 'eb:asset/eb:files/eb:file/eb:technical_metadata/eb:width', $res);
+        $height = $this->stringOrNull($xpath, 'eb:asset/eb:files/eb:file/eb:technical_metadata/eb:height', $res);
+        $size = ($width !== null || $height !== null) ? sprintf('%s,%s', $width ?? '', $height ?? '') : '';
+        $image->setSize($size);
+
+        $file = $this->stringOrNull($xpath, 'eb:asset/eb:files/eb:file/eb:original_filename', $res);
+        $image->setFile($file ?? '');
+
+        if ($isNew || $image->getPath() === null) {
+            $image->setPath('');
         }
 
-        // --- 1. Iterate <objekte>: resolve find, update it, map eas-ids ---
-        /** @var array<string, \App\Entity\Find> $easToFind */
-        $easToFind = [];
-
-        foreach ($objekteNodes as $objekte) {
-            $urlNode = $xpath->query(
-                'eb:custom[@name="obj_beschreibung_link"]/eb:string[@name="url"]',
-                $objekte
-            )->item(0);
-
-            $objHeidiconId = $this->intOrNull($xpath, 'eb:_id', $objekte);
-            $objLabel = sprintf('<objekte> _id=%s', $objHeidiconId ?? '?');
-
-            if ($urlNode === null) {
-                $warnings[] = sprintf(
-                    '[WARNING] %s (%s): no obj_beschreibung_link URL; skipping branch',
-                    basename($xmlFile),
-                    $objLabel
-                );
-                $stats['objekte_skipped']++;
-                continue;
-            }
-
-            $url = trim($urlNode->textContent);
-            if (!preg_match('#/find/(\d+)$#', $url, $m)) {
-                $warnings[] = sprintf(
-                    '[WARNING] %s (%s): cannot extract find ID from URL "%s"; skipping branch',
-                    basename($xmlFile),
-                    $objLabel,
-                    $url
-                );
-                $stats['objekte_skipped']++;
-                continue;
-            }
-            $findId = (int) $m[1];
-
-            $find = $this->findRepository->find($findId);
-            if ($find === null) {
-                $warnings[] = sprintf(
-                    '[WARNING] %s (%s): find ID %d not found in database; skipping branch',
-                    basename($xmlFile),
-                    $objLabel,
-                    $findId
-                );
-                $stats['objekte_skipped']++;
-                continue;
-            }
-
-            $find->setHeidiconId($objHeidiconId);
-            $find->setHeidiconUuid($this->stringOrNull($xpath, 'eb:_uuid', $objekte));
-            $find->setHeidiconSystemObjectId($this->intOrNull($xpath, 'eb:_system_object_id', $objekte));
-            if (!$dryRun) {
-                $this->entityManager->persist($find);
-            }
-            $stats['finds_updated']++;
-
-            // heidICON XML is the source of truth: on first encounter of
-            // this find in the current run, wipe every existing image (and
-            // its image_specialist rows, via cascade-remove) so only what
-            // the current XML describes remains attached.
-            if (!isset($clearedFinds[$findId])) {
-                $clearedFinds[$findId] = true;
-                $imageRepoForWipe = $this->entityManager->getRepository(Image::class);
-                $existing = $imageRepoForWipe->findBy(['find' => $find]);
-                foreach ($existing as $oldImg) {
-                    if (!$dryRun) {
-                        $this->entityManager->remove($oldImg);
-                    }
-                    $stats['images_deleted']++;
-                }
-                if (!$dryRun && !empty($existing)) {
-                    // Flush deletes before re-inserting so unique constraints don't trip.
-                    $this->entityManager->flush();
-                }
-            }
-
-            // Register every eas-id owned by this objekte against its find.
-            $easNodes = $xpath->query('eb:_standard-eas/eb:files/eb:file/eb:eas-id', $objekte);
-            foreach ($easNodes as $easNode) {
-                $easId = trim($easNode->textContent);
-                if ($easId !== '') {
-                    $easToFind[$easId] = $find;
-                }
-            }
+        if (!$dryRun) {
+            $this->entityManager->persist($image);
+        }
+        if ($isNew) {
+            $stats['images_inserted']++;
+        } else {
+            $stats['images_updated']++;
         }
 
-        // --- 2. Iterate <ressourcen>: link by eas-id, upsert image --------
-        $ressourcenNodes = $xpath->query('/eb:objects/eb:ressourcen');
-        foreach ($ressourcenNodes as $res) {
-            $resHeidiconId = $this->intOrNull($xpath, 'eb:_id', $res);
-            if ($resHeidiconId === null) {
-                $warnings[] = sprintf('[WARNING] %s: <ressourcen> without _id, skipped', basename($xmlFile));
-                continue;
-            }
-
-            $resEasId = $this->stringOrNull(
+        // --- Photographer link ----------------------------------------
+        $gndUri = $this->stringOrNull(
+            $xpath,
+            'eb:_nested__ressourcen__res_autoren/eb:ressourcen__res_autoren'
+            . '/eb:custom[@name="res_autor_gnd"]/eb:string[@name="conceptURI"]',
+            $res
+        );
+        if ($gndUri === null) {
+            $plain = $this->stringOrNull(
                 $xpath,
-                'eb:_standard-eas/eb:files/eb:file/eb:eas-id',
+                'eb:_nested__ressourcen__res_autoren_lok/eb:ressourcen__res_autoren_lok/eb:res_autor_lok',
                 $res
             );
-            if ($resEasId === null || !isset($easToFind[$resEasId])) {
-                $warnings[] = sprintf(
-                    '[WARNING] %s: ressourcen _id=%d (eas-id=%s) has no owning <objekte> in this file; skipped',
-                    basename($xmlFile),
-                    $resHeidiconId,
-                    $resEasId ?? '?'
-                );
-                $stats['ressourcen_orphaned']++;
-                continue;
-            }
-            $find = $easToFind[$resEasId];
-            $resEasIdInt = (int) $resEasId;
-
-            // --- Upsert Image ---------------------------------------------
-            $imageRepo = $this->entityManager->getRepository(Image::class);
-            $image = $imageRepo->findOneBy(['heidiconId' => $resEasIdInt, 'find' => $find]);
-            $isNew = false;
-            if ($image === null) {
-                $image = new Image();
-                $isNew = true;
-            }
-
-            $image->setFind($find);
-            $image->setType(self::IMAGE_TYPE_PHOTO);
-            $image->setHeidiconId($resEasIdInt);
-            $image->setHeidiconUuid($this->stringOrNull($xpath, 'eb:_uuid', $res));
-            $image->setHeidiconSystemObjectId($this->intOrNull($xpath, 'eb:_system_object_id', $res));
-
-            $width  = $this->stringOrNull($xpath, 'eb:asset/eb:files/eb:file/eb:technical_metadata/eb:width', $res);
-            $height = $this->stringOrNull($xpath, 'eb:asset/eb:files/eb:file/eb:technical_metadata/eb:height', $res);
-            $size = ($width !== null || $height !== null) ? sprintf('%s,%s', $width ?? '', $height ?? '') : '';
-            $image->setSize($size);
-
-            $file = $this->stringOrNull($xpath, 'eb:asset/eb:files/eb:file/eb:original_filename', $res);
-            $image->setFile($file ?? '');
-
-            // `path` is NOT NULL in the schema — keep empty string for heidICON images.
-            if ($isNew || $image->getPath() === null) {
-                $image->setPath('');
-            }
-
-            if (!$dryRun) {
-                $this->entityManager->persist($image);
-            }
-            if ($isNew) {
-                $stats['images_inserted']++;
-            } else {
-                $stats['images_updated']++;
-            }
-
-            // --- Upsert ImageSpecialist (photographer) --------------------
-            $gndUri = $this->stringOrNull(
-                $xpath,
-                'eb:_nested__ressourcen__res_autoren/eb:ressourcen__res_autoren'
-                . '/eb:custom[@name="res_autor_gnd"]/eb:string[@name="conceptURI"]',
-                $res
+            $warnings[] = sprintf(
+                '[WARNING] No GND author for ressourcen _id=%s (file %s); plain-text author: %s',
+                $resHeidiconId ?? '?',
+                basename($xmlFile),
+                $plain ?? '(none)'
             );
-
-            if ($gndUri === null) {
-                $plain = $this->stringOrNull(
-                    $xpath,
-                    'eb:_nested__ressourcen__res_autoren_lok/eb:ressourcen__res_autoren_lok/eb:res_autor_lok',
-                    $res
-                );
-                $warnings[] = sprintf(
-                    '[WARNING] No GND author for ressourcen _id=%d (file %s); plain-text author: %s',
-                    $resHeidiconId,
-                    basename($xmlFile),
-                    $plain ?? '(none)'
-                );
-                continue;
-            }
-
-            $specialist = $this->specialistRepository->findOneBy(['gnd' => $gndUri]);
-            if ($specialist === null) {
-                $warnings[] = sprintf(
-                    '[WARNING] Specialist not found for GND %s (ressourcen _id=%d, file %s)',
-                    $gndUri,
-                    $resHeidiconId,
-                    basename($xmlFile)
-                );
-                continue;
-            }
-
-            // Remove any existing photographer ImageSpecialist on this image.
-            foreach ($image->getImageSpecialists() as $existing) {
-                if ($existing->getSpeciality() === self::SPECIALITY_PHOTOGRAPHER) {
-                    $image->removeImageSpecialist($existing);
-                    if (!$dryRun) {
-                        $this->entityManager->remove($existing);
-                    }
-                }
-            }
-
-            $dateCreated = $this->stringOrNull(
-                $xpath,
-                'eb:asset/eb:files/eb:file/eb:date_created',
-                $res
-            );
-            $year = null;
-            if ($dateCreated !== null && preg_match('/^(\d{4})/', $dateCreated, $ym)) {
-                $year = (int) $ym[1];
-            }
-
-            $imageSpecialist = new ImageSpecialist();
-            $imageSpecialist->setSpeciality(self::SPECIALITY_PHOTOGRAPHER);
-            $imageSpecialist->setYear($year);
-            $imageSpecialist->setSpecialist($specialist);
-            $image->addImageSpecialist($imageSpecialist);
-
-            if (!$dryRun) {
-                $this->entityManager->persist($imageSpecialist);
-            }
-            $stats['specialists_linked']++;
+            return;
         }
 
-        return $stats;
+        $specialist = $this->specialistRepository->findOneBy(['gnd' => $gndUri]);
+        if ($specialist === null) {
+            $warnings[] = sprintf(
+                '[WARNING] Specialist not found for GND %s (ressourcen _id=%s, file %s)',
+                $gndUri,
+                $resHeidiconId ?? '?',
+                basename($xmlFile)
+            );
+            return;
+        }
+
+        foreach ($image->getImageSpecialists() as $existingIs) {
+            if ($existingIs->getSpeciality() === self::SPECIALITY_PHOTOGRAPHER) {
+                $image->removeImageSpecialist($existingIs);
+                if (!$dryRun) {
+                    $this->entityManager->remove($existingIs);
+                }
+            }
+        }
+
+        $dateCreated = $this->stringOrNull(
+            $xpath,
+            'eb:asset/eb:files/eb:file/eb:date_created',
+            $res
+        );
+        $year = null;
+        if ($dateCreated !== null && preg_match('/^(\d{4})/', $dateCreated, $ym)) {
+            $year = (int) $ym[1];
+        }
+
+        $imageSpecialist = new ImageSpecialist();
+        $imageSpecialist->setSpeciality(self::SPECIALITY_PHOTOGRAPHER);
+        $imageSpecialist->setYear($year);
+        $imageSpecialist->setSpecialist($specialist);
+        $image->addImageSpecialist($imageSpecialist);
+
+        if (!$dryRun) {
+            $this->entityManager->persist($imageSpecialist);
+        }
+        $stats['specialists_linked']++;
     }
 
     /**
