@@ -134,7 +134,7 @@
               {% if image.heidiconUuid and image.heidiconId %}
                 <div style="flex-shrink: 0;">
                   <a href="{{ path('PapyrillioBerenike_ImageShow', {'id': image.id}) }}" title="View image">
-                    <img src="{% if app.user %}https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/{{ image.heidiconUuid }}/file/id/{{ image.heidiconId }}/file_version/name/small{% else %}{{ asset('images/placeholder.png') }}{% endif %}" alt="Image thumbnail"
+                    <img src="https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/{{ image.heidiconUuid }}/file/id/{{ image.heidiconId }}/file_version/name/small" alt="Image thumbnail"
                          style="max-width: 150px; height: auto; border: 1px solid #ccc; border-radius: 4px;" />
                   </a>
                 </div>

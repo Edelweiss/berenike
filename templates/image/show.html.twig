@@ -97,41 +97,30 @@
         {% set urlFull     = 'https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/' ~ image.heidiconUuid ~ '/file/id/' ~ image.heidiconId ~ '/file_version/name/full' %}
         {% set urlOriginal = 'https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/' ~ image.heidiconUuid ~ '/file/id/' ~ image.heidiconId ~ '/file_version/name/original' %}
 
-        {% if app.user %}
-          <div class="image-viewer" id="imageViewer">
-            <div class="viewer-loading">Loading image…</div>
-            <div class="viewer-stage" id="viewerStage">
-              <img id="viewerImg" class="viewer-img"
-                   src="{{ urlPreview }}"
-                   data-src-huge="{{ urlHuge }}"
-                   alt="Image {{ image.id }}" />
-            </div>
-            <div class="viewer-controls">
-              <button type="button" id="zoomOut" title="Zoom out">−</button>
-              <button type="button" id="zoomReset" title="Reset view">⟲</button>
-              <button type="button" id="zoomIn" title="Zoom in">+</button>
-              <button type="button" id="zoomFit" title="Fit to view">⤢</button>
-              <a href="{{ urlOriginal }}" download title="Download original">⬇</a>
-            </div>
+        <div class="image-viewer" id="imageViewer">
+          <div class="viewer-loading">Loading image…</div>
+          <div class="viewer-stage" id="viewerStage">
+            <img id="viewerImg" class="viewer-img"
+                 src="{{ urlPreview }}"
+                 data-src-huge="{{ urlHuge }}"
+                 alt="Image {{ image.id }}" />
           </div>
+          <div class="viewer-controls">
+            <button type="button" id="zoomOut" title="Zoom out">−</button>
+            <button type="button" id="zoomReset" title="Reset view">⟲</button>
+            <button type="button" id="zoomIn" title="Zoom in">+</button>
+            <button type="button" id="zoomFit" title="Fit to view">⤢</button>
+            <a href="{{ urlOriginal }}" download title="Download original">⬇</a>
+          </div>
+        </div>
 
-          <div style="margin-top: 0.5em; font-size: 0.85em; color: #555;">
-            Download:
-            <a href="{{ urlPreview }}" target="_blank">1000px</a> ·
-            <a href="{{ urlHuge }}" target="_blank">2000px</a> ·
-            <a href="{{ urlFull }}" target="_blank">Full</a> ·
-            <a href="{{ urlOriginal }}" target="_blank">Original</a>
-          </div>
-        {% else %}
-          <div class="image-viewer">
-            <div class="viewer-stage">
-              <img class="viewer-img" src="{{ asset('images/placeholder.png') }}" alt="Login required" />
-            </div>
-          </div>
-          <div style="margin-top: 0.5em; font-size: 0.9em; color: #555;">
-            Please <a href="{{ path('PapyrillioBerenike_Login') }}">log in</a> to view the image.
-          </div>
-        {% endif %}
+        <div style="margin-top: 0.5em; font-size: 0.85em; color: #555;">
+          Download:
+          <a href="{{ urlPreview }}" target="_blank">1000px</a> ·
+          <a href="{{ urlHuge }}" target="_blank">2000px</a> ·
+          <a href="{{ urlFull }}" target="_blank">Full</a> ·
+          <a href="{{ urlOriginal }}" target="_blank">Original</a>
+        </div>
       {% else %}
         <p class="ui-state-disabled" style="padding: 0.5em;">No heidICON image data available for this record.</p>
       {% endif %}
@@ -187,7 +176,7 @@
 
 {% block javascripts %}
   {{ parent() }}
-  {% if app.user and image.heidiconUuid and image.heidiconId %}
+  {% if image.heidiconUuid and image.heidiconId %}
   <script type="text/javascript">
     (function(){
       var viewer  = document.getElementById('imageViewer');
