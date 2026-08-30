@@ -22,10 +22,22 @@
 /.settings
 
 # Application specific
+
+# soft link to storage (e.g. SDS
+/public/assets
+
+# import data etc.
 /data/logs
+/data/tmp
 /data/*.xml
 /data/*.csv
 /data/mysql_dump
+/data/heidICON
+/data/import
+
+# bots
 robots.txt
+
+# backup
 *.php~
 
