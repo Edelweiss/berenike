@@ -38,31 +38,17 @@ class AssetController extends BerenikeController
      */
     public function list(Request $request): Response
     {
-        $page = max(1, $request->query->getInt('page', 1));
-        $limit = 20;
-        $offset = ($page - 1) * $limit;
-
+        // Load all assets for client-side sorting/filtering with List.js
         $queryBuilder = $this->imageRepository->createQueryBuilder('i')
             ->where('i.assetKey IS NOT NULL')
             ->andWhere('i.assetShard IS NOT NULL')
-            ->orderBy('i.id', 'DESC')
-            ->setFirstResult($offset)
-            ->setMaxResults($limit);
+            ->orderBy('i.id', 'DESC');
 
         $assets = $queryBuilder->getQuery()->getResult();
-
-        $countQueryBuilder = $this->imageRepository->createQueryBuilder('i')
-            ->select('COUNT(i.id)')
-            ->where('i.assetKey IS NOT NULL')
-            ->andWhere('i.assetShard IS NOT NULL');
-        $totalAssets = $countQueryBuilder->getQuery()->getSingleScalarResult();
-
-        $totalPages = ceil($totalAssets / $limit);
+        $totalAssets = count($assets);
 
         return $this->render('asset/list.html.twig', [
             'assets' => $assets,
-            'page' => $page,
-            'totalPages' => $totalPages,
             'totalAssets' => $totalAssets,
         ]);
     }

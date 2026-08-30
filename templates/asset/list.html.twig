@@ -7,63 +7,154 @@
 {% block stylesheets %}
   {{ parent() }}
   <style>
-    .asset-grid {
+    /* Toolbar styles */
+    .asset-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1em;
+      margin-bottom: 1em;
+      padding: 1em;
+      background: #f5f5f5;
+      border-radius: 4px;
+      align-items: center;
+    }
+    .asset-controls > * {
+      margin: 0;
+    }
+    .asset-controls input[type="text"],
+    .asset-controls select {
+      padding: 0.5em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1em;
+    }
+    .asset-controls input[type="text"] {
+      flex: 1;
+      min-width: 200px;
+    }
+    .view-toggle {
+      display: flex;
+      gap: 0.25em;
+    }
+    .view-toggle button {
+      padding: 0.5em 1em;
+      border: 1px solid #ccc;
+      background: #fff;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .view-toggle button.active {
+      background: #0073aa;
+      color: #fff;
+      border-color: #0073aa;
+    }
+    
+    /* Grid view styles */
+    .asset-list.grid-view {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 1em;
       margin: 1em 0;
     }
-    .asset-card {
+    .grid-view .asset-item {
       border: 1px solid #ccc;
       border-radius: 4px;
       overflow: hidden;
       background: #fff;
       transition: box-shadow 0.2s;
     }
-    .asset-card:hover {
+    .grid-view .asset-item:hover {
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
-    .asset-card-image {
+    .grid-view .asset-image {
       width: 100%;
       height: 200px;
       object-fit: cover;
       background: #f5f5f5;
       display: block;
     }
-    .asset-card-body {
+    .grid-view .asset-body {
       padding: 0.75em;
     }
-    .asset-card-title {
+    .grid-view .asset-title {
       font-weight: bold;
       margin: 0 0 0.5em 0;
       font-size: 0.9em;
     }
-    .asset-card-meta {
+    .grid-view .asset-meta {
       font-size: 0.85em;
       color: #666;
       margin: 0.25em 0;
     }
-    .pagination {
+    
+    /* List view styles */
+    .asset-list.list-view {
       display: flex;
-      justify-content: center;
-      align-items: center;
+      flex-direction: column;
       gap: 0.5em;
-      margin: 2em 0;
+      margin: 1em 0;
     }
-    .pagination a, .pagination span {
-      padding: 0.5em 1em;
+    .list-view .asset-item {
+      display: flex;
+      gap: 1em;
+      padding: 0.75em;
       border: 1px solid #ccc;
       border-radius: 4px;
+      background: #fff;
+      transition: background 0.2s;
+      align-items: center;
+    }
+    .list-view .asset-item:hover {
+      background: #f9f9f9;
+    }
+    .list-view .asset-image {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      background: #f5f5f5;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .list-view .asset-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 120px 100px 1fr 100px;
+      gap: 1em;
+      align-items: center;
+    }
+    .list-view .asset-title {
+      font-weight: bold;
+      font-size: 0.95em;
+    }
+    .list-view .asset-meta {
+      font-size: 0.9em;
+      color: #666;
+      display: contents;
+    }
+    .list-view .asset-meta > span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .list-view .file-info {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    /* Common styles */
+    .asset-item a {
       text-decoration: none;
-      color: #333;
+      color: inherit;
     }
-    .pagination a:hover {
-      background: #f0f0f0;
+    .asset-item a:hover {
+      text-decoration: underline;
     }
-    .pagination .current {
-      background: #0073aa;
-      color: #fff;
-      border-color: #0073aa;
+    
+    .list-info {
+      text-align: center;
+      padding: 2em;
+      color: #666;
+      font-style: italic;
     }
   </style>
 {% endblock %}
@@ -72,7 +163,7 @@
   <div class="ui-widget">
     <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
       <h3 style="margin: 0; font-size: 1.1em;">
-        Assets ({{ totalAssets }} total)
+        Assets (<span class="asset-count">{{ totalAssets }}</span> total)
         {% if app.user %}
           <a href="{{ path('PapyrillioBerenike_AssetCreate') }}" style="float: right;" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
             <span class="ui-button-text">Upload New Asset</span>
@@ -83,66 +174,80 @@
 
     <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
       {% if assets|length > 0 %}
-        <div class="asset-grid">
-          {% for asset in assets %}
-            <div class="asset-card">
-              <a href="{{ path('PapyrillioBerenike_AssetShow', {'id': asset.id}) }}">
-                {% if asset.assetKey %}
-                  <img src="{{ asset('assets/' ~ asset.assetShard ~ '/' ~ asset.assetKey ~ '/thumbnail.webp') }}" 
-                       alt="{{ asset.file }}"
-                       class="asset-card-image"
-                       onerror="this.src='{{ asset('images/no-image.png') }}'; this.onerror=null;">
-                {% else %}
-                  <div class="asset-card-image" style="display: flex; align-items: center; justify-content: center; color: #999;">
-                    No preview
-                  </div>
-                {% endif %}
-              </a>
-              <div class="asset-card-body">
-                <h4 class="asset-card-title">
-                  <a href="{{ path('PapyrillioBerenike_AssetShow', {'id': asset.id}) }}">
-                    Asset #{{ asset.id }}
-                  </a>
-                </h4>
-                <div class="asset-card-meta">
-                  <strong>Type:</strong> {{ asset.type|capitalize }}
-                </div>
-                {% if asset.file %}
-                  <div class="asset-card-meta" title="{{ asset.file }}">
-                    <strong>File:</strong> {{ asset.file|length > 20 ? asset.file|slice(0, 20) ~ '...' : asset.file }}
-                  </div>
-                {% endif %}
-                {% if asset.finds|length > 0 %}
-                  <div class="asset-card-meta">
-                    <strong>Finds:</strong> {{ asset.finds|length }}
-                  </div>
-                {% endif %}
-              </div>
+        <div id="asset-list-container">
+          <!-- Controls -->
+          <div class="asset-controls">
+            <input type="text" class="search" placeholder="Search assets..." />
+            
+            <select class="sort" data-sort="id">
+              <option value="">Sort by...</option>
+              <option value="id">Asset ID</option>
+              <option value="type">Type</option>
+              <option value="filename">Filename</option>
+              <option value="finds">Number of Finds</option>
+            </select>
+            
+            <div class="view-toggle">
+              <button type="button" class="view-btn grid-btn active" data-view="grid">
+                <span>⊞ Grid</span>
+              </button>
+              <button type="button" class="view-btn list-btn" data-view="list">
+                <span>☰ List</span>
+              </button>
             </div>
-          {% endfor %}
-        </div>
-
-        {% if totalPages > 1 %}
-          <div class="pagination">
-            {% if page > 1 %}
-              <a href="{{ path('PapyrillioBerenike_AssetList', {'page': page - 1}) }}">« Previous</a>
-            {% endif %}
-
-            {% for p in 1..totalPages %}
-              {% if p == page %}
-                <span class="current">{{ p }}</span>
-              {% elseif p == 1 or p == totalPages or (p >= page - 2 and p <= page + 2) %}
-                <a href="{{ path('PapyrillioBerenike_AssetList', {'page': p}) }}">{{ p }}</a>
-              {% elseif p == page - 3 or p == page + 3 %}
-                <span>...</span>
-              {% endif %}
-            {% endfor %}
-
-            {% if page < totalPages %}
-              <a href="{{ path('PapyrillioBerenike_AssetList', {'page': page + 1}) }}">Next »</a>
-            {% endif %}
+            
+            <button type="button" class="reset-btn ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+              <span class="ui-button-text">Reset</span>
+            </button>
           </div>
-        {% endif %}
+
+          <!-- Asset List (Grid view by default) -->
+          <div class="asset-list grid-view">
+            <ul class="list" style="list-style: none; padding: 0; margin: 0; display: contents;">
+              {% for asset in assets %}
+                <li class="asset-item">
+                  <a href="{{ path('PapyrillioBerenike_AssetShow', {'id': asset.id}) }}">
+                    {% if asset.assetKey %}
+                      <img src="{{ asset('assets/' ~ asset.assetShard ~ '/' ~ asset.assetKey ~ '/thumbnail.webp') }}" 
+                           alt="{{ asset.file }}"
+                           class="asset-image"
+                           onerror="this.src='{{ asset('images/no-image.png') }}'; this.onerror=null;">
+                    {% else %}
+                      <div class="asset-image" style="display: flex; align-items: center; justify-content: center; color: #999; background: #f5f5f5;">
+                        No preview
+                      </div>
+                    {% endif %}
+                  </a>
+                  <div class="asset-body">
+                    <h4 class="asset-title">
+                      <a href="{{ path('PapyrillioBerenike_AssetShow', {'id': asset.id}) }}">
+                        <span class="id" style="display: none;">{{ asset.id }}</span>
+                        <span>Asset #{{ asset.id }}</span>
+                      </a>
+                    </h4>
+                    <div class="asset-meta">
+                      <span><strong>Type:</strong> <span class="type">{{ asset.type|capitalize }}</span></span>
+                      {% if asset.file %}
+                        <span class="file-info">
+                          <strong>File:</strong> 
+                          <span class="filename" title="{{ asset.file }}">{{ asset.file }}</span>
+                        </span>
+                      {% else %}
+                        <span class="filename" style="display: none;"></span>
+                      {% endif %}
+                      <span>
+                        <strong>Finds:</strong> 
+                        <span class="finds">{{ asset.finds|length }}</span>
+                      </span>
+                    </div>
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <p class="list-info" style="display: none;">No assets match your search.</p>
+        </div>
       {% else %}
         <p class="ui-state-disabled" style="padding: 2em; text-align: center;">
           No assets found. 
@@ -154,9 +259,101 @@
     </div>
   </div>
 
-  <div style="margin-top: 1em;">
-    <a href="{{ path('PapyrillioBerenike_FindList') }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
-      <span class="ui-button-text">Back to Finds</span>
-    </a>
-  </div>
+  <script src="{{ asset('js/list.min.js') }}"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize List.js
+      var options = {
+        valueNames: ['id', 'type', 'filename', 'finds'],
+        searchClass: 'search',
+        sortClass: 'sort',
+        listClass: 'list'
+      };
+      
+      var assetList = new List('asset-list-container', options);
+      
+      // Update count display
+      function updateCount() {
+        var count = assetList.matchingItems.length;
+        document.querySelector('.asset-count').textContent = count;
+        
+        // Show/hide "no results" message
+        var listInfo = document.querySelector('.list-info');
+        if (count === 0) {
+          listInfo.style.display = 'block';
+        } else {
+          listInfo.style.display = 'none';
+        }
+      }
+      
+      // Listen for search/filter changes
+      assetList.on('searchComplete', updateCount);
+      assetList.on('sortComplete', updateCount);
+      assetList.on('filterComplete', updateCount);
+      
+      // View toggle functionality
+      var listContainer = document.querySelector('.asset-list');
+      var viewButtons = document.querySelectorAll('.view-btn');
+      
+      viewButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var view = this.getAttribute('data-view');
+          
+          // Update active button
+          viewButtons.forEach(function(b) { b.classList.remove('active'); });
+          this.classList.add('active');
+          
+          // Update view
+          if (view === 'grid') {
+            listContainer.classList.remove('list-view');
+            listContainer.classList.add('grid-view');
+          } else {
+            listContainer.classList.remove('grid-view');
+            listContainer.classList.add('list-view');
+          }
+        });
+      });
+      
+      // Reset button
+      document.querySelector('.reset-btn').addEventListener('click', function() {
+        // Clear search
+        document.querySelector('.search').value = '';
+        assetList.search();
+        
+        // Reset sort
+        document.querySelector('.sort').value = '';
+        assetList.sort('id', { order: 'desc' });
+        
+        // Reset to grid view
+        listContainer.classList.remove('list-view');
+        listContainer.classList.add('grid-view');
+        viewButtons.forEach(function(b) { b.classList.remove('active'); });
+        document.querySelector('.grid-btn').classList.add('active');
+        
+        updateCount();
+      });
+      
+      // Handle sort with toggle between asc/desc
+      var currentSort = 'id';
+      var sortOrder = 'desc';
+      document.querySelector('.sort').addEventListener('change', function() {
+        var sortBy = this.value;
+        if (sortBy) {
+          if (currentSort === sortBy) {
+            // Toggle order
+            sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+          } else {
+            // New sort field, default to ascending (except ID which is descending)
+            sortOrder = sortBy === 'id' ? 'desc' : 'asc';
+            currentSort = sortBy;
+          }
+          assetList.sort(sortBy, { order: sortOrder });
+        }
+      });
+      
+      // Initialize with descending ID order (newest first)
+      assetList.sort('id', { order: 'desc' });
+      updateCount();
+    });
+  </script>
 {% endblock %}
