@@ -51,6 +51,36 @@ PapyrillioBerenike_ImageShow:
     requirements:
         id: '\d+'
 
+# Asset Management Routes
+PapyrillioBerenike_AssetList:
+    path:  /asset-library
+    controller: App\Controller\AssetController::list
+
+PapyrillioBerenike_AssetShow:
+    path:  /asset/{id}
+    controller: App\Controller\AssetController::show
+    requirements:
+        id: '\d+'
+
+PapyrillioBerenike_AssetCreate:
+    path:  /asset/create
+    controller: App\Controller\AssetController::create
+    methods: [GET, POST]
+
+PapyrillioBerenike_AssetEdit:
+    path:  /asset/{id}/edit
+    controller: App\Controller\AssetController::edit
+    methods: [GET, POST]
+    requirements:
+        id: '\d+'
+
+PapyrillioBerenike_AssetDelete:
+    path:  /asset/{id}/delete
+    controller: App\Controller\AssetController::delete
+    methods: [GET, POST]
+    requirements:
+        id: '\d+'
+
 PapyrillioBerenike_BucketList:
     path:  /buckets
     controller: App\Controller\BucketController::list

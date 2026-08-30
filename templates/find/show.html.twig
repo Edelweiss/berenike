@@ -21,6 +21,9 @@
     <a href="{{ path('PapyrillioBerenike_FindList') }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
       <span class="ui-button-text">Back to Finds</span>
     </a>
+    <a href="{{ path('PapyrillioBerenike_AssetList') }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+      <span class="ui-button-text">View Assets</span>
+    </a>
     {% if app.user %}
     <a href="{{ path('PapyrillioBerenike_FindShowForHeidIcon', {'id': find.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
       <span class="ui-button-text">HeidICON View</span>

@@ -380,7 +380,8 @@ class Find {
     /**
      * Get the thumbnail image for this find.
      * Returns the image with the lowest number if available,
-     * or the first image with HeidICON data.
+     * prioritizing images with asset_key (new asset system).
+     * Falls back to legacy images with HeidICON data.
      * 
      * @return Image|null
      */
@@ -393,14 +394,19 @@ class Find {
         $lowestNumber = null;
         
         foreach ($this->images as $image) {
-            // Only consider images with HeidICON data
-            if ($image->getHeidiconUuid() && $image->getHeidiconSystemObjectId()) {
+            // Prioritize images with asset_key (new asset system)
+            if ($image->getAssetKey() && $image->getAssetShard()) {
                 // If this image has a number, check if it's the lowest
                 if ($image->getNumber() && ($lowestNumber === null || $image->getNumber() < $lowestNumber)) {
                     $lowestNumber = $image->getNumber();
                     $thumbnailImage = $image;
-                } elseif ($thumbnailImage === null) {
-                    // No image selected yet, use this one
+                } elseif ($thumbnailImage === null || !$thumbnailImage->getAssetKey()) {
+                    // No asset image selected yet, use this one
+                    $thumbnailImage = $image;
+                }
+            } elseif ($thumbnailImage === null) {
+                // Fallback to legacy images with HeidICON data
+                if ($image->getHeidiconUuid() && $image->getHeidiconSystemObjectId()) {
                     $thumbnailImage = $image;
                 }
             }
@@ -409,4 +415,3 @@ class Find {
         return $thumbnailImage;
     }
 }
-
