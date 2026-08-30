@@ -7,11 +7,14 @@ use App\Entity\Bucket;
 use App\Entity\Locus;
 use App\Entity\Excavation;
 use App\Entity\Specialist;
+use App\Entity\Image;
+use App\Entity\ImageSpecialist;
 use App\Form\FindType;
 use App\Form\BucketType;
 use App\Form\LocusType;
 use App\Form\ExcavationType;
 use App\Form\SpecialistType;
+use App\Service\ImageService;
 use App\Repository\FindRepository;
 use App\Repository\BucketRepository;
 use App\Repository\LocusRepository;
@@ -31,6 +34,7 @@ class AdminController extends BerenikeController
     private $locusRepository;
     private $excavationRepository;
     private $specialistRepository;
+    private $imageService;
 
     public function __construct(
         RequestStack $requestStack,
@@ -40,7 +44,8 @@ class AdminController extends BerenikeController
         BucketRepository $bucketRepository,
         LocusRepository $locusRepository,
         ExcavationRepository $excavationRepository,
-        SpecialistRepository $specialistRepository
+        SpecialistRepository $specialistRepository,
+        ImageService $imageService
     ) {
         parent::__construct($requestStack, $logger);
         $this->entityManager = $entityManager;
@@ -49,6 +54,7 @@ class AdminController extends BerenikeController
         $this->locusRepository = $locusRepository;
         $this->excavationRepository = $excavationRepository;
         $this->specialistRepository = $specialistRepository;
+        $this->imageService = $imageService;
     }
 
     public function newFind(Request $request): Response
@@ -59,12 +65,82 @@ class AdminController extends BerenikeController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Handle new image uploads - access from form, not getData()
+            $newImageUploadsForm = $form->get('newImageUploads');
+            
+            if ($newImageUploadsForm->count() > 0) {
+                foreach ($newImageUploadsForm as $index => $uploadForm) {
+                    $uploadedFile = $uploadForm->get('uploadedFile')->getData();
+                    
+                    $this->logger->info('Processing upload form', [
+                        'index' => $index,
+                        'has_file' => $uploadedFile !== null,
+                        'file_name' => $uploadedFile ? $uploadedFile->getClientOriginalName() : null
+                    ]);
+                    
+                    if ($uploadedFile) {
+                        try {
+                            $type = $uploadForm->get('type')->getData() ?? 'photo';
+                            $specialist = $uploadForm->get('specialist')->getData();
+                            $speciality = $uploadForm->get('speciality')->getData();
+                            $year = $uploadForm->get('year')->getData();
+                            
+                            // Generate asset_key from filename
+                            $originalFilename = $uploadedFile->getClientOriginalName();
+                            $assetKey = $this->imageService->generateAssetKey($originalFilename);
+                            
+                            // Create new Image entity
+                            $image = new Image();
+                            $image->setAssetKey($assetKey);
+                            $image->setType($type);
+                            $image->setFile($originalFilename);
+                            $image->setPath($assetKey);
+                            
+                            // Use uploaded file's temporary path
+                            $tempPath = $uploadedFile->getRealPath();
+                            
+                            // Process the image
+                            $dimensions = $this->imageService->processImage($tempPath, $assetKey);
+                            $image->setSize(sprintf('%d,%d', $dimensions['width'], $dimensions['height']));
+                            
+                            // Handle specialist data if provided
+                            if ($specialist || $speciality || $year) {
+                                $imageSpecialist = new ImageSpecialist();
+                                $imageSpecialist->setImage($image);
+                                
+                                if ($specialist) {
+                                    $imageSpecialist->setSpecialist($specialist);
+                                }
+                                if ($speciality) {
+                                    $imageSpecialist->setSpeciality($speciality);
+                                }
+                                if ($year) {
+                                    $imageSpecialist->setYear($year);
+                                }
+                                
+                                $image->addImageSpecialist($imageSpecialist);
+                                $this->entityManager->persist($imageSpecialist);
+                            }
+                            
+                            // Link image to find
+                            $find->addImage($image);
+                            $this->entityManager->persist($image);
+                            
+                        } catch (\Exception $e) {
+                            $this->logger->error('Failed to process uploaded image: ' . $e->getMessage());
+                            $this->addFlash('error', 'Failed to process image: ' . $originalFilename);
+                        }
+                    }
+                }
+            }
+            
             $find->setCreated(new \DateTime());
             $find->setModified(new \DateTime());
             
             $this->entityManager->persist($find);
             $this->entityManager->flush();
 
+            $this->addFlash('success', 'Find created successfully');
             return $this->redirectToRoute('PapyrillioBerenike_FindShow', ['id' => $find->getId()]);
         }
 

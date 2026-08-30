@@ -22,7 +22,7 @@
 {% endblock %}
 
 {% block body %}
-    {{ form_start(form, {'attr': {'class': 'ui-widget'}}) }}
+    {{ form_start(form, {'attr': {'class': 'ui-widget', 'enctype': 'multipart/form-data'}}) }}
     <div class="ui-widget" style="margin-bottom: 1em;">
         <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
             <h3 style="margin: 0; font-size: 1.1em;">Data</h3>

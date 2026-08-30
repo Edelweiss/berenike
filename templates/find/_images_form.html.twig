@@ -5,99 +5,104 @@
     </div>
     <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
     
-    {# Specialist prototype template with placeholders #}
-    <script type="text/template" id="specialist-prototype-template">
-        <div class="specialist-item" style="margin-bottom: 1em; padding: 0.5em; background-color: #f0f0f0; border-radius: 4px;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5em;">
-                <div>
-                    <label for="find_images_IMAGEINDEX_imageSpecialists_SPECIALISTINDEX_specialist">Specialist <span style="color: red;">*</span></label>
-                    <select id="find_images_IMAGEINDEX_imageSpecialists_SPECIALISTINDEX_specialist" name="find[images][IMAGEINDEX][imageSpecialists][SPECIALISTINDEX][specialist]" class="ui-widget ui-widget-content ui-corner-all" required>
-                        <option value="">-- Select Specialist --</option>
-                        {% for specialist in form.images.vars.prototype.imageSpecialists.vars.prototype.specialist.vars.choices %}
-                            <option value="{{ specialist.value }}">{{ specialist.label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div>
-                    <label for="find_images_IMAGEINDEX_imageSpecialists_SPECIALISTINDEX_speciality">Speciality <span style="color: red;">*</span></label>
-                    <select id="find_images_IMAGEINDEX_imageSpecialists_SPECIALISTINDEX_speciality" name="find[images][IMAGEINDEX][imageSpecialists][SPECIALISTINDEX][speciality]" class="ui-widget ui-widget-content ui-corner-all" required>
-                        <option value="">-- Select Speciality --</option>
-                        <option value="photographer">Photographer</option>
-                        <option value="artist">Artist</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="find_images_IMAGEINDEX_imageSpecialists_SPECIALISTINDEX_year">Year <span style="color: red;">*</span></label>
-                    <select id="find_images_IMAGEINDEX_imageSpecialists_SPECIALISTINDEX_year" name="find[images][IMAGEINDEX][imageSpecialists][SPECIALISTINDEX][year]" class="ui-widget ui-widget-content ui-corner-all" required>
-                        <option value="">-- Select Year --</option>
-                        {% for year in 1995..('now'|date('Y') + 1) %}
-                            <option value="{{ year }}">{{ year }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-            <button type="button" class="remove-specialist ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="margin-top: 0.5em;">
-                <span class="ui-button-text">Remove Specialist</span>
-            </button>
-        </div>
-    </script>
-
-    <div id="images-collection" data-prototype="{{ form_widget(form.images.vars.prototype)|e('html_attr') }}">
-        {% for imageForm in form.images %}
-            <div class="image-item ui-widget-content ui-corner-all" style="padding: 1em; margin-bottom: 1em; background-color: #f9f9f9;">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 0.5em;">
-                    {{ form_row(imageForm.type, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
-                    {{ form_row(imageForm.number, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
-                    {{ form_row(imageForm.file, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
-                    {{ form_row(imageForm.path, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
-                    {{ form_row(imageForm.size, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all', 'rows': 2}}) }}
-                    {{ form_row(imageForm.heidiconId, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
-                    {{ form_row(imageForm.heidiconUuid, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
-                    {{ form_row(imageForm.heidiconSystemObjectId, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
-                </div>
-
-                <!-- Specialists Subsection -->
-                <div style="margin-top: 1em;">
-                    <h4>Specialists</h4>
-                    <div class="image-specialists-collection">
-                        {% for specialistForm in imageForm.imageSpecialists %}
-                            <div class="specialist-item" style="margin-bottom: 1em; padding: 0.5em; background-color: #f0f0f0; border-radius: 4px;">
-                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5em;">
-                                    <div>
-                                        {{ form_label(specialistForm.specialist) }}
-                                        {{ form_widget(specialistForm.specialist, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
-                                    </div>
-                                    <div>
-                                        {{ form_label(specialistForm.speciality) }}
-                                        {{ form_widget(specialistForm.speciality, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
-                                    </div>
-                                    <div>
-                                        {{ form_label(specialistForm.year) }}
-                                        {{ form_widget(specialistForm.year, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
-                                    </div>
-                                </div>
-                                <button type="button" class="remove-specialist ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="margin-top: 0.5em;">
-                                    <span class="ui-button-text">Remove Specialist</span>
-                                </button>
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <button type="button" class="add-specialist ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
-                        <span class="ui-button-text">Add Specialist</span>
-                    </button>
-                </div>
-                
-                <button type="button" class="remove-image ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="margin-top: 1em;">
-                    <span class="ui-button-text">Remove Image</span>
-                </button>
-            </div>
-        {% endfor %}
+    <!-- Section 1: Link Existing Assets -->
+    <div style="margin-bottom: 2em;">
+        <h4 style="margin-bottom: 0.5em;">📎 Link Existing Assets</h4>
+        <p style="color: #666; font-size: 0.9em; margin-bottom: 0.5em;">
+            Select one or more existing assets from the library to associate with this find.
+        </p>
+        {{ form_row(form.images, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+        <p style="font-size: 0.85em; color: #666; margin-top: 0.25em;">
+            Hold Ctrl (or Cmd on Mac) to select multiple assets. 
+            <a href="{{ path('PapyrillioBerenike_AssetList') }}" target="_blank">Browse Asset Library →</a>
+        </p>
     </div>
-    <button type="button" id="add-image" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
-        <span class="ui-button-text">Add Image</span>
-    </button>
+
+    <!-- Section 2: Upload New Images -->
+    <div>
+        <h4 style="margin-bottom: 0.5em;">⬆️ Upload New Images</h4>
+        <p style="color: #666; font-size: 0.9em; margin-bottom: 1em;">
+            Upload new image files. They will be processed through the asset manager and linked to this find.
+        </p>
+        
+        <div id="new-images-collection" data-prototype="{{ form_widget(form.newImageUploads.vars.prototype)|e('html_attr') }}">
+            {% for uploadForm in form.newImageUploads %}
+                <div class="new-image-item ui-widget-content ui-corner-all" style="padding: 1em; margin-bottom: 1em; background-color: #f9f9f9;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1em;">
+                        <div>
+                            {{ form_row(uploadForm.uploadedFile, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+                            {{ form_row(uploadForm.type, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+                        </div>
+                        <div>
+                            {{ form_row(uploadForm.specialist, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+                            {{ form_row(uploadForm.speciality, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+                            {{ form_row(uploadForm.year, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+                        </div>
+                    </div>
+                    <div style="text-align: right; margin-top: 0.5em;">
+                        <button type="button" class="remove-new-image ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+                            <span class="ui-button-text">Remove</span>
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <button type="button" id="add-new-image" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+            <span class="ui-button-text">+ Add Image Upload</span>
+        </button>
+    </div>
+    
     </div>
 </div>
 
-{# Mark images field as rendered to prevent duplicate output in form_end #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var newImagesCollection = document.getElementById('new-images-collection');
+    var addNewImageButton = document.getElementById('add-new-image');
+    
+    if (!newImagesCollection || !addNewImageButton) {
+        return;
+    }
+    
+    var newImageIndex = newImagesCollection.querySelectorAll('.new-image-item').length;
+    
+    addNewImageButton.addEventListener('click', function() {
+        var prototype = newImagesCollection.dataset.prototype;
+        var newForm = prototype.replace(/__name__/g, newImageIndex);
+        
+        var wrapper = document.createElement('div');
+        wrapper.className = 'new-image-item ui-widget-content ui-corner-all';
+        wrapper.style.cssText = 'padding: 1em; margin-bottom: 1em; background-color: #f9f9f9;';
+        
+        // Wrap the form fields in grid layout
+        wrapper.innerHTML = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1em;"><div>' + 
+            newForm + 
+            '</div><div></div></div>' +
+            '<div style="text-align: right; margin-top: 0.5em;">' +
+            '<button type="button" class="remove-new-image ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">' +
+            '<span class="ui-button-text">Remove</span></button></div>';
+        
+        newImagesCollection.appendChild(wrapper);
+        newImageIndex++;
+    });
+    newImagesCollection.addEventListener('click', function(e) {
+        var target = e.target;
+        if (target.classList.contains('remove-new-image') || 
+            (target.classList.contains('ui-button-text') && target.textContent.trim() === 'Remove')) {
+            var item = target.closest('.new-image-item');
+            if (item) {
+                item.remove();
+            }
+        }
+    });
+});
+</script>
+
+{# Mark fields as rendered to prevent duplicate output in form_end #}
 {% do form.images.setRendered() %}
+{% do form.newImageUploads.setRendered() %}
+</script>
+
+{# Mark fields as rendered to prevent duplicate output in form_end #}
+{% do form.images.setRendered() %}
+{% do form.newImageUploads.setRendered() %}

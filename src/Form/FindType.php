@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Find;
 use App\Entity\Bucket;
+use App\Entity\Image;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -177,13 +178,35 @@ class FindType extends AbstractType
                 'required' => true,
                 'label' => 'Bucket',
             ])
-            ->add('images', CollectionType::class, [
-                'entry_type' => ImageType::class,
+            ->add('images', EntityType::class, [
+                'class' => Image::class,
+                'choice_label' => function (Image $image) {
+                    if ($image->getAssetKey()) {
+                        return sprintf('Asset #%d (%s)', $image->getId(), $image->getFile() ?: $image->getAssetKey());
+                    }
+                    return sprintf('Image #%d (Legacy)', $image->getId());
+                },
+                'query_builder' => function ($repository) {
+                    return $repository->createQueryBuilder('i')
+                        ->where('i.assetKey IS NOT NULL')
+                        ->orderBy('i.id', 'DESC');
+                },
+                'multiple' => true,
+                'required' => false,
+                'label' => 'Link Existing Assets',
+                'by_reference' => false,
+                'attr' => [
+                    'size' => 10,
+                ],
+            ])
+            ->add('newImageUploads', CollectionType::class, [
+                'entry_type' => FindImageUploadType::class,
                 'allow_add' => true,
                 'allow_delete' => true,
                 'by_reference' => false,
-                'label' => 'Images',
+                'label' => 'Upload New Images',
                 'required' => false,
+                'mapped' => false, // Not directly mapped to entity, handled in controller
             ])
         ;
     }
