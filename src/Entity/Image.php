@@ -10,13 +10,16 @@ class Image {
     private $size;
     private $file;
     private $path;
+    private $assetKey;
+    private $assetShard;
     private $heidiconId;
     private $heidiconUuid;
     private $heidiconSystemObjectId;
-    private $find;
+    private $finds;
     private $imageSpecialists;
     
     public function __construct() {
+        $this->finds = new \Doctrine\Common\Collections\ArrayCollection();
         $this->imageSpecialists = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
@@ -62,6 +65,29 @@ class Image {
         return $this->path;
     }
 
+    public function setAssetKey(?string $assetKey): self {
+        $this->assetKey = $assetKey;
+        // Automatically compute asset_shard when asset_key is set
+        if ($assetKey !== null) {
+            $this->assetShard = substr(md5($assetKey), 0, 2);
+        } else {
+            $this->assetShard = null;
+        }
+        return $this;
+    }
+    public function getAssetKey(): ?string {
+        return $this->assetKey;
+    }
+
+    public function setAssetShard(?string $assetShard): self {
+        // Asset shard is automatically computed, but setter is needed for Doctrine
+        $this->assetShard = $assetShard;
+        return $this;
+    }
+    public function getAssetShard(): ?string {
+        return $this->assetShard;
+    }
+
     public function setHeidiconId(?int $heidiconId): self {
         $this->heidiconId = $heidiconId;
         return $this;
@@ -86,11 +112,54 @@ class Image {
         return $this->heidiconSystemObjectId;
     }
 
-    public function setFind(\App\Entity\Find $find){
-        $this->find = $find;
+    public function addFind(\App\Entity\Find $find): self {
+        if (!$this->finds->contains($find)) {
+            $this->finds[] = $find;
+            $find->addImage($this);
+        }
+        return $this;
     }
-    public function getFind(){
-        return $this->find;
+    
+    public function removeFind(\App\Entity\Find $find): self {
+        if ($this->finds->removeElement($find)) {
+            $find->removeImage($this);
+        }
+        return $this;
+    }
+    
+    public function setFinds($finds): self {
+        // Clear existing finds
+        foreach ($this->finds->toArray() as $existingFind) {
+            $this->removeFind($existingFind);
+        }
+        
+        // Add new finds
+        $newFinds = is_array($finds) ? $finds : $finds->toArray();
+        foreach ($newFinds as $find) {
+            $this->addFind($find);
+        }
+        return $this;
+    }
+    
+    public function getFinds() {
+        return $this->finds;
+    }
+
+    /**
+     * Legacy method for backward compatibility
+     * @deprecated Use getFinds() instead
+     */
+    public function getFind() {
+        return $this->finds->first() ?: null;
+    }
+
+    /**
+     * Legacy method for backward compatibility
+     * @deprecated Use addFind() or setFinds() instead
+     */
+    public function setFind(\App\Entity\Find $find){
+        $this->finds->clear();
+        $this->addFind($find);
     }
 
     public function addImageSpecialist(?\App\Entity\ImageSpecialist $imageSpecialist) {

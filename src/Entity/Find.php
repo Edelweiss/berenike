@@ -343,12 +343,14 @@ class Find {
     public function addImage(\App\Entity\Image $image) {
         if (!$this->images->contains($image)) {
             $this->images[] = $image;
-            $image->setFind($this);
+            $image->addFind($this);
         }
     }
     
     public function removeImage(\App\Entity\Image $image) {
-        $this->images->removeElement($image);
+        if ($this->images->removeElement($image)) {
+            $image->removeFind($this);
+        }
     }
     
     public function setImages($images) {

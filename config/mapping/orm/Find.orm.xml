@@ -68,12 +68,11 @@
                 <order-by-field name="year" direction="ASC" />
             </order-by>
         </one-to-many>
-        <one-to-many field="images" target-entity="Image" mapped-by="find" orphan-removal="true">
+        <many-to-many field="images" target-entity="Image" mapped-by="finds">
             <cascade>
                 <cascade-persist/>
-                <cascade-remove/>
             </cascade>
-        </one-to-many>
+        </many-to-many>
         <!-- don't forget to init the collection in entity __construct() method -->
     </entity>
 </doctrine-mapping>
