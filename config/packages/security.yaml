@@ -37,6 +37,10 @@ security:
         # User profile - requires ROLE_USER (any logged in user)
         - { path: '^/user/editProfile', roles: ROLE_USER }
         - { path: '^/user/changePassword', roles: ROLE_USER }
+        # Asset management - requires ROLE_EDITOR
+        - { path: '^/asset/create$', roles: ROLE_EDITOR }
+        - { path: '^/asset/[0-9]+/edit$', roles: ROLE_EDITOR }
+        - { path: '^/asset/[0-9]+/delete$', roles: ROLE_EDITOR }
         # General access rules
         - { path: '^/admin', roles: ROLE_EDITOR }
         - { path: '^/dashboard$', roles: ROLE_USER }
