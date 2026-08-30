@@ -121,11 +121,10 @@ class AssetController extends BerenikeController
 
                     $asset->setAssetKey($assetKey);
                     
-                    // Move uploaded file to temporary location
-                    $tempPath = sys_get_temp_dir() . '/' . uniqid() . '_' . $originalFilename;
-                    $uploadedFile->move(dirname($tempPath), basename($tempPath));
+                    // Use the uploaded file's existing temporary path
+                    $tempPath = $uploadedFile->getRealPath();
 
-                    // Process the image
+                    // Process the image (this will copy to asset directory)
                     $dimensions = $this->imageService->processImage($tempPath, $assetKey);
                     
                     // Set size and file properties
@@ -137,11 +136,8 @@ class AssetController extends BerenikeController
                     if (!$asset->getType()) {
                         $asset->setType('photo');
                     }
-
-                    // Clean up temp file
-                    if (file_exists($tempPath)) {
-                        unlink($tempPath);
-                    }
+                    
+                    // Note: Symfony automatically cleans up uploaded file after request
 
                     $this->entityManager->persist($asset);
                     $this->entityManager->flush();
@@ -150,10 +146,18 @@ class AssetController extends BerenikeController
                     return $this->redirectToRoute('PapyrillioBerenike_AssetShow', ['id' => $asset->getId()]);
 
                 } catch (\Exception $e) {
+                    $this->logger->error('Failed to process asset: ' . $e->getMessage());
                     $this->addFlash('error', 'Failed to process image: ' . $e->getMessage());
                 }
             } else {
                 $this->addFlash('error', 'Please select a file to upload');
+            }
+        } elseif ($form->isSubmitted()) {
+            // Form was submitted but has validation errors
+            $this->logger->error('Asset form validation failed');
+            foreach ($form->getErrors(true) as $error) {
+                $this->logger->error('Form error: ' . $error->getMessage());
+                $this->addFlash('error', $error->getMessage());
             }
         }
 

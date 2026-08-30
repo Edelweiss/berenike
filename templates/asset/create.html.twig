@@ -21,7 +21,34 @@
 {% endblock %}
 
 {% block body %}
+  {# Display flash messages #}
+  {% for type, messages in app.flashes %}
+    {% for message in messages %}
+      <div class="ui-widget" style="margin-bottom: 1em;">
+        <div class="ui-state-{{ type == 'error' ? 'error' : (type == 'warning' ? 'highlight' : 'default') }} ui-corner-all" style="padding: 1em;">
+          <span class="ui-icon ui-icon-{{ type == 'error' ? 'alert' : 'info' }}" style="float: left; margin-right: 0.3em;"></span>
+          {{ message }}
+        </div>
+      </div>
+    {% endfor %}
+  {% endfor %}
+  
   {{ form_start(form, {'attr': {'class': 'ui-widget', 'enctype': 'multipart/form-data'}}) }}
+  
+  {# Display form errors if any #}
+  {% if form.vars.errors|length > 0 %}
+    <div class="ui-widget" style="margin-bottom: 1em;">
+      <div class="ui-state-error ui-corner-all" style="padding: 1em;">
+        <strong>Form Errors:</strong>
+        <ul>
+          {% for error in form.vars.errors %}
+            <li>{{ error.message }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  {% endif %}
+  
   <div class="ui-widget" style="margin-bottom: 1em;">
     <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
       <h3 style="margin: 0; font-size: 1.1em;">Upload Image</h3>
@@ -89,7 +116,12 @@
       <span class="ui-button-text">Cancel</span>
     </a>
   </div>
-  {{ form_end(form) }}
+  
+  {# Render remaining fields without labels to avoid duplication #}
+  <div style="display: none;">
+    {{ form_rest(form) }}
+  </div>
+  {{ form_end(form, {'render_rest': false}) }}
 
   <script>
     // Collection management for specialists

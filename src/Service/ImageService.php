@@ -9,11 +9,21 @@ class ImageService
 {
     private string $publicDir;
     private string $assetsDir;
+    private string $identifyPath = '/usr/local/bin/identify';
+    private string $convertPath = '/usr/local/bin/convert';
 
     public function __construct(string $projectDir)
     {
         $this->publicDir = $projectDir . '/public';
-        $this->assetsDir = $this->publicDir . '/assets';
+        $assetsPath = $this->publicDir . '/assets';
+        
+        // Resolve symlink to actual directory
+        $realPath = realpath($assetsPath);
+        if ($realPath === false) {
+            throw new \RuntimeException(sprintf('Assets directory does not exist: %s', $assetsPath));
+        }
+        
+        $this->assetsDir = $realPath;
     }
 
     /**
@@ -54,11 +64,47 @@ class ImageService
     public function ensureAssetDirectory(string $assetKey): string
     {
         $dir = $this->getAssetDirectory($assetKey);
-        if (!is_dir($dir)) {
-            if (!mkdir($dir, 0755, true) && !is_dir($dir)) {
-                throw new \RuntimeException(sprintf('Failed to create directory: %s', $dir));
+        
+        // Check if directory already exists
+        if (is_dir($dir)) {
+            return $dir;
+        }
+        
+        // Log debug info
+        error_log(sprintf(
+            'Creating asset directory: %s (user: %s, umask: %03o, parent exists: %s, parent writable: %s)',
+            $dir,
+            get_current_user(),
+            umask(),
+            is_dir(dirname($dir)) ? 'yes' : 'no',
+            is_writable(dirname($dir)) ? 'yes' : 'no'
+        ));
+        
+        // Ensure parent directory exists first
+        $parentDir = dirname($dir);
+        if (!is_dir($parentDir)) {
+            $oldUmask = umask(0);
+            $result = @mkdir($parentDir, 0777, true);
+            umask($oldUmask);
+            if (!$result && !is_dir($parentDir)) {
+                throw new \RuntimeException(sprintf('Failed to create parent directory: %s', $parentDir));
             }
         }
+        
+        // Try to create directory
+        $oldUmask = umask(0);
+        $result = @mkdir($dir, 0777, false);
+        umask($oldUmask);
+        
+        if (!$result && !is_dir($dir)) {
+            $error = error_get_last();
+            throw new \RuntimeException(sprintf(
+                'Failed to create directory "%s": %s',
+                $dir,
+                $error['message'] ?? 'Unknown error'
+            ));
+        }
+        
         return $dir;
     }
 
@@ -119,7 +165,8 @@ class ImageService
         // Use -quiet to suppress warnings and [0] to only read first frame/page
         // Redirect stderr to /dev/null to filter out warnings
         exec(sprintf(
-            'identify -quiet -format "%%w,%%h" %s 2>/dev/null',
+            '%s -quiet -format "%%w,%%h" %s 2>/dev/null',
+            escapeshellcmd($this->identifyPath),
             escapeshellarg($imageFile . '[0]')
         ), $output, $returnVar);
         
@@ -127,7 +174,8 @@ class ImageService
         if (empty($output[0])) {
             $output = [];
             exec(sprintf(
-                'identify -format "%%w,%%h" %s 2>&1',
+                '%s -format "%%w,%%h" %s 2>&1',
+                escapeshellcmd($this->identifyPath),
                 escapeshellarg($imageFile . '[0]')
             ), $output, $returnVar);
             
@@ -162,7 +210,8 @@ class ImageService
         $output = [];
         $returnVar = 0;
         exec(sprintf(
-            'convert %s -colorspace sRGB -compress LZW %s 2>&1',
+            '%s %s -colorspace sRGB -compress LZW %s 2>&1',
+            escapeshellcmd($this->convertPath),
             escapeshellarg($sourceFile),
             escapeshellarg($destFile)
         ), $output, $returnVar);
@@ -188,7 +237,8 @@ class ImageService
         // Use ImageMagick to resize maintaining aspect ratio
         // -resize will scale to fit within maxDimension x maxDimension box
         exec(sprintf(
-            'convert %s -resize %dx%d\> -quality 85 %s 2>&1',
+            '%s %s -resize %dx%d\> -quality 85 %s 2>&1',
+            escapeshellcmd($this->convertPath),
             escapeshellarg($sourceFile),
             $maxDimension,
             $maxDimension,
