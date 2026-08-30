@@ -192,7 +192,7 @@
           <div class="asset-controls">
             <input type="text" class="search" placeholder="Search assets..." autocomplete="off" />
             
-            <select class="sort" data-sort="id">
+            <select class="sort-select" data-sort="id">
               <option value="">Sort by...</option>
               <option value="id">Asset ID</option>
               <option value="type">Type</option>
@@ -307,8 +307,8 @@
       var options = {
         valueNames: ['id', 'type', 'filename', 'finds', 'specialist', 'speciality', 'year'],
         searchClass: 'search',
-        sortClass: 'sort',
         listClass: 'list'
+        // sortClass removed - we handle sorting manually to prevent unwanted triggers
       };
       
       var assetList = new List('asset-list-container', options);
@@ -362,7 +362,7 @@
         assetList.search();
         
         // Reset sort
-        document.querySelector('.sort').value = '';
+        document.querySelector('.sort-select').value = '';
         assetList.sort('id', { order: 'desc' });
         
         // Reset to grid view
@@ -377,7 +377,7 @@
       // Handle sort with toggle between asc/desc
       var currentSort = 'id';
       var sortOrder = 'desc';
-      document.querySelector('.sort').addEventListener('change', function() {
+      document.querySelector('.sort-select').addEventListener('change', function() {
         var sortBy = this.value;
         if (sortBy) {
           if (currentSort === sortBy) {
