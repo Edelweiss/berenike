@@ -89,22 +89,32 @@ class AdminController extends BerenikeController
                             $originalFilename = $uploadedFile->getClientOriginalName();
                             $assetKey = $this->imageService->generateAssetKey($originalFilename);
                             
-                            // Create new Image entity
-                            $image = new Image();
-                            $image->setAssetKey($assetKey);
-                            $image->setType($type);
-                            $image->setFile($originalFilename);
-                            $image->setPath($assetKey);
+                            // Check if image with this assetKey already exists
+                            $imageRepository = $this->entityManager->getRepository(Image::class);
+                            $existingImage = $imageRepository->findOneBy(['assetKey' => $assetKey]);
                             
-                            // Use uploaded file's temporary path
-                            $tempPath = $uploadedFile->getRealPath();
+                            if ($existingImage) {
+                                // Use existing image, just link it to the find
+                                $this->logger->info('Image already exists, linking to find', ['assetKey' => $assetKey]);
+                                $image = $existingImage;
+                            } else {
+                                // Create new Image entity
+                                $image = new Image();
+                                $image->setAssetKey($assetKey);
+                                $image->setType($type);
+                                $image->setFile($originalFilename);
+                                $image->setPath($assetKey);
+                                
+                                // Use uploaded file's temporary path
+                                $tempPath = $uploadedFile->getRealPath();
+                                
+                                // Process the image
+                                $dimensions = $this->imageService->processImage($tempPath, $assetKey);
+                                $image->setSize(sprintf('%d,%d', $dimensions['width'], $dimensions['height']));
+                            }
                             
-                            // Process the image
-                            $dimensions = $this->imageService->processImage($tempPath, $assetKey);
-                            $image->setSize(sprintf('%d,%d', $dimensions['width'], $dimensions['height']));
-                            
-                            // Handle specialist data if provided
-                            if ($specialist || $speciality || $year) {
+                            // Handle specialist data if provided (only for new images)
+                            if (!$existingImage && ($specialist || $speciality || $year)) {
                                 $imageSpecialist = new ImageSpecialist();
                                 $imageSpecialist->setImage($image);
                                 
@@ -124,7 +134,9 @@ class AdminController extends BerenikeController
                             
                             // Link image to find
                             $find->addImage($image);
-                            $this->entityManager->persist($image);
+                            if (!$existingImage) {
+                                $this->entityManager->persist($image);
+                            }
                             
                         } catch (\Exception $e) {
                             $this->logger->error('Failed to process uploaded image: ' . $e->getMessage());
