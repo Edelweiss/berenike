@@ -1,0 +1,28 @@
+/**
+ * Bucket Autocomplete Styles
+ */
+.bucket-autocomplete {
+    font-family: inherit;
+}
+
+.bucket-autocomplete-results {
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.bucket-autocomplete-results > div {
+    transition: background-color 0.2s ease;
+}
+
+.bucket-autocomplete-results > div:last-child {
+    border-bottom: none !important;
+}
+
+/* Make the hidden bucket select accessible for form validation */
+#find_bucket[style*="display: none"] {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}

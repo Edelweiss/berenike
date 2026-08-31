@@ -658,4 +658,167 @@ class FindController extends BerenikeController
       return $response;
   }
 
+  public function searchBuckets(Request $request): Response
+  {
+      $query = $request->query->get('q', '');
+      
+      if (strlen($query) < 2) {
+          return $this->json([]);
+      }
+      
+      // Remove trailing separators (-, /) to prevent empty results while typing
+      $query = rtrim($query, '-/');
+      
+      if (strlen($query) < 2) {
+          return $this->json([]);
+      }
+      
+      // Try to parse progressive input
+      // Patterns to match:
+      // 1. Full format: SITE+SEASON-TRENCH/LOCUS/BUCKET (e.g., BE98-127/999/1)
+      // 2. Partial with trench: SITE+SEASON-TRENCH (e.g., BE98-127)
+      // 3. Site with season: SITE+SEASON (e.g., BE98 or AG26)
+      // 4. Site only: SITE (e.g., BE or AG)
+      
+      $qb = $this->entityManager->createQueryBuilder();
+      $qb->select('b', 'l', 'e')
+          ->from(Bucket::class, 'b')
+          ->join('b.locus', 'l')
+          ->join('l.excavation', 'e');
+      
+      // Try full format first
+      if (preg_match('/^([A-Z]{2,3})(\d{2})-(.+?)\/(.+?)\/(.+)$/i', $query, $matches)) {
+          // Full format: SITE+SEASON-TRENCH/LOCUS/BUCKET
+          $site = strtoupper($matches[1]);
+          $seasonShort = $matches[2];
+          $trench = $matches[3];
+          $locusNum = $matches[4];
+          $bucketNum = $matches[5];
+          $seasonYear = $this->inflateSeason($seasonShort);
+          
+          $qb->where('e.site = :site')
+              ->andWhere('LOCATE(:season, e.season) > 0')
+              ->andWhere('e.trench = :trench')
+              ->andWhere('l.number = :locus')
+              ->andWhere('b.number = :bucket')
+              ->setParameter('site', $site)
+              ->setParameter('season', $seasonYear)
+              ->setParameter('trench', $trench)
+              ->setParameter('locus', $locusNum)
+              ->setParameter('bucket', $bucketNum);
+      } elseif (preg_match('/^([A-Z]{2,3})(\d{2})-(.+?)\/(.+?)$/i', $query, $matches)) {
+          // Partial: SITE+SEASON-TRENCH/LOCUS
+          $site = strtoupper($matches[1]);
+          $seasonShort = $matches[2];
+          $trench = $matches[3];
+          $locusNum = $matches[4];
+          $seasonYear = $this->inflateSeason($seasonShort);
+          
+          $qb->where('e.site = :site')
+              ->andWhere('LOCATE(:season, e.season) > 0')
+              ->andWhere('e.trench = :trench')
+              ->andWhere('l.number = :locus')
+              ->setParameter('site', $site)
+              ->setParameter('season', $seasonYear)
+              ->setParameter('trench', $trench)
+              ->setParameter('locus', $locusNum);
+      } elseif (preg_match('/^([A-Z]{2,3})(\d{2})-(.+?)$/i', $query, $matches)) {
+          // Partial: SITE+SEASON-TRENCH
+          $site = strtoupper($matches[1]);
+          $seasonShort = $matches[2];
+          $trench = $matches[3];
+          $seasonYear = $this->inflateSeason($seasonShort);
+          
+          $qb->where('e.site = :site')
+              ->andWhere('LOCATE(:season, e.season) > 0')
+              ->andWhere('e.trench LIKE :trench')
+              ->setParameter('site', $site)
+              ->setParameter('season', $seasonYear)
+              ->setParameter('trench', $trench . '%');
+      } elseif (preg_match('/^([A-Z]{2,3})(\d{1,4})$/i', $query, $matches)) {
+          // Partial: SITE+SEASON (e.g., AG26, BE98, AG2026)
+          $site = strtoupper($matches[1]);
+          $seasonInput = $matches[2];
+          
+          // Handle both 2-digit and 4-digit year input
+          if (strlen($seasonInput) <= 2) {
+              $seasonYear = $this->inflateSeason(str_pad($seasonInput, 2, '0', STR_PAD_LEFT));
+          } else {
+              $seasonYear = $seasonInput;
+          }
+          
+          $qb->where('e.site = :site')
+              ->andWhere('LOCATE(:season, e.season) > 0')
+              ->setParameter('site', $site)
+              ->setParameter('season', $seasonYear);
+      } elseif (preg_match('/^([A-Z]{2,3})$/i', $query, $matches)) {
+          // Partial: SITE only (e.g., AG, BE)
+          $site = strtoupper($matches[1]);
+          
+          $qb->where('e.site = :site')
+              ->setParameter('site', $site);
+      } else {
+          // No match - return empty
+          return $this->json([]);
+      }
+      
+      $qb->setMaxResults(20)
+          ->orderBy('e.site', 'ASC')
+          ->addOrderBy('e.season', 'ASC')
+          ->addOrderBy('e.trench', 'ASC')
+          ->addOrderBy('l.number', 'ASC')
+          ->addOrderBy('b.number', 'ASC');
+      
+      $buckets = $qb->getQuery()->getResult();
+      
+      // Format results
+      $results = [];
+      foreach ($buckets as $bucket) {
+          $locus = $bucket->getLocus();
+          $excavation = $locus->getExcavation();
+          $label = $excavation->getSite() . $this->formatSeasonDisplay($excavation->getSeason()) . '-' 
+                 . $excavation->getTrench() . '/' . $locus->getNumber() . '/' . $bucket->getNumber();
+          
+          $results[] = [
+              'id' => $bucket->getId(),
+              'label' => $label
+          ];
+      }
+      
+      return $this->json($results);
+  }
+  
+  private function inflateSeason(string $twoDigitYear): string
+  {
+      $year = (int)$twoDigitYear;
+      
+      // Assume 20th century for years >= 95, 21st century for years < 95
+      if ($year >= 95) {
+          return '19' . $twoDigitYear;
+      } else {
+          return '20' . str_pad($twoDigitYear, 2, '0', STR_PAD_LEFT);
+      }
+  }
+  
+  private function formatSeasonDisplay(string $season): string
+  {
+      if (empty($season)) {
+          return '';
+      }
+      
+      // Extract all 4-digit years
+      preg_match_all('/\d{4}/', $season, $matches);
+      $years = $matches[0];
+      
+      if (empty($years)) {
+          return $season;
+      }
+      
+      if (count($years) === 1) {
+          return substr($years[0], -2);
+      } else {
+          return substr($years[0], -2) . '/' . substr(end($years), -2);
+      }
+  }
+
 }

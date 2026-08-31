@@ -160,23 +160,26 @@ class FindType extends AbstractType
                 'required' => false,
                 'label' => 'Remarks',
             ])
+            ->add('bucketSearch', TextType::class, [
+                'mapped' => false,
+                'required' => false,
+                'label' => 'Bucket Search',
+                'attr' => [
+                    'placeholder' => 'Type: SITE+SEASON-TRENCH/LOCUS/BUCKET (e.g., BE98-127/999/1)',
+                    'class' => 'bucket-autocomplete',
+                    'autocomplete' => 'off',
+                ],
+            ])
             ->add('bucket', EntityType::class, [
                 'class' => Bucket::class,
                 'choice_label' => function (Bucket $bucket) {
                     return $bucket . '';
                 },
-                'query_builder' => function ($repository) {
-                    return $repository->createQueryBuilder('b')
-                        ->leftJoin('b.locus', 'l')
-                        ->leftJoin('l.excavation', 'e')
-                        ->orderBy('e.site', 'ASC')
-                        ->addOrderBy('SUBSTRING(e.season, LENGTH(e.season) - 3, 4)', 'DESC')
-                        ->addOrderBy('e.trench + 0', 'ASC')
-                        ->addOrderBy('l.number + 0', 'ASC')
-                        ->addOrderBy('b.number', 'ASC');
-                },
                 'required' => true,
                 'label' => 'Bucket',
+                'attr' => [
+                    'style' => 'display: none;',
+                ],
             ])
             ->add('images', EntityType::class, [
                 'class' => Image::class,
