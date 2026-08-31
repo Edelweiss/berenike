@@ -211,128 +211,100 @@ class AssetController extends BerenikeController
     #[IsGranted('ROLE_EDITOR')]
     public function saveEdited(int $id, Request $request): Response
     {
-        // Start output buffering to prevent any accidental output from breaking JSON response
-        ob_start();
-        
+        $asset = $this->imageRepository->findOneBy(['id' => $id]);
+
+        if (!$asset || !$asset->getAssetKey()) {
+            return $this->json(['error' => 'Asset not found'], 404);
+        }
+
+        $imageData = $request->request->get('imageData');
+        $saveMode = $request->request->get('saveMode', 'new'); // 'new' or 'overwrite'
+
+        if (!$imageData) {
+            return $this->json(['error' => 'No image data provided'], 400);
+        }
+
+        if (!preg_match('/^data:image\/\w+;base64,/', $imageData)) {
+            return $this->json(['error' => 'Invalid image data format'], 400);
+        }
+        $imageData = base64_decode(substr($imageData, strpos($imageData, ',') + 1));
+        if ($imageData === false) {
+            return $this->json(['error' => 'Base64 decode failed'], 400);
+        }
+
+        $tmpDir = $this->projectDir . '/var/tmp';
+        if (!is_dir($tmpDir)) {
+            mkdir($tmpDir, 0777, true);
+        }
+        $tempFile = $tmpDir . '/img_edit_' . uniqid() . '.png';
+        if (file_put_contents($tempFile, $imageData) === false) {
+            return $this->json(['error' => 'Failed to write temporary file'], 500);
+        }
+
         try {
-            $asset = $this->imageRepository->findOneBy(['id' => $id]);
-
-            if (!$asset || !$asset->getAssetKey()) {
-                ob_end_clean();
-                return $this->json(['error' => 'Asset not found'], 404);
-            }
-
-            // Get the base64 image data from request
-            $imageData = $request->request->get('imageData');
-            $saveMode = $request->request->get('saveMode', 'new'); // 'new' or 'overwrite'
-
-            if (!$imageData) {
-                ob_end_clean();
-                return $this->json(['error' => 'No image data provided'], 400);
-            }
-
-            // Decode base64 data
-            if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
-                $imageData = substr($imageData, strpos($imageData, ',') + 1);
-                $type = strtolower($type[1]); // jpg, png, gif, etc.
-            } else {
-                ob_end_clean();
-                return $this->json(['error' => 'Invalid image data format'], 400);
-            }
-
-            $imageData = base64_decode($imageData);
-            if ($imageData === false) {
-                ob_end_clean();
-                return $this->json(['error' => 'Base64 decode failed'], 400);
-            }
             if ($saveMode === 'overwrite') {
-                // Overwrite original: use same asset_key
                 $assetKey = $asset->getAssetKey();
-                
-                // Create temp file in project's var/tmp directory
-                $tmpDir = $this->projectDir . '/var/tmp';
-                if (!is_dir($tmpDir)) {
-                    mkdir($tmpDir, 0777, true);
-                }
-                $tempFile = $tmpDir . '/img_edit_' . uniqid() . '.png';
-                file_put_contents($tempFile, $imageData);
-                
+
                 // Delete old asset files
                 $assetDir = $this->imageService->getAssetDirectory($assetKey);
                 if (is_dir($assetDir)) {
-                    $files = glob($assetDir . '/*');
-                    foreach ($files as $file) {
+                    foreach (glob($assetDir . '/*') as $file) {
                         if (is_file($file)) {
                             unlink($file);
                         }
                     }
                 }
-                
-                // Process image to regenerate all variants
-                $this->imageService->processImage($tempFile, $assetKey);
-                unlink($tempFile);
-                
+
+                $dimensions = $this->imageService->processImage($tempFile, $assetKey);
+                $asset->setSize(sprintf('%d,%d', $dimensions['width'], $dimensions['height']));
                 $this->entityManager->flush();
-                
-                ob_end_clean();
+
                 return $this->json([
                     'success' => true,
                     'message' => 'Asset updated successfully',
                     'assetId' => $asset->getId(),
                     'redirectUrl' => $this->generateUrl('PapyrillioBerenike_AssetShow', ['id' => $asset->getId()])
                 ]);
-                
-            } else {
-                // Save as new: create new Image entity
-                $newAsset = new Image();
-                
-                // Generate new asset_key with timestamp to make it unique
-                $baseAssetKey = $asset->getAssetKey();
-                $newAssetKey = $baseAssetKey . '_edited_' . time();
-                
-                // Create temp file in project's var/tmp directory
-                $tmpDir = $this->projectDir . '/var/tmp';
-                if (!is_dir($tmpDir)) {
-                    mkdir($tmpDir, 0777, true);
-                }
-                $tempFile = $tmpDir . '/img_edit_' . uniqid() . '.png';
-                file_put_contents($tempFile, $imageData);
-                
-                // Process image
-                $this->imageService->processImage($tempFile, $newAssetKey);
-                unlink($tempFile);
-                
-                // Set properties from original
-                $newAsset->setAssetKey($newAssetKey);
-                $newAsset->setType($asset->getType());
-                $newAsset->setNumber($asset->getNumber() ? $asset->getNumber() . ' (edited)' : 'edited');
-                $newAsset->setFile($asset->getFile());
-                
-                // Copy specialist relationships
-                foreach ($asset->getImageSpecialists() as $originalIS) {
-                    $newIS = new ImageSpecialist();
-                    $newIS->setImage($newAsset);
-                    $newIS->setSpecialist($originalIS->getSpecialist());
-                    $newIS->setYear($originalIS->getYear());
-                    $this->entityManager->persist($newIS);
-                    $newAsset->addImageSpecialist($newIS);
-                }
-                
-                $this->entityManager->persist($newAsset);
-                $this->entityManager->flush();
-                
-                ob_end_clean();
-                return $this->json([
-                    'success' => true,
-                    'message' => 'New asset created successfully',
-                    'assetId' => $newAsset->getId(),
-                    'redirectUrl' => $this->generateUrl('PapyrillioBerenike_AssetShow', ['id' => $newAsset->getId()])
-                ]);
             }
+
+            // Save as new: create new Image entity
+            $newAssetKey = $asset->getAssetKey() . '_edited_' . time();
+            $dimensions = $this->imageService->processImage($tempFile, $newAssetKey);
+
+            $newAsset = new Image();
+            $newAsset->setAssetKey($newAssetKey);
+            $newAsset->setType($asset->getType());
+            $newAsset->setNumber($asset->getNumber() ? $asset->getNumber() . ' (edited)' : 'edited');
+            $newAsset->setFile($asset->getFile());
+            $newAsset->setPath($newAssetKey);
+            $newAsset->setSize(sprintf('%d,%d', $dimensions['width'], $dimensions['height']));
+
+            // Copy specialist relationships
+            foreach ($asset->getImageSpecialists() as $originalIS) {
+                $newIS = new ImageSpecialist();
+                $newIS->setImage($newAsset);
+                $newIS->setSpecialist($originalIS->getSpecialist());
+                $newIS->setYear($originalIS->getYear());
+                $this->entityManager->persist($newIS);
+                $newAsset->addImageSpecialist($newIS);
+            }
+
+            $this->entityManager->persist($newAsset);
+            $this->entityManager->flush();
+
+            return $this->json([
+                'success' => true,
+                'message' => 'New asset created successfully',
+                'assetId' => $newAsset->getId(),
+                'redirectUrl' => $this->generateUrl('PapyrillioBerenike_AssetShow', ['id' => $newAsset->getId()])
+            ]);
         } catch (\Exception $e) {
-            ob_end_clean();
             $this->logger->error('Asset edit save failed', ['error' => $e->getMessage()]);
             return $this->json(['error' => 'Failed to save asset: ' . $e->getMessage()], 500);
+        } finally {
+            if (is_file($tempFile)) {
+                @unlink($tempFile);
+            }
         }
     }
 

@@ -1,5 +1,7 @@
 {% extends 'cinema.html.twig' %}
 
+{% set imagePath = asset('assets/' ~ asset.assetShard ~ '/' ~ asset.assetKey ~ '/large.webp') %}
+
 {% block title %}Edit Asset {{ asset.id }}{% endblock %}
 
 {% block top %}Edit Asset <small>Visual Editor</small>{% endblock %}
@@ -158,15 +160,11 @@
             
             var imageEditor;
             var saveOptionsVisible = false;
-            
-            // Initialize editor
+
             document.addEventListener('DOMContentLoaded', function() {
-                var assetKey = '{{ asset.assetKey }}';
-                var assetShard = '{{ asset.assetShard }}';
-                var imagePath = '/berenike/assets/' + assetShard + '/' + assetKey + '/large.webp';
-                
+                var imagePath = {{ imagePath|json_encode|raw }};
                 console.log('Loading image from:', imagePath);
-                
+
                 imageEditor = new tui.ImageEditor('#tui-image-editor-container', {
                     includeUI: {
                         loadImage: {
