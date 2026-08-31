@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Image;
+use App\Entity\ImageSpecialist;
 use App\Entity\Find;
 use App\Form\AssetType;
 use App\Service\ImageService;
@@ -12,25 +13,31 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class AssetController extends BerenikeController
 {
     private EntityManagerInterface $entityManager;
     private ImageRepository $imageRepository;
     private ImageService $imageService;
+    private string $projectDir;
 
     public function __construct(
         RequestStack $requestStack,
         LoggerInterface $logger,
         EntityManagerInterface $entityManager,
         ImageRepository $imageRepository,
-        ImageService $imageService
+        ImageService $imageService,
+        ParameterBagInterface $params
     ) {
         parent::__construct($requestStack, $logger);
         $this->entityManager = $entityManager;
         $this->imageRepository = $imageRepository;
         $this->imageService = $imageService;
+        $this->projectDir = $params->get('kernel.project_dir');
     }
 
     /**
@@ -180,6 +187,153 @@ class AssetController extends BerenikeController
             'asset' => $asset,
             'form' => $form->createView(),
         ]);
+    }
+
+    /**
+     * Visual editor for an asset
+     */
+    #[IsGranted('ROLE_EDITOR')]
+    public function editVisual(int $id): Response
+    {
+        $asset = $this->imageRepository->findOneBy(['id' => $id]);
+
+        if (!$asset || !$asset->getAssetKey()) {
+            $this->addFlash('warning', 'Asset not found or has no asset files to edit');
+            return $this->redirectToRoute('PapyrillioBerenike_AssetList');
+        }
+
+        return $this->render('asset/edit_visual.html.twig', ['asset' => $asset]);
+    }
+
+    /**
+     * Save edited asset image
+     */
+    #[IsGranted('ROLE_EDITOR')]
+    public function saveEdited(int $id, Request $request): Response
+    {
+        // Start output buffering to prevent any accidental output from breaking JSON response
+        ob_start();
+        
+        try {
+            $asset = $this->imageRepository->findOneBy(['id' => $id]);
+
+            if (!$asset || !$asset->getAssetKey()) {
+                ob_end_clean();
+                return $this->json(['error' => 'Asset not found'], 404);
+            }
+
+            // Get the base64 image data from request
+            $imageData = $request->request->get('imageData');
+            $saveMode = $request->request->get('saveMode', 'new'); // 'new' or 'overwrite'
+
+            if (!$imageData) {
+                ob_end_clean();
+                return $this->json(['error' => 'No image data provided'], 400);
+            }
+
+            // Decode base64 data
+            if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
+                $imageData = substr($imageData, strpos($imageData, ',') + 1);
+                $type = strtolower($type[1]); // jpg, png, gif, etc.
+            } else {
+                ob_end_clean();
+                return $this->json(['error' => 'Invalid image data format'], 400);
+            }
+
+            $imageData = base64_decode($imageData);
+            if ($imageData === false) {
+                ob_end_clean();
+                return $this->json(['error' => 'Base64 decode failed'], 400);
+            }
+            if ($saveMode === 'overwrite') {
+                // Overwrite original: use same asset_key
+                $assetKey = $asset->getAssetKey();
+                
+                // Create temp file in project's var/tmp directory
+                $tmpDir = $this->projectDir . '/var/tmp';
+                if (!is_dir($tmpDir)) {
+                    mkdir($tmpDir, 0777, true);
+                }
+                $tempFile = $tmpDir . '/img_edit_' . uniqid() . '.png';
+                file_put_contents($tempFile, $imageData);
+                
+                // Delete old asset files
+                $assetDir = $this->imageService->getAssetDirectory($assetKey);
+                if (is_dir($assetDir)) {
+                    $files = glob($assetDir . '/*');
+                    foreach ($files as $file) {
+                        if (is_file($file)) {
+                            unlink($file);
+                        }
+                    }
+                }
+                
+                // Process image to regenerate all variants
+                $this->imageService->processImage($tempFile, $assetKey);
+                unlink($tempFile);
+                
+                $this->entityManager->flush();
+                
+                ob_end_clean();
+                return $this->json([
+                    'success' => true,
+                    'message' => 'Asset updated successfully',
+                    'assetId' => $asset->getId(),
+                    'redirectUrl' => $this->generateUrl('PapyrillioBerenike_AssetShow', ['id' => $asset->getId()])
+                ]);
+                
+            } else {
+                // Save as new: create new Image entity
+                $newAsset = new Image();
+                
+                // Generate new asset_key with timestamp to make it unique
+                $baseAssetKey = $asset->getAssetKey();
+                $newAssetKey = $baseAssetKey . '_edited_' . time();
+                
+                // Create temp file in project's var/tmp directory
+                $tmpDir = $this->projectDir . '/var/tmp';
+                if (!is_dir($tmpDir)) {
+                    mkdir($tmpDir, 0777, true);
+                }
+                $tempFile = $tmpDir . '/img_edit_' . uniqid() . '.png';
+                file_put_contents($tempFile, $imageData);
+                
+                // Process image
+                $this->imageService->processImage($tempFile, $newAssetKey);
+                unlink($tempFile);
+                
+                // Set properties from original
+                $newAsset->setAssetKey($newAssetKey);
+                $newAsset->setType($asset->getType());
+                $newAsset->setNumber($asset->getNumber() ? $asset->getNumber() . ' (edited)' : 'edited');
+                $newAsset->setFile($asset->getFile());
+                
+                // Copy specialist relationships
+                foreach ($asset->getImageSpecialists() as $originalIS) {
+                    $newIS = new ImageSpecialist();
+                    $newIS->setImage($newAsset);
+                    $newIS->setSpecialist($originalIS->getSpecialist());
+                    $newIS->setYear($originalIS->getYear());
+                    $this->entityManager->persist($newIS);
+                    $newAsset->addImageSpecialist($newIS);
+                }
+                
+                $this->entityManager->persist($newAsset);
+                $this->entityManager->flush();
+                
+                ob_end_clean();
+                return $this->json([
+                    'success' => true,
+                    'message' => 'New asset created successfully',
+                    'assetId' => $newAsset->getId(),
+                    'redirectUrl' => $this->generateUrl('PapyrillioBerenike_AssetShow', ['id' => $newAsset->getId()])
+                ]);
+            }
+        } catch (\Exception $e) {
+            ob_end_clean();
+            $this->logger->error('Asset edit save failed', ['error' => $e->getMessage()]);
+            return $this->json(['error' => 'Failed to save asset: ' . $e->getMessage()], 500);
+        }
     }
 
     /**

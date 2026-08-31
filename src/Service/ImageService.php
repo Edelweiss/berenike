@@ -71,14 +71,14 @@ class ImageService
         }
         
         // Log debug info
-        error_log(sprintf(
-            'Creating asset directory: %s (user: %s, umask: %03o, parent exists: %s, parent writable: %s)',
-            $dir,
-            get_current_user(),
-            umask(),
-            is_dir(dirname($dir)) ? 'yes' : 'no',
-            is_writable(dirname($dir)) ? 'yes' : 'no'
-        ));
+        // error_log(sprintf(
+        //     'Creating asset directory: %s (user: %s, umask: %03o, parent exists: %s, parent writable: %s)',
+        //     $dir,
+        //     get_current_user(),
+        //     umask(),
+        //     is_dir(dirname($dir)) ? 'yes' : 'no',
+        //     is_writable(dirname($dir)) ? 'yes' : 'no'
+        // ));
         
         // Ensure parent directory exists first
         $parentDir = dirname($dir);

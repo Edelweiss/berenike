@@ -89,6 +89,20 @@ PapyrillioBerenike_AssetEdit:
     requirements:
         id: '\d+'
 
+PapyrillioBerenike_AssetEditVisual:
+    path:  /asset/{id}/edit-visual
+    controller: App\Controller\AssetController::editVisual
+    methods: [GET]
+    requirements:
+        id: '\d+'
+
+PapyrillioBerenike_AssetSaveEdited:
+    path:  /asset/{id}/save-edited
+    controller: App\Controller\AssetController::saveEdited
+    methods: [POST]
+    requirements:
+        id: '\d+'
+
 PapyrillioBerenike_AssetDelete:
     path:  /asset/{id}/delete
     controller: App\Controller\AssetController::delete
