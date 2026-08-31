@@ -38,13 +38,14 @@ $(function(){
     url: '{{ path('PapyrillioBerenike_ExcavationList') }}',
     datatype: 'xml',
     mtype: 'POST',
-    colNames:['Site', 'Season', 'Trench', 'Year', 'Context', 'Actions'],
-    colModel :[ 
-      {name:'site',     index:'site',     width:100},
-      {name:'season',   index:'season',   width:100},
-      {name:'trench',   index:'trench',   width:80},
-      {name:'year',     index:'year',     width:70},
-      {name:'context',  index:'context',  width:200},
+    colNames:['Site', 'Season', 'Trench', 'Year', 'Supervisor', 'Context', 'Actions'],
+    colModel:[
+      {name:'site',       index:'site',       width:80},
+      {name:'season',     index:'season',     width:80},
+      {name:'trench',     index:'trench',     width:80},
+      {name:'year',       index:'year',       width:60},
+      {name:'supervisor', index:'supervisor', width:120},
+      {name:'context',    index:'context',    width:150},
       {name:'actions',  index:'actions',  width:60, sortable: false, search: false}
     ],
     pager: '#pager',

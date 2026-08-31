@@ -11,6 +11,9 @@
         <field name="trench" type="string" length="64"/>
         <field name="context" type="string" length="512"/>
         <field name="year" type="integer" nullable="true"/>
+        <many-to-one field="specialist" target-entity="Specialist">
+            <join-column name="specialist_id" referenced-column-name="id" nullable="true" on-delete="SET NULL"/>
+        </many-to-one>
         <one-to-many field="loci" target-entity="Locus" mapped-by="excavation">
             <cascade>
                 <cascade-persist/>

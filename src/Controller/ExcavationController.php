@@ -44,8 +44,12 @@ class ExcavationController extends BerenikeController
             // ORDER BY
 
             $orderBy = '';
-            if(in_array($sort, ['site', 'season', 'trench', 'year', 'context'])){
-                $orderBy = ' ORDER BY e.' . $sort . ' ' . $sortDirection;
+            if(in_array($sort, ['site', 'season', 'trench', 'year', 'context', 'supervisor'])){
+                if($sort === 'supervisor') {
+                    $orderBy = ' ORDER BY s.name ' . $sortDirection;
+                } else {
+                    $orderBy = ' ORDER BY e.' . $sort . ' ' . $sortDirection;
+                }
             }
 
             // WHERE
@@ -84,6 +88,7 @@ class ExcavationController extends BerenikeController
 
             $query = $this->entityManager->createQuery('
                 SELECT DISTINCT e.id FROM App\Entity\Excavation e
+                LEFT JOIN e.specialist s
                 ' . $where . ' ' . $orderBy
             );
             $query->setParameters($parameters);
@@ -94,6 +99,17 @@ class ExcavationController extends BerenikeController
             foreach ($result as $row) {
                 $ids[] = $row['id'];
             }
+            
+            // If no IDs found, return empty result
+            if (empty($ids)) {
+                return $this->render('excavation/list.xml.twig', [
+                    'excavations' => [], 
+                    'count' => $count, 
+                    'totalPages' => $totalPages, 
+                    'page' => $page
+                ]);
+            }
+            
             if($where === ''){
                 $where = ' WHERE ';
             } else {
@@ -105,7 +121,8 @@ class ExcavationController extends BerenikeController
             // QUERY
 
             $query = $this->entityManager->createQuery('
-                SELECT e FROM App\Entity\Excavation e
+                SELECT e, s FROM App\Entity\Excavation e
+                LEFT JOIN e.specialist s
                 ' . $where . ' ' . $orderBy
             );
             $query->setParameters($parameters);

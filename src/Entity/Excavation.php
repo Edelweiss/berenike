@@ -15,6 +15,7 @@ class Excavation {
     private $trench;
     private $context;
     private $year;
+    private $specialist;
     private $loci;
 
     public function __construct() {
@@ -61,6 +62,13 @@ class Excavation {
     }
     public function getYear() {
         return $this->year;
+    }
+
+    public function setSpecialist($specialist) {
+        $this->specialist = $specialist;
+    }
+    public function getSpecialist() {
+        return $this->specialist;
     }
 
     public function setLoci($loci) {

@@ -9,10 +9,12 @@ class Specialist {
     private $gnd;
     private $findSpecialists;
     private $imageSpecialists;
+    private $excavations;
 
     public function __construct() {
         $this->findSpecialists = new \Doctrine\Common\Collections\ArrayCollection();
         $this->imageSpecialists = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->excavations = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     public function setId($id) {
@@ -48,5 +50,12 @@ class Specialist {
     }
     public function getImageSpecialists() {
         return $this->imageSpecialists;
+    }
+
+    public function setExcavations($excavations) {
+        $this->excavations = $excavations;
+    }
+    public function getExcavations() {
+        return $this->excavations;
     }
 }

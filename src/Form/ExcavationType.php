@@ -3,12 +3,14 @@
 namespace App\Form;
 
 use App\Entity\Excavation;
+use App\Entity\Specialist;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class ExcavationType extends AbstractType
@@ -56,6 +58,13 @@ class ExcavationType extends AbstractType
                     range(1995, $currentYear + 1),
                     range(1995, $currentYear + 1)
                 ),
+            ])
+            ->add('specialist', EntityType::class, [
+                'class' => Specialist::class,
+                'choice_label' => 'name',
+                'required' => false,
+                'placeholder' => '-- Select Supervisor --',
+                'label' => 'Trench Supervisor',
             ])
             ->add('context', TextareaType::class, [
                 'required' => false,
