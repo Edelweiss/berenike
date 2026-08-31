@@ -18,6 +18,9 @@
 
 {% block javascripts %}
     {{ parent() }}
+    <script>
+        window.BUCKET_SEARCH_URL = '{{ path('PapyrillioBerenike_FindSearchBuckets') }}';
+    </script>
     <script src="{{ asset('js/find-form-validation.js') }}"></script>
     <script src="{{ asset('js/image-collection-manager.js') }}"></script>
     <script src="{{ asset('js/bucket-autocomplete.js') }}"></script>

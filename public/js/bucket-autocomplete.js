@@ -73,7 +73,7 @@
             }
             
             $.ajax({
-                url: '/berenike/find/search-buckets',
+                url: window.BUCKET_SEARCH_URL || '/berenike/find/search-buckets',
                 method: 'GET',
                 data: { q: query },
                 success: function(results) {

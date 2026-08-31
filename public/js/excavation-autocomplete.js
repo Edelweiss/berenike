@@ -57,7 +57,7 @@
 
         function performSearch(query) {
             $.ajax({
-                url: '/berenike/locus/search-excavations',
+                url: window.EXCAVATION_SEARCH_URL || '/berenike/locus/search-excavations',
                 method: 'GET',
                 data: { q: query },
                 dataType: 'json',

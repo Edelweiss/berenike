@@ -45,5 +45,8 @@
 
 {% block javascripts %}
     {{ parent() }}
+    <script>
+        window.LOCUS_SEARCH_URL = '{{ path('PapyrillioBerenike_BucketSearchLoci') }}';
+    </script>
     <script src="{{ asset('js/locus-autocomplete.js') }}"></script>
 {% endblock %}

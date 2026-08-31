@@ -45,5 +45,8 @@
 
 {% block javascripts %}
     {{ parent() }}
+    <script>
+        window.EXCAVATION_SEARCH_URL = '{{ path('PapyrillioBerenike_LocusSearchExcavations') }}';
+    </script>
     <script src="{{ asset('js/excavation-autocomplete.js') }}"></script>
 {% endblock %}

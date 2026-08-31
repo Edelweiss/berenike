@@ -57,7 +57,7 @@
 
         function performSearch(query) {
             $.ajax({
-                url: '/berenike/bucket/search-loci',
+                url: window.LOCUS_SEARCH_URL || '/berenike/bucket/search-loci',
                 method: 'GET',
                 data: { q: query },
                 dataType: 'json',
