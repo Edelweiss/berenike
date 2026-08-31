@@ -12,7 +12,9 @@
         #tui-image-editor-container { height: 700px; }
         .tui-image-editor-header-logo,
         .tui-image-editor-download-btn,
-        .tui-image-editor-load-btn { display: none !important; }
+        .tui-image-editor-load-btn,
+        .tie-btn-zoomIn,
+        .tie-btn-zoomOut { display: none !important; }
 
         .editor-actions {
             margin: 1em 0;
@@ -109,6 +111,18 @@
                     <span class="ui-button-text">✕ Cancel</span>
                 </button>
 
+                <span style="display: inline-block; margin-left: 1em; padding-left: 1em; border-left: 1px solid #ccc;">
+                    <button type="button" id="zoomOutBtn" title="Zoom out" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+                        <span class="ui-button-text">🔍−</span>
+                    </button>
+                    <button type="button" id="zoomResetBtn" title="Reset zoom (100%)" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+                        <span class="ui-button-text" id="zoomLabel">100%</span>
+                    </button>
+                    <button type="button" id="zoomInBtn" title="Zoom in" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+                        <span class="ui-button-text">🔍+</span>
+                    </button>
+                </span>
+
                 <div class="save-options" id="saveOptions">
                     <h4 style="margin-top: 0;">Save Options</h4>
                     <div class="save-mode-selection">
@@ -195,6 +209,56 @@
                         window.location.href = cancelUrl;
                     }
                 });
+
+                // --- Zoom controls (bypass Tui's own zoom buttons, which are inert in v3.15) ---
+                function getFabricCanvas() {
+                    return imageEditor && imageEditor._graphics && imageEditor._graphics.getCanvas();
+                }
+                function applyZoom(factor, pointerX, pointerY) {
+                    var canvas = getFabricCanvas();
+                    if (!canvas) return;
+                    var zoom = Math.max(0.1, Math.min(10, canvas.getZoom() * factor));
+                    var pt;
+                    if (typeof pointerX === 'number' && typeof pointerY === 'number') {
+                        pt = new fabric.Point(pointerX, pointerY);
+                    } else {
+                        var c = canvas.getCenter();
+                        pt = new fabric.Point(c.left, c.top);
+                    }
+                    canvas.zoomToPoint(pt, zoom);
+                    updateZoomLabel();
+                }
+                function resetZoom() {
+                    var canvas = getFabricCanvas();
+                    if (!canvas) return;
+                    canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+                    canvas.setZoom(1);
+                    updateZoomLabel();
+                }
+                function updateZoomLabel() {
+                    var canvas = getFabricCanvas();
+                    var label = document.getElementById('zoomLabel');
+                    if (canvas && label) {
+                        label.textContent = Math.round(canvas.getZoom() * 100) + '%';
+                    }
+                }
+                document.getElementById('zoomInBtn').addEventListener('click',    function() { applyZoom(1.2); });
+                document.getElementById('zoomOutBtn').addEventListener('click',   function() { applyZoom(1/1.2); });
+                document.getElementById('zoomResetBtn').addEventListener('click', function() { resetZoom(); });
+
+                // Mouse-wheel zoom on the canvas + space/middle-click pan
+                var container = document.getElementById('tui-image-editor-container');
+                container.addEventListener('wheel', function(e) {
+                    if (!e.ctrlKey && !e.metaKey) return; // only zoom with Ctrl/Cmd+wheel
+                    var canvas = getFabricCanvas();
+                    if (!canvas) return;
+                    e.preventDefault();
+                    var rect = canvas.upperCanvasEl.getBoundingClientRect();
+                    applyZoom(e.deltaY < 0 ? 1.1 : 1/1.1, e.clientX - rect.left, e.clientY - rect.top);
+                }, {passive: false});
+
+                // Refresh the zoom label whenever Tui re-renders (crop/rotate reset the transform)
+                setInterval(updateZoomLabel, 500);
 
                 document.querySelectorAll('input[name="saveMode"]').forEach(function(radio) {
                     radio.addEventListener('change', function() {
