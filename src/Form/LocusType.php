@@ -16,6 +16,16 @@ class LocusType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
+            ->add('excavationSearch', TextType::class, [
+                'mapped' => false,
+                'required' => false,
+                'label' => 'Trench Search',
+                'attr' => [
+                    'placeholder' => 'Type: SITE+SEASON-TRENCH (e.g., BE98-127)',
+                    'class' => 'excavation-autocomplete',
+                    'autocomplete' => 'off',
+                ],
+            ])
             ->add('excavation', EntityType::class, [
                 'class' => Excavation::class,
                 'required' => true,
@@ -23,12 +33,9 @@ class LocusType extends AbstractType
                 'choice_label' => function(Excavation $excavation) {
                     return $excavation . '';
                 },
-                'query_builder' => function(\Doctrine\ORM\EntityRepository $er) {
-                    return $er->createQueryBuilder('e')
-                        ->orderBy('e.site', 'ASC')
-                        ->addOrderBy('LENGTH(e.trench)', 'ASC')
-                        ->addOrderBy('e.trench', 'ASC');
-                },
+                'attr' => [
+                    'style' => 'display: none;',
+                ],
             ])
             ->add('number', TextType::class, [
                 'required' => true,

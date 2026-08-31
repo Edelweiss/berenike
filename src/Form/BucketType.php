@@ -28,21 +28,26 @@ class BucketType extends AbstractType
                 'required' => false,
                 'label' => 'Remarks'
             ])
+            ->add('locusSearch', TextType::class, [
+                'mapped' => false,
+                'required' => false,
+                'label' => 'Locus Search',
+                'attr' => [
+                    'placeholder' => 'Type: SITE+SEASON-TRENCH/LOCUS (e.g., BE98-127/999)',
+                    'class' => 'locus-autocomplete',
+                    'autocomplete' => 'off',
+                ],
+            ])
             ->add('locus', EntityType::class, [
                 'class' => Locus::class,
                 'choice_label' => function (Locus $locus) {
                     return $locus . '';
                 },
-                'query_builder' => function ($repository) {
-                    return $repository->createQueryBuilder('l')
-                        ->leftJoin('l.excavation', 'e')
-                        ->orderBy('e.site', 'ASC')
-                        ->addOrderBy('SUBSTRING(e.season, LENGTH(e.season) - 3, 4)', 'DESC')
-                        ->addOrderBy('e.trench + 0', 'ASC')
-                        ->addOrderBy('l.number + 0', 'ASC');
-                },
                 'required' => true,
-                'label' => 'Locus'
+                'label' => 'Locus',
+                'attr' => [
+                    'style' => 'display: none;',
+                ],
             ])
         ;
     }

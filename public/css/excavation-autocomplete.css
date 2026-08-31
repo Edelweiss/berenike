@@ -1,0 +1,28 @@
+/**
+ * Excavation/Trench Autocomplete Styles
+ */
+.excavation-autocomplete {
+    font-family: inherit;
+}
+
+.excavation-autocomplete-results {
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.excavation-autocomplete-results > div {
+    transition: background-color 0.2s ease;
+}
+
+.excavation-autocomplete-results > div:last-child {
+    border-bottom: none !important;
+}
+
+/* Make the hidden excavation select accessible for form validation */
+#locus_excavation[style*="display: none"] {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}

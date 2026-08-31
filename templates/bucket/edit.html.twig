@@ -6,6 +6,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/locus-autocomplete.css') }}">
     <style>
         .ui-widget label {
             font-weight: bold;
@@ -21,6 +22,7 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1em;">
             <div style="display: flex; flex-direction: column; gap: 1em;">
                 {{ form_row(form.number, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+                {{ form_row(form.locusSearch) }}
                 {{ form_row(form.locus, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
                 {{ form_row(form.dating, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
             </div>
@@ -39,4 +41,9 @@
         </a>
     </div>
     {{ form_end(form) }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('js/locus-autocomplete.js') }}"></script>
 {% endblock %}

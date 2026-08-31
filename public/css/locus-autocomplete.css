@@ -1,0 +1,28 @@
+/**
+ * Locus Autocomplete Styles
+ */
+.locus-autocomplete {
+    font-family: inherit;
+}
+
+.locus-autocomplete-results {
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.locus-autocomplete-results > div {
+    transition: background-color 0.2s ease;
+}
+
+.locus-autocomplete-results > div:last-child {
+    border-bottom: none !important;
+}
+
+/* Make the hidden locus select accessible for form validation */
+#bucket_locus[style*="display: none"] {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}

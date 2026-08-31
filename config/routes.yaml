@@ -18,6 +18,14 @@ PapyrillioBerenike_FindSearchBuckets:
     path:  /find/search-buckets
     controller: App\Controller\FindController::searchBuckets
 
+PapyrillioBerenike_BucketSearchLoci:
+    path:  /bucket/search-loci
+    controller: App\Controller\BucketController::searchLoci
+
+PapyrillioBerenike_LocusSearchExcavations:
+    path:  /locus/search-excavations
+    controller: App\Controller\LocusController::searchExcavations
+
 PapyrillioBerenike_FindResetView:
     path:  /finds/reset-view
     controller: App\Controller\FindController::resetView

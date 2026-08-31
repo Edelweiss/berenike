@@ -6,6 +6,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/excavation-autocomplete.css') }}">
     <style>
         .ui-widget label {
             font-weight: bold;
@@ -20,6 +21,7 @@
     <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 1em; margin-bottom: 1em;">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1em;">
             <div>
+                {{ form_row(form.excavationSearch) }}
                 {{ form_row(form.excavation, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
                 {{ form_row(form.number, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
                 {{ form_row(form.addendum, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
@@ -39,4 +41,9 @@
         </a>
     </div>
     {{ form_end(form) }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('js/excavation-autocomplete.js') }}"></script>
 {% endblock %}
