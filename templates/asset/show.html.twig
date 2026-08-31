@@ -336,6 +336,7 @@
     </a>
     {% endif %}
     <form method="post" action="{{ path('PapyrillioBerenike_AssetDelete', {'id': asset.id}) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this asset?');">
+      <input type="hidden" name="_token" value="{{ csrf_token('asset-delete-' ~ asset.id) }}">
       <button type="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="color: #cc0000;">
         <span class="ui-button-text">Delete</span>
       </button>

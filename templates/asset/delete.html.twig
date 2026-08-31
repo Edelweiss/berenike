@@ -35,6 +35,7 @@
       </div>
 
       <form method="post" style="margin-top: 2em;">
+        <input type="hidden" name="_token" value="{{ csrf_token('asset-delete-' ~ asset.id) }}">
         <button type="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="background-color: #cc0000; border-color: #cc0000; color: #fff;">
           <span class="ui-button-text">Yes, Delete Asset</span>
         </button>

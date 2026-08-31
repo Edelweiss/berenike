@@ -71,16 +71,16 @@ PapyrillioBerenike_AssetList:
     path:  /asset-library
     controller: App\Controller\AssetController::list
 
+PapyrillioBerenike_AssetCreate:
+    path:  /asset/create
+    controller: App\Controller\AssetController::create
+    methods: [GET, POST]
+
 PapyrillioBerenike_AssetShow:
     path:  /asset/{id}
     controller: App\Controller\AssetController::show
     requirements:
         id: '\d+'
-
-PapyrillioBerenike_AssetCreate:
-    path:  /asset/create
-    controller: App\Controller\AssetController::create
-    methods: [GET, POST]
 
 PapyrillioBerenike_AssetEdit:
     path:  /asset/{id}/edit

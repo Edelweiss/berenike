@@ -394,7 +394,6 @@ class ImportImagesCommand extends Command
         
         // Legacy fields (kept for compatibility)
         $image->setFile($imageName);
-        $image->setPath($assetKey); // Store asset_key in path field
         
         if (!$dryRun) {
             // Process image files

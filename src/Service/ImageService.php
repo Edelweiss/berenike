@@ -2,6 +2,9 @@
 
 namespace App\Service;
 
+use App\Entity\Image;
+use App\Repository\ImageRepository;
+
 /**
  * Service for managing image assets, file processing, and variant generation
  */
@@ -11,8 +14,9 @@ class ImageService
     private string $assetsDir;
     private string $identifyPath = '/usr/local/bin/identify';
     private string $convertPath = '/usr/local/bin/convert';
+    private ?ImageRepository $imageRepository = null;
 
-    public function __construct(string $projectDir)
+    public function __construct(string $projectDir, ?ImageRepository $imageRepository = null)
     {
         $this->publicDir = $projectDir . '/public';
         $assetsPath = $this->publicDir . '/assets';
@@ -24,6 +28,7 @@ class ImageService
         }
         
         $this->assetsDir = $realPath;
+        $this->imageRepository = $imageRepository;
     }
 
     /**
@@ -162,33 +167,16 @@ class ImageService
     {
         $output = [];
         $returnVar = 0;
-        // Use -quiet to suppress warnings and [0] to only read first frame/page
-        // Redirect stderr to /dev/null to filter out warnings
         exec(sprintf(
             '%s -quiet -format "%%w,%%h" %s 2>/dev/null',
             escapeshellcmd($this->identifyPath),
             escapeshellarg($imageFile . '[0]')
         ), $output, $returnVar);
-        
-        // If quiet failed, try again without -quiet but take only the first line
-        if (empty($output[0])) {
-            $output = [];
-            exec(sprintf(
-                '%s -format "%%w,%%h" %s 2>&1',
-                escapeshellcmd($this->identifyPath),
-                escapeshellarg($imageFile . '[0]')
-            ), $output, $returnVar);
-            
-            // Take only the first line (dimensions)
-            if (!empty($output)) {
-                $output = [trim($output[0])];
-            }
-        }
-        
-        if (empty($output[0])) {
+
+        if ($returnVar !== 0 || empty($output[0])) {
             throw new \RuntimeException(sprintf('Failed to get image dimensions for: %s', $imageFile));
         }
-        
+
         $parts = explode(',', trim($output[0]));
         if (count($parts) !== 2) {
             throw new \RuntimeException(sprintf(
@@ -197,9 +185,8 @@ class ImageService
                 $output[0]
             ));
         }
-        
-        list($width, $height) = $parts;
-        return ['width' => (int)$width, 'height' => (int)$height];
+
+        return ['width' => (int)$parts[0], 'height' => (int)$parts[1]];
     }
 
     /**
@@ -287,5 +274,176 @@ class ImageService
         }
         
         return $variants;
+    }
+
+    /**
+     * Provision an Image entity from an uploaded source file.
+     * If an Image with the derived asset_key already exists, returns it untouched.
+     * Otherwise creates variants on disk, populates assetKey/type/file/size, and returns the new (not yet persisted) entity.
+     *
+     * @return array{image: Image, isNew: bool}
+     */
+    public function provisionAssetFromUpload(string $sourceFile, string $originalFilename, string $type = 'photo'): array
+    {
+        if ($this->imageRepository === null) {
+            throw new \LogicException('ImageService needs an ImageRepository for provisioning.');
+        }
+
+        $assetKey = $this->generateAssetKey($originalFilename);
+        $existing = $this->imageRepository->findOneBy(['assetKey' => $assetKey]);
+        if ($existing !== null) {
+            return ['image' => $existing, 'isNew' => false];
+        }
+
+        $dimensions = $this->processImage($sourceFile, $assetKey);
+
+        $image = new Image();
+        $image->setAssetKey($assetKey);
+        $image->setType($type);
+        $image->setFile($originalFilename);
+        $image->setSize(sprintf('%d,%d', $dimensions['width'], $dimensions['height']));
+
+        return ['image' => $image, 'isNew' => true];
+    }
+
+    /**
+     * Regenerate variants transactionally: stage into a temp key, only touch the real dir on success.
+     * The archival source_* file is preserved.
+     *
+     * @return array{width:int,height:int}
+     */
+    public function overwriteAsset(string $sourceFile, string $assetKey): array
+    {
+        $assetDir = $this->getAssetDirectory($assetKey);
+        if (!is_dir($assetDir)) {
+            throw new \RuntimeException(sprintf('Asset directory does not exist: %s', $assetDir));
+        }
+
+        $stageKey = $assetKey . '__stage_' . uniqid();
+        try {
+            $dimensions = $this->processImage($sourceFile, $stageKey);
+        } catch (\Throwable $e) {
+            $this->purgeAssetDirectory($stageKey);
+            throw $e;
+        }
+
+        $stageDir = $this->getAssetDirectory($stageKey);
+        try {
+            // Delete only regenerated variants in real dir; keep source_* archive
+            foreach ((array) glob($assetDir . '/*') as $file) {
+                if (!is_file($file)) {
+                    continue;
+                }
+                if (strpos(basename($file), 'source_') === 0) {
+                    continue;
+                }
+                @unlink($file);
+            }
+
+            // Move staged files into place; discard staged source_* (real archive kept)
+            foreach ((array) glob($stageDir . '/*') as $file) {
+                $name = basename($file);
+                if (strpos($name, 'source_') === 0) {
+                    @unlink($file);
+                    continue;
+                }
+                rename($file, $assetDir . '/' . $name);
+            }
+        } finally {
+            $this->purgeAssetDirectory($stageKey);
+        }
+
+        // Stale edit_source cache from previous session
+        @unlink($assetDir . '/edit_source.png');
+
+        return $dimensions;
+    }
+
+    /**
+     * Ensure an editable PNG (derived from original.tif) exists and return its asset-relative path.
+     * Falls back to large.webp if original.tif is missing. Caller should pipe the return value
+     * through Twig's asset() helper so the app base path gets prepended.
+     */
+    public function ensureEditSource(string $assetKey, int $maxDimension = 3000): string
+    {
+        $assetDir = $this->getAssetDirectory($assetKey);
+        $editPng = $assetDir . '/edit_source.png';
+        $originalTif = $assetDir . '/original.tif';
+
+        if (!file_exists($editPng) || (file_exists($originalTif) && filemtime($originalTif) > filemtime($editPng))) {
+            if (file_exists($originalTif)) {
+                $this->renderPng($originalTif, $editPng, $maxDimension);
+            }
+        }
+
+        $shard = $this->generateAssetShard($assetKey);
+        $variant = file_exists($editPng) ? 'edit_source.png' : 'large.webp';
+        return sprintf('assets/%s/%s/%s', $shard, $assetKey, $variant);
+    }
+
+    /**
+     * Suggest the next versioned asset key (base, base_v2, base_v3, …).
+     * Existing "_vN" suffix on $baseKey is stripped before search.
+     */
+    public function nextVersionedKey(string $baseKey): string
+    {
+        if ($this->imageRepository === null) {
+            throw new \LogicException('ImageService needs an ImageRepository for versioning.');
+        }
+
+        $rootKey = preg_replace('/_v\d+$/', '', $baseKey);
+        $qb = $this->imageRepository->createQueryBuilder('i')
+            ->where('i.assetKey = :root OR i.assetKey LIKE :pattern')
+            ->setParameter('root', $rootKey)
+            ->setParameter('pattern', $rootKey . '_v%');
+        $existing = $qb->getQuery()->getResult();
+
+        $maxV = 1;
+        foreach ($existing as $img) {
+            $key = $img->getAssetKey();
+            if ($key === $rootKey) {
+                continue;
+            }
+            if (preg_match('/^' . preg_quote($rootKey, '/') . '_v(\d+)$/', $key, $m)) {
+                $maxV = max($maxV, (int) $m[1]);
+            }
+        }
+        return $rootKey . '_v' . ($maxV + 1);
+    }
+
+    private function renderPng(string $sourceFile, string $destFile, int $maxDimension): void
+    {
+        $output = [];
+        $returnVar = 0;
+        exec(sprintf(
+            '%s %s[0] -resize %dx%d\> -colorspace sRGB %s 2>&1',
+            escapeshellcmd($this->convertPath),
+            escapeshellarg($sourceFile),
+            $maxDimension,
+            $maxDimension,
+            escapeshellarg($destFile)
+        ), $output, $returnVar);
+        if ($returnVar !== 0) {
+            throw new \RuntimeException(sprintf(
+                'Failed to render editable PNG %s: %s',
+                $destFile,
+                implode("\n", $output)
+            ));
+        }
+    }
+
+    private function purgeAssetDirectory(string $assetKey): void
+    {
+        $dir = $this->getAssetDirectory($assetKey);
+        if (!is_dir($dir)) {
+            return;
+        }
+        foreach ((array) glob($dir . '/*') as $file) {
+            if (is_file($file)) {
+                @unlink($file);
+            }
+        }
+        @rmdir($dir);
+        @rmdir(dirname($dir)); // remove shard dir if now empty
     }
 }

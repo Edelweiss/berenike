@@ -34,6 +34,7 @@ services:
     App\Service\ImageService:
         arguments:
             $projectDir: '%kernel.project_dir%'
+            $imageRepository: '@App\Repository\ImageRepository'
     App\EventListener\Loggable:
             tags:
                 -

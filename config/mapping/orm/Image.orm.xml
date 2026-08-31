@@ -10,7 +10,7 @@
         <field name="number" type="string" length="64" nullable="true"/>
         <field name="size" type="text" nullable="false"/>
         <field name="file" type="string" length="512" nullable="false"/>
-        <field name="path" type="string" length="512" nullable="false"/>
+        <field name="path" type="string" length="512" nullable="true"/><!-- legacy: retained for later assignment of photos from old harddrive; nullable -->
         <field name="assetKey" type="string" length="512" nullable="true"/>
         <field name="assetShard" type="string" length="2" nullable="true"/>
         <field name="heidiconId" type="integer" nullable="true">

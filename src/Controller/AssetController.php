@@ -89,6 +89,7 @@ class AssetController extends BerenikeController
     /**
      * Create a new asset
      */
+    #[IsGranted('ROLE_EDITOR')]
     public function create(Request $request): Response
     {
         $asset = new Image();
@@ -101,42 +102,34 @@ class AssetController extends BerenikeController
 
             if ($uploadedFile) {
                 try {
-                    // Generate asset_key from filename
                     $originalFilename = $uploadedFile->getClientOriginalName();
-                    $assetKey = $this->imageService->generateAssetKey($originalFilename);
-                    
-                    // Check if asset already exists
-                    $existingAsset = $this->imageRepository->findOneBy(['assetKey' => $assetKey]);
-                    if ($existingAsset) {
+                    $result = $this->imageService->provisionAssetFromUpload(
+                        $uploadedFile->getRealPath(),
+                        $originalFilename,
+                        $asset->getType() ?: 'photo'
+                    );
+
+                    if (!$result['isNew']) {
                         $this->addFlash('warning', 'An asset with this filename already exists');
-                        return $this->redirectToRoute('PapyrillioBerenike_AssetShow', ['id' => $existingAsset->getId()]);
+                        return $this->redirectToRoute('PapyrillioBerenike_AssetShow', ['id' => $result['image']->getId()]);
                     }
 
-                    $asset->setAssetKey($assetKey);
-                    
-                    // Use the uploaded file's existing temporary path
-                    $tempPath = $uploadedFile->getRealPath();
-
-                    // Process the image (this will copy to asset directory)
-                    $dimensions = $this->imageService->processImage($tempPath, $assetKey);
-                    
-                    // Set size and file properties
-                    $asset->setSize(sprintf('%d,%d', $dimensions['width'], $dimensions['height']));
-                    $asset->setFile($originalFilename);
-                    $asset->setPath($assetKey);
-                    
-                    // Set default type if not set
-                    if (!$asset->getType()) {
-                        $asset->setType('photo');
+                    // Carry over any metadata typed into the form (type/number/heidicon/…)
+                    $provisioned = $result['image'];
+                    $provisioned->setType($asset->getType() ?: 'photo');
+                    $provisioned->setNumber($asset->getNumber());
+                    $provisioned->setHeidiconId($asset->getHeidiconId());
+                    $provisioned->setHeidiconUuid($asset->getHeidiconUuid());
+                    $provisioned->setHeidiconSystemObjectId($asset->getHeidiconSystemObjectId());
+                    foreach ($asset->getFinds() as $find) {
+                        $provisioned->addFind($find);
                     }
-                    
-                    // Note: Symfony automatically cleans up uploaded file after request
 
-                    $this->entityManager->persist($asset);
+                    $this->entityManager->persist($provisioned);
                     $this->entityManager->flush();
 
                     $this->addFlash('success', 'Asset created successfully');
-                    return $this->redirectToRoute('PapyrillioBerenike_AssetShow', ['id' => $asset->getId()]);
+                    return $this->redirectToRoute('PapyrillioBerenike_AssetShow', ['id' => $provisioned->getId()]);
 
                 } catch (\Exception $e) {
                     $this->logger->error('Failed to process asset: ' . $e->getMessage());
@@ -146,7 +139,6 @@ class AssetController extends BerenikeController
                 $this->addFlash('error', 'Please select a file to upload');
             }
         } elseif ($form->isSubmitted()) {
-            // Form was submitted but has validation errors
             $this->logger->error('Asset form validation failed');
             foreach ($form->getErrors(true) as $error) {
                 $this->logger->error('Form error: ' . $error->getMessage());
@@ -162,6 +154,7 @@ class AssetController extends BerenikeController
     /**
      * Edit an existing asset (metadata only, not the image files)
      */
+    #[IsGranted('ROLE_EDITOR')]
     public function edit(int $id, Request $request): Response
     {
         $asset = $this->imageRepository->findOneBy(['id' => $id]);
@@ -202,7 +195,12 @@ class AssetController extends BerenikeController
             return $this->redirectToRoute('PapyrillioBerenike_AssetList');
         }
 
-        return $this->render('asset/edit_visual.html.twig', ['asset' => $asset]);
+        $editSourceUrl = $this->imageService->ensureEditSource($asset->getAssetKey());
+
+        return $this->render('asset/edit_visual.html.twig', [
+            'asset' => $asset,
+            'editSourceUrl' => $editSourceUrl,
+        ]);
     }
 
     /**
@@ -215,6 +213,10 @@ class AssetController extends BerenikeController
 
         if (!$asset || !$asset->getAssetKey()) {
             return $this->json(['error' => 'Asset not found'], 404);
+        }
+
+        if (!$this->isCsrfTokenValid('asset-save-edited-' . $id, (string) $request->request->get('_token'))) {
+            return $this->json(['error' => 'Invalid CSRF token'], 403);
         }
 
         $imageData = $request->request->get('imageData');
@@ -243,19 +245,7 @@ class AssetController extends BerenikeController
 
         try {
             if ($saveMode === 'overwrite') {
-                $assetKey = $asset->getAssetKey();
-
-                // Delete old asset files
-                $assetDir = $this->imageService->getAssetDirectory($assetKey);
-                if (is_dir($assetDir)) {
-                    foreach (glob($assetDir . '/*') as $file) {
-                        if (is_file($file)) {
-                            unlink($file);
-                        }
-                    }
-                }
-
-                $dimensions = $this->imageService->processImage($tempFile, $assetKey);
+                $dimensions = $this->imageService->overwriteAsset($tempFile, $asset->getAssetKey());
                 $asset->setSize(sprintf('%d,%d', $dimensions['width'], $dimensions['height']));
                 $this->entityManager->flush();
 
@@ -267,19 +257,17 @@ class AssetController extends BerenikeController
                 ]);
             }
 
-            // Save as new: create new Image entity
-            $newAssetKey = $asset->getAssetKey() . '_edited_' . time();
+            // Save as new: next versioned key (base, base_v2, base_v3, …)
+            $newAssetKey = $this->imageService->nextVersionedKey($asset->getAssetKey());
             $dimensions = $this->imageService->processImage($tempFile, $newAssetKey);
 
             $newAsset = new Image();
             $newAsset->setAssetKey($newAssetKey);
             $newAsset->setType($asset->getType());
-            $newAsset->setNumber($asset->getNumber() ? $asset->getNumber() . ' (edited)' : 'edited');
+            $newAsset->setNumber($asset->getNumber());
             $newAsset->setFile($asset->getFile());
-            $newAsset->setPath($newAssetKey);
             $newAsset->setSize(sprintf('%d,%d', $dimensions['width'], $dimensions['height']));
 
-            // Copy specialist relationships
             foreach ($asset->getImageSpecialists() as $originalIS) {
                 $newIS = new ImageSpecialist();
                 $newIS->setImage($newAsset);
@@ -311,6 +299,7 @@ class AssetController extends BerenikeController
     /**
      * Delete an asset
      */
+    #[IsGranted('ROLE_EDITOR')]
     public function delete(int $id, Request $request): Response
     {
         $asset = $this->imageRepository->findOneBy(['id' => $id]);
@@ -321,20 +310,13 @@ class AssetController extends BerenikeController
         }
 
         if ($request->isMethod('POST')) {
-            $assetKey = $asset->getAssetKey();
-            
-            // Remove from database
+            if (!$this->isCsrfTokenValid('asset-delete-' . $id, (string) $request->request->get('_token'))) {
+                $this->addFlash('error', 'Invalid CSRF token');
+                return $this->redirectToRoute('PapyrillioBerenike_AssetShow', ['id' => $id]);
+            }
+
             $this->entityManager->remove($asset);
             $this->entityManager->flush();
-
-            // Optionally remove files from disk
-            // Uncomment if you want to delete physical files
-            /*
-            $assetDir = $this->imageService->getAssetDirectory($assetKey);
-            if (is_dir($assetDir)) {
-                $this->removeDirectory($assetDir);
-            }
-            */
 
             $this->addFlash('success', 'Asset deleted successfully');
             return $this->redirectToRoute('PapyrillioBerenike_AssetList');
@@ -343,23 +325,5 @@ class AssetController extends BerenikeController
         return $this->render('asset/delete.html.twig', [
             'asset' => $asset,
         ]);
-    }
-
-    /**
-     * Recursively remove directory and its contents
-     */
-    private function removeDirectory(string $dir): bool
-    {
-        if (!is_dir($dir)) {
-            return false;
-        }
-
-        $files = array_diff(scandir($dir), ['.', '..']);
-        foreach ($files as $file) {
-            $path = $dir . '/' . $file;
-            is_dir($path) ? $this->removeDirectory($path) : unlink($path);
-        }
-
-        return rmdir($dir);
     }
 }

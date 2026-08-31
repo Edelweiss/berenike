@@ -1,7 +1,5 @@
 {% extends 'cinema.html.twig' %}
 
-{% set imagePath = asset('assets/' ~ asset.assetShard ~ '/' ~ asset.assetKey ~ '/large.webp') %}
-
 {% block title %}Edit Asset {{ asset.id }}{% endblock %}
 
 {% block top %}Edit Asset <small>Visual Editor</small>{% endblock %}
@@ -11,21 +9,11 @@
     <link rel="stylesheet" href="https://uicdn.toast.com/tui-image-editor/latest/tui-image-editor.css">
     <link rel="stylesheet" href="https://uicdn.toast.com/tui-color-picker/latest/tui-color-picker.css">
     <style>
-        #tui-image-editor-container {
-            height: 700px;
-        }
-        /* Hide TOAST UI branding logo */
-        .tui-image-editor-header-logo {
-            display: none !important;
-        }
-        /* Hide download button in header */
-        .tui-image-editor-download-btn {
-            display: none !important;
-        }
-        /* Hide load button */
-        .tui-image-editor-load-btn {
-            display: none !important;
-        }
+        #tui-image-editor-container { height: 700px; }
+        .tui-image-editor-header-logo,
+        .tui-image-editor-download-btn,
+        .tui-image-editor-load-btn { display: none !important; }
+
         .editor-actions {
             margin: 1em 0;
             padding: 1em;
@@ -33,9 +21,8 @@
             border: 1px solid #ddd;
             border-radius: 4px;
         }
-        .editor-actions button {
-            margin-right: 0.5em;
-        }
+        .editor-actions button { margin-right: 0.5em; }
+
         .save-options {
             display: none;
             margin-top: 1em;
@@ -44,12 +31,9 @@
             border: 2px solid #4CAF50;
             border-radius: 4px;
         }
-        .save-options.active {
-            display: block;
-        }
-        .save-mode-selection {
-            margin: 1em 0;
-        }
+        .save-options.active { display: block; }
+
+        .save-mode-selection { margin: 1em 0; }
         .save-mode-selection label {
             display: block;
             margin: 0.5em 0;
@@ -58,12 +42,9 @@
             border-radius: 3px;
             cursor: pointer;
         }
-        .save-mode-selection label:hover {
-            background: #f0f0f0;
-        }
-        .save-mode-selection input[type="radio"]:checked + span {
-            font-weight: bold;
-        }
+        .save-mode-selection label:hover { background: #f0f0f0; }
+        .save-mode-selection input[type="radio"]:checked + span { font-weight: bold; }
+
         .warning-box {
             padding: 0.75em;
             margin: 0.5em 0;
@@ -77,22 +58,38 @@
             padding: 0.5em;
             display: none;
         }
-        #saveStatus.success {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-            display: block;
+        #saveStatus.success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; display: block; }
+        #saveStatus.error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; display: block; }
+
+        /* Blocking overlay while save is in flight */
+        #saveOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: #fff;
+            font-size: 1.15em;
         }
-        #saveStatus.error {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-            display: block;
+        #saveOverlay.active { display: flex; }
+        #saveOverlay .spinner {
+            width: 42px;
+            height: 42px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin-right: 0.75em;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 {% endblock %}
 
 {% block body %}
+    <div id="saveOverlay"><div class="spinner"></div><span id="saveOverlayText">Saving…</span></div>
+
     <div class="ui-widget">
         <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
             <h3 style="margin: 0; font-size: 1.1em;">
@@ -111,33 +108,30 @@
                 <button type="button" id="cancelButton" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
                     <span class="ui-button-text">✕ Cancel</span>
                 </button>
-                
+
                 <div class="save-options" id="saveOptions">
                     <h4 style="margin-top: 0;">Save Options</h4>
                     <div class="save-mode-selection">
                         <label>
                             <input type="radio" name="saveMode" value="new" checked>
-                            <span><strong>Save as New Image</strong> — Creates a new image entry, keeps original unchanged</span>
+                            <span><strong>Save as New Image</strong> — Creates a new versioned entry (<code>_v2</code>, <code>_v3</code>, …), keeps original unchanged</span>
                         </label>
                         <label>
                             <input type="radio" name="saveMode" value="overwrite">
-                            <span><strong>Overwrite Original</strong> — Replaces all image variants of this entry</span>
+                            <span><strong>Overwrite Original</strong> — Regenerates variants in place (archival <code>source_*</code> file preserved)</span>
                         </label>
                     </div>
-                    
+
                     <div class="warning-box" id="overwriteWarning" style="display: none;">
-                        <strong>⚠️ Warning:</strong> Overwriting will permanently delete the original image files. This cannot be undone!
+                        <strong>⚠️ Warning:</strong> The current variants (<code>original.tif</code>, <code>*.webp</code>) will be replaced. The archival <code>source_*</code> file is kept.
                     </div>
-                    
+
                     <div>
                         <button type="button" id="confirmSaveButton" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="background: #4CAF50; color: white;">
                             <span class="ui-button-text">✓ Confirm Save</span>
                         </button>
-                        <button type="button" id="cancelSaveButton" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
-                            <span class="ui-button-text">Cancel</span>
-                        </button>
                     </div>
-                    
+
                     <div id="saveStatus"></div>
                 </div>
             </div>
@@ -153,26 +147,22 @@
     <script src="https://uicdn.toast.com/tui-code-snippet/v1.5.2/tui-code-snippet.min.js"></script>
     <script src="https://uicdn.toast.com/tui-color-picker/v2.2.7/tui-color-picker.min.js"></script>
     <script src="https://uicdn.toast.com/tui-image-editor/v3.15.3/tui-image-editor.js"></script>
-    
+
     <script>
         (function() {
             'use strict';
-            
+
             var imageEditor;
-            var saveOptionsVisible = false;
+            var saveUrl   = {{ path('PapyrillioBerenike_AssetSaveEdited', {'id': asset.id})|json_encode|raw }};
+            var cancelUrl = {{ path('PapyrillioBerenike_AssetShow',       {'id': asset.id})|json_encode|raw }};
+            var imagePath = {{ asset(editSourceUrl)|json_encode|raw }};
+            var csrfToken = {{ csrf_token('asset-save-edited-' ~ asset.id)|json_encode|raw }};
 
             document.addEventListener('DOMContentLoaded', function() {
-                var imagePath = {{ imagePath|json_encode|raw }};
-                console.log('Loading image from:', imagePath);
-
                 imageEditor = new tui.ImageEditor('#tui-image-editor-container', {
                     includeUI: {
-                        loadImage: {
-                            path: imagePath,
-                            name: 'Asset {{ asset.id }}'
-                        },
+                        loadImage: { path: imagePath, name: 'Asset {{ asset.id }}' },
                         theme: {
-                            // Hide logo/branding
                             'common.bi.image': '',
                             'common.bisize.width': '0',
                             'common.bisize.height': '0',
@@ -180,110 +170,96 @@
                         },
                         menu: ['crop', 'flip', 'rotate', 'draw', 'shape', 'text', 'filter'],
                         initMenu: 'crop',
-                        uiSize: {
-                            width: '100%',
-                            height: '700px'
-                        },
+                        uiSize: { width: '100%', height: '700px' },
                         menuBarPosition: 'bottom'
                     },
                     cssMaxWidth: 2000,
                     cssMaxHeight: 2000,
                     usageStatistics: false
                 });
-                
-                // Save button - show options
+
+                var saveOptions      = document.getElementById('saveOptions');
+                var overwriteWarning = document.getElementById('overwriteWarning');
+                var statusDiv        = document.getElementById('saveStatus');
+                var overlay          = document.getElementById('saveOverlay');
+                var overlayText      = document.getElementById('saveOverlayText');
+                var confirmBtn       = document.getElementById('confirmSaveButton');
+
                 document.getElementById('saveButton').addEventListener('click', function() {
-                    saveOptionsVisible = !saveOptionsVisible;
-                    var saveOptions = document.getElementById('saveOptions');
-                    if (saveOptionsVisible) {
-                        saveOptions.classList.add('active');
-                    } else {
-                        saveOptions.classList.remove('active');
-                    }
+                    saveOptions.classList.add('active');
+                    saveOptions.scrollIntoView({behavior: 'smooth', block: 'nearest'});
                 });
-                
-                // Cancel button
+
                 document.getElementById('cancelButton').addEventListener('click', function() {
                     if (confirm('Are you sure? Any unsaved changes will be lost.')) {
-                        window.location.href = '{{ path('PapyrillioBerenike_AssetShow', {'id': asset.id}) }}';
+                        window.location.href = cancelUrl;
                     }
                 });
-                
-                // Cancel save button
-                document.getElementById('cancelSaveButton').addEventListener('click', function() {
-                    document.getElementById('saveOptions').classList.remove('active');
-                    saveOptionsVisible = false;
-                });
-                
-                // Show warning for overwrite mode
+
                 document.querySelectorAll('input[name="saveMode"]').forEach(function(radio) {
                     radio.addEventListener('change', function() {
-                        var warning = document.getElementById('overwriteWarning');
-                        if (this.value === 'overwrite') {
-                            warning.style.display = 'block';
-                        } else {
-                            warning.style.display = 'none';
-                        }
+                        overwriteWarning.style.display = (this.value === 'overwrite') ? 'block' : 'none';
                     });
                 });
-                
-                // Confirm save button
-                document.getElementById('confirmSaveButton').addEventListener('click', function() {
+
+                confirmBtn.addEventListener('click', function() {
                     var saveMode = document.querySelector('input[name="saveMode"]:checked').value;
-                    var statusDiv = document.getElementById('saveStatus');
-                    
-                    // Confirm overwrite
+
                     if (saveMode === 'overwrite') {
-                        if (!confirm('⚠️ FINAL WARNING: This will permanently overwrite the original image. Continue?')) {
+                        if (!confirm('⚠️ Overwriting will replace the current variants (source_* archive is kept). Continue?')) {
                             return;
                         }
                     }
-                    
-                    // Disable button during save
-                    var confirmBtn = document.getElementById('confirmSaveButton');
+
                     confirmBtn.disabled = true;
-                    confirmBtn.querySelector('.ui-button-text').textContent = '⏳ Saving...';
-                    
                     statusDiv.className = '';
                     statusDiv.style.display = 'none';
-                    
-                    // Get edited image as base64
-                    var imageDataURL = imageEditor.toDataURL({
-                        format: 'png',
-                        quality: 1.0
-                    });
-                    
-                    // Send to server
-                    fetch('{{ path('PapyrillioBerenike_AssetSaveEdited', {'id': asset.id}) }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                        body: 'imageData=' + encodeURIComponent(imageDataURL) + '&saveMode=' + saveMode
-                    })
-                    .then(function(response) { return response.json(); })
-                    .then(function(data) {
-                        if (data.success) {
-                            statusDiv.className = 'success';
-                            statusDiv.textContent = '✓ ' + data.message;
-                            statusDiv.style.display = 'block';
-                            
-                            // Redirect after 1.5 seconds
-                            setTimeout(function() {
-                                window.location.href = data.redirectUrl;
-                            }, 1500);
-                        } else {
-                            throw new Error(data.error || 'Save failed');
+                    overlayText.textContent = 'Encoding image…';
+                    overlay.classList.add('active');
+
+                    // Defer the heavy toDataURL() so the overlay actually paints first
+                    setTimeout(function() {
+                        var imageDataURL;
+                        try {
+                            imageDataURL = imageEditor.toDataURL({ format: 'png', quality: 1.0 });
+                        } catch (e) {
+                            overlay.classList.remove('active');
+                            confirmBtn.disabled = false;
+                            statusDiv.className = 'error';
+                            statusDiv.textContent = '✗ Failed to encode image: ' + e.message;
+                            return;
                         }
-                    })
-                    .catch(function(error) {
-                        statusDiv.className = 'error';
-                        statusDiv.textContent = '✗ Error: ' + error.message;
-                        statusDiv.style.display = 'block';
-                        
-                        confirmBtn.disabled = false;
-                        confirmBtn.querySelector('.ui-button-text').textContent = '✓ Confirm Save';
-                    });
+
+                        overlayText.textContent = 'Uploading…';
+
+                        var body = new URLSearchParams();
+                        body.append('imageData', imageDataURL);
+                        body.append('saveMode', saveMode);
+                        body.append('_token',   csrfToken);
+
+                        fetch(saveUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: body.toString()
+                        })
+                        .then(function(response) { return response.json(); })
+                        .then(function(data) {
+                            if (data.success) {
+                                overlayText.textContent = data.message + ' — redirecting…';
+                                statusDiv.className = 'success';
+                                statusDiv.textContent = '✓ ' + data.message;
+                                setTimeout(function() { window.location.href = data.redirectUrl; }, 900);
+                            } else {
+                                throw new Error(data.error || 'Save failed');
+                            }
+                        })
+                        .catch(function(error) {
+                            overlay.classList.remove('active');
+                            confirmBtn.disabled = false;
+                            statusDiv.className = 'error';
+                            statusDiv.textContent = '✗ Error: ' + error.message;
+                        });
+                    }, 30);
                 });
             });
         })();

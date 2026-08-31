@@ -84,33 +84,18 @@ class AdminController extends BerenikeController
                             $specialist = $uploadForm->get('specialist')->getData();
                             $speciality = $uploadForm->get('speciality')->getData();
                             $year = $uploadForm->get('year')->getData();
-                            
-                            // Generate asset_key from filename
+
                             $originalFilename = $uploadedFile->getClientOriginalName();
-                            $assetKey = $this->imageService->generateAssetKey($originalFilename);
-                            
-                            // Check if image with this assetKey already exists
-                            $imageRepository = $this->entityManager->getRepository(Image::class);
-                            $existingImage = $imageRepository->findOneBy(['assetKey' => $assetKey]);
-                            
+                            $result = $this->imageService->provisionAssetFromUpload(
+                                $uploadedFile->getRealPath(),
+                                $originalFilename,
+                                $type
+                            );
+                            $image = $result['image'];
+                            $existingImage = !$result['isNew'] ? $image : null;
+
                             if ($existingImage) {
-                                // Use existing image, just link it to the find
-                                $this->logger->info('Image already exists, linking to find', ['assetKey' => $assetKey]);
-                                $image = $existingImage;
-                            } else {
-                                // Create new Image entity
-                                $image = new Image();
-                                $image->setAssetKey($assetKey);
-                                $image->setType($type);
-                                $image->setFile($originalFilename);
-                                $image->setPath($assetKey);
-                                
-                                // Use uploaded file's temporary path
-                                $tempPath = $uploadedFile->getRealPath();
-                                
-                                // Process the image
-                                $dimensions = $this->imageService->processImage($tempPath, $assetKey);
-                                $image->setSize(sprintf('%d,%d', $dimensions['width'], $dimensions['height']));
+                                $this->logger->info('Image already exists, linking to find', ['assetKey' => $image->getAssetKey()]);
                             }
                             
                             // Handle specialist data if provided (only for new images)
