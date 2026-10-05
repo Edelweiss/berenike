@@ -9,19 +9,21 @@
         <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
           <h4 class="ui-widget-header ui-corner-all" style="padding: 0.3em; margin: -0.3em -0.3em 0.5em -0.3em; font-size: 0.9em;">Basic Information</h4>
           <div class="ui-helper-clearfix">
-            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">ID:</strong> {{ find.id }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">ID:</strong> {{ find.id }} <strong style="display: inline-block; width: 6em; padding: 0 0 0 5em">TM:</strong> {% if find.tm %} <a href="https://www.trismegistos.org/text/{{ find.tm }}" target="_blank">{{ find.tm }}</a> {% else %} {{ find.tm }} {% endif %}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Bucket:</strong> {{ find.bucket.number }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Locus:</strong> {{ find.bucket.locus.number }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Trench:</strong> {{ find.bucket.locus.excavation.trench }}</p>
+            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Kontext:</strong> {{ find.trench }}</p>
             <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Inventory:</strong> {{ find.inventoryNumber }}</p>
-            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">TM:</strong> {% if find.tm %} <a href="https://www.trismegistos.org/text/{{ find.tm }}" target="_blank">{{ find.tm }}</a> {% else %} {{ find.tm }} {% endif %}</p>
             {% if find.heidiconId %}
-              <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">HeidICON ID:</strong> {{ find.heidiconId }}</p>
+              <!--p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">HeidICON ID:</strong> {{ find.heidiconId }}</p-->
             {% endif %}
             {% if find.heidiconUuid %}
-              <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">HeidICON UUID:</strong> {{ find.heidiconUuid }}</p>
+              <!--p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">HeidICON UUID:</strong> {{ find.heidiconUuid }}</p-->
             {% endif %}
             {% if find.heidiconSystemObjectId %}
-              <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">HeidICON Sys ID:</strong> <a href="https://heidicon.ub.uni-heidelberg.de#/detail/{{ find.heidiconSystemObjectId }}" target="heidicon">{{ find.heidiconSystemObjectId }}</a></p>
+              <!--p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">HeidICON Sys ID:</strong> <a href="https://heidicon.ub.uni-heidelberg.de#/detail/{{ find.heidiconSystemObjectId }}" target="heidicon">{{ find.heidiconSystemObjectId }}</a></p-->
             {% endif %}
-            <p style="margin: 0.2em 0;"><strong style="display: inline-block; width: 6em;">Trench:</strong> {{ find.trench }}</p>
           </div>
         </div>
 
@@ -179,6 +181,124 @@
   </div>
   {% endif %}
   
+  {% set sharedImages = find.images|filter(image => image.finds|length > 1) %}
+  {% if sharedImages|length > 0 %}
+  <div class="ui-widget" style="margin-top: 0.5em;">
+    <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
+      <h3 style="margin: 0; font-size: 1.1em;">Related Finds</h3>
+    </div>
+
+    <div class="ui-widget-content ui-corner-bottom" style="padding: 0.5em;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1em;">
+        {% for sharedImage in sharedImages %}
+          <div class="ui-widget ui-widget-content ui-corner-all" style="padding: 0.5em;">
+            <!-- Shared Image -->
+            <div style="margin-bottom: 1em; padding-bottom: 1em; border-bottom: 1px solid #ddd;">
+              <h4 style="margin: 0 0 0.5em 0; font-size: 0.9em;">Shared Image</h4>
+              <div style="display: flex; align-items: center; gap: 1em;">
+                {% if sharedImage.assetKey and sharedImage.assetShard %}
+                  <div style="flex-shrink: 0;">
+                    <a href="{{ path('PapyrillioBerenike_AssetShow', {'id': sharedImage.id}) }}" title="View asset">
+                      <img src="{{ asset('assets/' ~ sharedImage.assetShard ~ '/' ~ sharedImage.assetKey ~ '/thumbnail.webp') }}" 
+                           alt="Image thumbnail"
+                           style="max-width: 120px; height: auto; border: 1px solid #ccc; border-radius: 4px;"
+                           onerror="this.src='{{ asset('images/no-image.png') }}'; this.onerror=null;" />
+                    </a>
+                  </div>
+                {% endif %}
+                <div style="flex-grow: 1;">
+                  <p style="margin: 0.2em 0; font-size: 0.9em;">
+                    <strong>Type:</strong> {{ sharedImage.type|capitalize }}
+                  </p>
+                  {% if sharedImage.number %}
+                    <p style="margin: 0.2em 0; font-size: 0.9em;">
+                      <strong>Number:</strong> {{ sharedImage.number }}
+                    </p>
+                  {% endif %}
+                  <p style="margin: 0.2em 0; font-size: 0.9em;">
+                    <strong>Associated with:</strong> {{ sharedImage.finds|length }} finds
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Other Related Finds -->
+            <h4 style="margin: 0.5em 0; font-size: 0.9em;">Other Finds with This Image</h4>
+            <div style="display: flex; flex-direction: column; gap: 0.8em;">
+              {% for relatedFind in sharedImage.finds %}
+                {% if relatedFind.id != find.id %}
+                  <div style="padding: 0.5em; background-color: #f5f5f5; border-radius: 4px; border-left: 3px solid #4a90e2;">
+                    <div style="display: grid; grid-template-columns: 80px 1fr; gap: 0.8em; align-items: start;">
+                      <!-- Thumbnail -->
+                      <div style="flex-shrink: 0;">
+                        <a href="{{ path('PapyrillioBerenike_FindShow', {'id': relatedFind.id}) }}" title="View Find">
+                          {% if relatedFind.thumbnailImage() %}
+                            {% set thumbImage = relatedFind.thumbnailImage() %}
+                            {% if thumbImage.assetKey and thumbImage.assetShard %}
+                              <img src="{{ asset('assets/' ~ thumbImage.assetShard ~ '/' ~ thumbImage.assetKey ~ '/thumbnail.webp') }}" 
+                                   alt="Find thumbnail"
+                                   style="width: 80px; height: auto; border: 1px solid #ccc; border-radius: 4px;"
+                                   onerror="this.src='{{ asset('images/no-image.png') }}'; this.onerror=null;" />
+                            {% elseif thumbImage.heidiconUuid and thumbImage.heidiconId %}
+                              <img src="https://heidicon.ub.uni-heidelberg.de/api/v1/objects/uuid/{{ thumbImage.heidiconUuid }}/file/id/{{ thumbImage.heidiconId }}/file_version/name/small" 
+                                   alt="Find thumbnail"
+                                   style="width: 80px; height: auto; border: 1px solid #ccc; border-radius: 4px;"
+                                   onerror="this.src='{{ asset('images/no-image.png') }}'; this.onerror=null;" />
+                            {% else %}
+                              <div style="width: 80px; height: 80px; border: 1px solid #ccc; border-radius: 4px; background-color: #e0e0e0; display: flex; align-items: center; justify-content: center; font-size: 0.85em; color: #666;">
+                                No image
+                              </div>
+                            {% endif %}
+                          {% else %}
+                            <div style="width: 80px; height: 80px; border: 1px solid #ccc; border-radius: 4px; background-color: #e0e0e0; display: flex; align-items: center; justify-content: center; font-size: 0.85em; color: #666;">
+                              No image
+                            </div>
+                          {% endif %}
+                        </a>
+                      </div>
+
+                      <!-- Find Details -->
+                      <div>
+                        <p style="margin: 0.2em 0; font-weight: bold;">
+                          <a href="{{ path('PapyrillioBerenike_FindShow', {'id': relatedFind.id}) }}" style="text-decoration: none; color: #4a90e2;">
+                            Find {{ relatedFind.object }}
+                          </a>
+                        </p>
+                        <p style="margin: 0.2em 0; font-size: 0.85em; color: #555;">
+                          ID: <strong>{{ relatedFind.id }}</strong>
+                        </p>
+                        {% if relatedFind.inventoryNumber %}
+                          <p style="margin: 0.2em 0; font-size: 0.85em; color: #555;">
+                            Inventory: <strong>{{ relatedFind.inventoryNumber }}</strong>
+                          </p>
+                        {% endif %}
+                        {% if relatedFind.material %}
+                          <p style="margin: 0.2em 0; font-size: 0.85em; color: #555;">
+                            Material: <strong>{{ relatedFind.material }}</strong>
+                          </p>
+                        {% endif %}
+                        {% if relatedFind.date %}
+                          <p style="margin: 0.2em 0; font-size: 0.85em; color: #555;">
+                            Date: <strong>{{ relatedFind.date|date('d.m.Y') }}</strong>
+                          </p>
+                        {% elseif relatedFind.year %}
+                          <p style="margin: 0.2em 0; font-size: 0.85em; color: #555;">
+                            Year: <strong>{{ relatedFind.year }}</strong>
+                          </p>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   <div style="margin-top: 0.5em;">
     {% include 'bucket/_bucket.html.twig' with {'bucket': find.bucket} %}
   </div>
