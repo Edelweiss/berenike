@@ -109,7 +109,7 @@ class FindController extends BerenikeController
                           
                       } catch (\Exception $e) {
                           $this->logger->error('Failed to process uploaded image: ' . $e->getMessage());
-                          $this->addFlash('error', 'Failed to process image: ' . ($uploadedFile?->getClientOriginalName() ?? ''));
+                          $this->addFlash('error', 'Failed to process image: ' . ($uploadedFile ? $uploadedFile->getClientOriginalName() : ''));
                       }
                   }
               }
