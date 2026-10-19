@@ -8,6 +8,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 
 class ImageSpecialistType extends AbstractType
@@ -35,14 +36,14 @@ class ImageSpecialistType extends AbstractType
                     'Artist' => 'artist',
                 ],
             ])
-            ->add('year', ChoiceType::class, [
+            ->add('year', IntegerType::class, [
                 'required' => false,
                 'label' => 'Year',
-                'placeholder' => '-- Select Year --',
-                'choices' => array_combine(
-                    range(1995, date('Y') + 1),
-                    range(1995, date('Y') + 1)
-                ),
+                'attr' => [
+                    'min' => 1995,
+                    'max' => date('Y') + 1,
+                    'placeholder' => 'YYYY',
+                ],
             ])
         ;
     }
