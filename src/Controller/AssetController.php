@@ -16,7 +16,6 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class AssetController extends BerenikeController
 {
@@ -89,7 +88,6 @@ class AssetController extends BerenikeController
     /**
      * Create a new asset
      */
-    #[IsGranted('ROLE_EDITOR')]
     public function create(Request $request): Response
     {
         $asset = new Image();
@@ -154,7 +152,6 @@ class AssetController extends BerenikeController
     /**
      * Edit an existing asset (metadata only, not the image files)
      */
-    #[IsGranted('ROLE_EDITOR')]
     public function edit(int $id, Request $request): Response
     {
         $asset = $this->imageRepository->findOneBy(['id' => $id]);
@@ -185,7 +182,6 @@ class AssetController extends BerenikeController
     /**
      * Visual editor for an asset
      */
-    #[IsGranted('ROLE_EDITOR')]
     public function editVisual(int $id): Response
     {
         $asset = $this->imageRepository->findOneBy(['id' => $id]);
@@ -206,7 +202,6 @@ class AssetController extends BerenikeController
     /**
      * Save edited asset image
      */
-    #[IsGranted('ROLE_EDITOR')]
     public function saveEdited(int $id, Request $request): Response
     {
         $asset = $this->imageRepository->findOneBy(['id' => $id]);
@@ -299,7 +294,6 @@ class AssetController extends BerenikeController
     /**
      * Delete an asset
      */
-    #[IsGranted('ROLE_EDITOR')]
     public function delete(int $id, Request $request): Response
     {
         $asset = $this->imageRepository->findOneBy(['id' => $id]);
