@@ -110,6 +110,11 @@ PapyrillioBerenike_AssetDelete:
     requirements:
         id: '\d+'
 
+PapyrillioBerenike_AssetSearchFinds:
+    path:  /asset/search-finds
+    controller: App\Controller\AssetController::searchFinds
+    methods: [GET]
+
 PapyrillioBerenike_BucketList:
     path:  /buckets
     controller: App\Controller\BucketController::list

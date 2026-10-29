@@ -6,6 +6,7 @@
 
 {% block stylesheets %}
   {{ parent() }}
+  <link rel="stylesheet" href="{{ asset('css/find-autocomplete.css') }}">
   <style>
     .ui-widget label {
       font-weight: bold;
@@ -17,7 +18,11 @@
 
 {% block javascripts %}
   {{ parent() }}
+  <script>
+    window.FIND_SEARCH_URL = '{{ path('PapyrillioBerenike_AssetSearchFinds') }}';
+  </script>
   <script src="{{ asset('js/image-collection-manager.js') }}"></script>
+  <script src="{{ asset('js/find-autocomplete.js') }}"></script>
 {% endblock %}
 
 {% block body %}
@@ -61,10 +66,9 @@
       <h3 style="margin: 0; font-size: 1.1em;">Link to Finds</h3>
     </div>
     <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
-      {{ form_row(form.finds, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
-      <p style="margin-top: 0.5em; font-size: 0.9em; color: #666;">
-        Hold Ctrl (Cmd on Mac) to select multiple finds
-      </p>
+      {{ form_row(form.findsSearch, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+      <div id="finds-list" style="margin-top: 1em;"></div>
+      {% do form.finds.setRendered %}
     </div>
   </div>
 

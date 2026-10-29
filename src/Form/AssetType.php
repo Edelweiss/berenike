@@ -86,7 +86,17 @@ class AssetType extends AbstractType
                 'expanded' => false,
                 'required' => false,
                 'label' => 'Linked Finds',
-                'attr' => ['size' => 5],
+                'attr' => ['size' => 5, 'style' => 'display: none;'],
+            ])
+            ->add('findsSearch', TextType::class, [
+                'label' => 'Search Finds',
+                'mapped' => false,
+                'required' => false,
+                'attr' => [
+                    'class' => 'find-autocomplete',
+                    'placeholder' => 'Search by ID, object number, or handle (e.g., BE95-2/44/154)',
+                    'autocomplete' => 'off',
+                ],
             ])
             ->add('imageSpecialists', CollectionType::class, [
                 'entry_type' => ImageSpecialistType::class,

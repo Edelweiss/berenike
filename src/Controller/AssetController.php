@@ -329,4 +329,140 @@ class AssetController extends BerenikeController
             'asset' => $asset,
         ]);
     }
+
+    /**
+     * Search for finds by ID, object number, or handle (site/season/trench/locus/bucket)
+     */
+    public function searchFinds(Request $request): Response
+    {
+        $query = $request->query->get('q', '');
+        
+        if (strlen($query) < 1) {
+            return $this->json([]);
+        }
+        
+        // Query builder to find matching finds
+        $qb = $this->entityManager->createQueryBuilder();
+        $qb->select('f.id', 'f.inventoryNumber', 'f.object', 'f.objectNo', 'b.number as bucketNumber', 'l.number as locusNumber', 'e.trench', 'e.season', 'e.site')
+            ->from(Find::class, 'f')
+            ->leftJoin('f.bucket', 'b')
+            ->leftJoin('b.locus', 'l')
+            ->leftJoin('l.excavation', 'e');
+        
+        $orConditions = $qb->expr()->orX();
+        
+        // Search by ID (numeric)
+        if (is_numeric($query)) {
+            $orConditions->add('f.id = :id');
+            $qb->setParameter('id', (int)$query);
+        }
+        
+        // Search by object number
+        if (strlen($query) >= 2) {
+            $orConditions->add('f.objectNo LIKE :objectNo');
+            $qb->setParameter('objectNo', '%' . $query . '%');
+        }
+        
+        // Search by inventory number
+        if (strlen($query) >= 2) {
+            $orConditions->add('f.inventoryNumber LIKE :inventoryNumber');
+            $qb->setParameter('inventoryNumber', '%' . $query . '%');
+        }
+        
+        // Try to parse handle format: SITE/SEASON-TRENCH/LOCUS/BUCKET
+        if (preg_match('/^([A-Z]{2,3})(\d{2})?-?(\d+)?\/(\d+)?\/(\d+)?$/i', $query, $matches)) {
+            $site = strtoupper($matches[1]);
+            $seasonShort = $matches[2] ?? null;
+            $trench = $matches[3] ?? null;
+            $locusNum = $matches[4] ?? null;
+            $bucketNum = $matches[5] ?? null;
+            
+            $orConditions->add('e.site = :site');
+            $qb->setParameter('site', $site);
+            
+            if ($seasonShort) {
+                $seasonYear = $this->inflateSeason($seasonShort);
+                $orConditions->add('LOCATE(:season, e.season) > 0');
+                $qb->setParameter('season', $seasonYear);
+            }
+            
+            if ($trench) {
+                $orConditions->add('e.trench = :trench');
+                $qb->setParameter('trench', $trench);
+            }
+            
+            if ($locusNum) {
+                $orConditions->add('l.number = :locus');
+                $qb->setParameter('locus', $locusNum);
+            }
+            
+            if ($bucketNum) {
+                $orConditions->add('b.number = :bucket');
+                $qb->setParameter('bucket', $bucketNum);
+            }
+        }
+        
+        if ($orConditions->count() === 0) {
+            return $this->json([]);
+        }
+        
+        $qb->where($orConditions)
+            ->setMaxResults(50)
+            ->orderBy('f.id', 'DESC');
+        
+        $finds = $qb->getQuery()->getResult();
+        
+        $results = [];
+        foreach ($finds as $find) {
+            $label = '';
+            if ($find['site']) {
+                $label = $find['site'];
+                if ($find['season']) {
+                    // Extract year from season like "1995 (Summer)"
+                    if (preg_match('/(\d{4})/', $find['season'], $matches)) {
+                        $label .= substr($matches[1], 2); // Last 2 digits
+                    }
+                }
+                if ($find['trench']) {
+                    $label .= '-' . $find['trench'];
+                }
+                if ($find['locusNumber']) {
+                    $label .= '/' . $find['locusNumber'];
+                }
+                if ($find['bucketNumber']) {
+                    $label .= '/' . $find['bucketNumber'];
+                }
+            } else {
+                $label = $find['inventoryNumber'] ?? 'Find #' . $find['id'];
+            }
+            
+            if ($find['object']) {
+                $label .= ' ' . $find['object'];
+            }
+            if ($find['objectNo']) {
+                $label .= ' (' . $find['objectNo'] . ')';
+            }
+            
+            $results[] = [
+                'id' => $find['id'],
+                'label' => $label . ' [#' . $find['id'] . ']',
+                'value' => (string)$find['id'],
+            ];
+        }
+        
+        return $this->json($results);
+    }
+
+    /**
+     * Helper to convert 2-digit season to 4-digit year
+     */
+    private function inflateSeason($seasonShort): string
+    {
+        $year = (int)$seasonShort;
+        if ($year < 50) {
+            return '20' . str_pad($year, 2, '0', STR_PAD_LEFT);
+        }
+        return '19' . str_pad($year, 2, '0', STR_PAD_LEFT);
+    }
 }
+
