@@ -67,8 +67,11 @@
     </div>
     <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
       {{ form_row(form.findsSearch, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+      <!-- Hidden finds select - used by find-autocomplete.js -->
+      <div style="display: none;">
+        {{ form_widget(form.finds) }}
+      </div>
       <div id="finds-list" style="margin-top: 1em;"></div>
-      {% do form.finds.setRendered %}
     </div>
   </div>
 

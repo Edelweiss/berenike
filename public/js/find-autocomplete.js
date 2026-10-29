@@ -4,9 +4,13 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('[Find Autocomplete] Initializing...');
+    
     const findsSearchUrl = window.FIND_SEARCH_URL;
+    console.log('[Find Autocomplete] Search URL:', findsSearchUrl);
+    
     if (!findsSearchUrl) {
-        console.warn('FIND_SEARCH_URL not defined');
+        console.error('[Find Autocomplete] FIND_SEARCH_URL not defined');
         return;
     }
 
@@ -15,40 +19,64 @@ document.addEventListener('DOMContentLoaded', function() {
     const findsSelect = document.getElementById('asset_finds');
     const findListContainer = document.getElementById('finds-list');
 
+    console.log('[Find Autocomplete] Elements found:', {
+        findSearchInput: !!findSearchInput,
+        findsSelect: !!findsSelect,
+        findListContainer: !!findListContainer
+    });
+
     if (!findSearchInput || !findsSelect || !findListContainer) {
+        console.error('[Find Autocomplete] Missing required elements');
+        console.log('  findSearchInput ID: asset_findsSearch -', findSearchInput ? 'FOUND' : 'NOT FOUND');
+        console.log('  findsSelect ID: asset_finds -', findsSelect ? 'FOUND' : 'NOT FOUND');
+        console.log('  findListContainer ID: finds-list -', findListContainer ? 'FOUND' : 'NOT FOUND');
         return;
     }
 
+    console.log('[Find Autocomplete] Found', findsSelect.options.length, 'find options in select');
+    
     let resultsDropdown = null;
     let selectedFindsMap = new Map(); // Map of find ID to find data
 
     // Initialize with already selected finds
     Array.from(findsSelect.selectedOptions).forEach(option => {
         if (option.value) {
-            selectedFindsMap.set(parseInt(option.value), {
-                id: parseInt(option.value),
+            const findId = parseInt(option.value);
+            selectedFindsMap.set(findId, {
+                id: findId,
                 label: option.textContent.trim()
             });
+            console.log('[Find Autocomplete] Pre-selected find:', findId, option.textContent.trim());
         }
     });
+    
+    console.log('[Find Autocomplete] Initialized with', selectedFindsMap.size, 'pre-selected finds');
     renderFindsList();
 
     // Input event for autocomplete
     findSearchInput.addEventListener('input', function(e) {
         const query = this.value.trim();
+        console.log('[Find Autocomplete] Query input:', query);
         
         if (query.length < 1) {
             closeResults();
             return;
         }
 
-        fetch(findsSearchUrl + '?q=' + encodeURIComponent(query))
-            .then(response => response.json())
+        const url = findsSearchUrl + '?q=' + encodeURIComponent(query);
+        console.log('[Find Autocomplete] Fetching:', url);
+        
+        fetch(url)
+            .then(response => {
+                console.log('[Find Autocomplete] Response status:', response.status);
+                return response.json();
+            })
             .then(data => {
+                console.log('[Find Autocomplete] Got', data.length, 'results');
                 showResults(data);
             })
             .catch(err => {
-                console.error('Find search error:', err);
+                console.error('[Find Autocomplete] Fetch error:', err);
             });
     });
 
@@ -67,6 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (results.length === 0) {
             findSearchInput.classList.add('error');
+            console.log('[Find Autocomplete] No results');
             return;
         }
 
@@ -83,6 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
             div.style.cssText = 'padding: 8px; border-bottom: 1px solid #ddd; cursor: pointer;';
             
             div.addEventListener('click', function() {
+                console.log('[Find Autocomplete] Selected find:', find.id);
                 selectFind(find);
             });
             
@@ -122,6 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function removeFind(findId) {
+        console.log('[Find Autocomplete] Removing find:', findId);
         selectedFindsMap.delete(findId);
         updateFindsSelect();
         renderFindsList();
@@ -129,8 +160,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateFindsSelect() {
         // Update the hidden select with selected find IDs
+        console.log('[Find Autocomplete] Updating select with', selectedFindsMap.size, 'finds');
         Array.from(findsSelect.options).forEach(option => {
-            option.selected = selectedFindsMap.has(parseInt(option.value));
+            const optionId = parseInt(option.value);
+            const wasSelected = option.selected;
+            option.selected = selectedFindsMap.has(optionId);
+            if (wasSelected !== option.selected) {
+                console.log('[Find Autocomplete] Option', optionId, ':', wasSelected ? 'deselected' : 'selected');
+            }
         });
     }
 
@@ -146,6 +183,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        console.log('[Find Autocomplete] Rendering', selectedFindsMap.size, 'finds');
+        
         selectedFindsMap.forEach(find => {
             const item = document.createElement('div');
             item.className = 'find-item';
@@ -187,4 +226,6 @@ document.addEventListener('DOMContentLoaded', function() {
             closeResults();
         }
     });
+    
+    console.log('[Find Autocomplete] Initialization complete');
 });
