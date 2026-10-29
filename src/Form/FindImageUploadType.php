@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
  */
 class FindImageUploadType extends AbstractType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $currentYear = (int)date('Y');
         $years = range($currentYear + 1, 1995);
@@ -82,7 +82,7 @@ class FindImageUploadType extends AbstractType
         ;
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => null, // This is a DTO, not mapped to an entity

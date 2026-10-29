@@ -44,7 +44,7 @@ class FileMaker2MariaDBCommand extends Command
         $this->connection = $connection;
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->addArgument('xml-file', InputArgument::REQUIRED, 'Path to FileMaker XML file (relative to data/ directory)')

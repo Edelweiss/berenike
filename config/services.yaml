@@ -35,8 +35,9 @@ services:
         arguments:
             $projectDir: '%kernel.project_dir%'
             $imageRepository: '@App\Repository\ImageRepository'
-    App\EventListener\Loggable:
-            tags:
+    loggable.entity_listener:
+        class: App\EventListener\Loggable
+        tags:
                 -
                     # these are the options required to define the entity listener
                     name: 'doctrine.orm.entity_listener'
