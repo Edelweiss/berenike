@@ -304,9 +304,9 @@
       <ul style="list-style: none; padding: 0; margin: 0;">
         {% for imageSpecialist in asset.imageSpecialists %}
           <li style="margin: 0.25em 0;">
-            <strong>{{ imageSpecialist.specialist.name }}</strong>
-            {% if imageSpecialist.speciality %} — {{ imageSpecialist.speciality }}{% endif %}
-            {% if imageSpecialist.year %} ({{ imageSpecialist.year }}){% endif %}
+            <a href="{{ path('PapyrillioBerenike_SpecialistShow', {'id': imageSpecialist.specialist.id}) }}">
+              <strong>{{ imageSpecialist.canonicalTitle }}</strong>
+            </a>
           </li>
         {% endfor %}
       </ul>

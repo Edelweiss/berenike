@@ -42,4 +42,30 @@ class ImageSpecialist {
     public function getSpecialist(){
         return $this->specialist;
     }
+
+    /**
+     * Get canonical specialist title in format:
+     * Name — Speciality (Year)
+     * e.g., "Domżalski,K. — Photographer (1990)"
+     */
+    public function getCanonicalTitle(): string
+    {
+        $parts = [];
+
+        if ($this->specialist) {
+            $parts[] = $this->specialist->getName();
+        }
+
+        if ($this->speciality) {
+            $parts[] = $this->speciality;
+        }
+
+        $result = implode(' — ', $parts);
+
+        if ($this->year) {
+            $result .= sprintf(' (%d)', $this->year);
+        }
+
+        return $result;
+    }
 }

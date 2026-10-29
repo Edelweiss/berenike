@@ -277,15 +277,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const label = document.createElement('span');
         label.className = 'specialist-item-label';
-        let labelText = specialist.name;
-        if (specialist.year) labelText += ' (' + specialist.year + ')';
+        
+        // Build canonical title: Name — Speciality (Year)
+        let parts = [];
+        
+        if (specialist.name) {
+            parts.push(specialist.name);
+        }
+        
         if (specialist.speciality) {
             const specialityLabel = specialist.speciality === 'photographer' ? 'Photographer' : 
                                    specialist.speciality === 'artist' ? 'Artist' : 
                                    specialist.speciality;
-            labelText += ' - ' + specialityLabel;
+            parts.push(specialityLabel);
         }
+        
+        let labelText = parts.join(' — ');
+        
+        if (specialist.year) {
+            labelText += ' (' + specialist.year + ')';
+        }
+        
         if (!specialist.isExisting) labelText += ' (NEW)';
+        
         label.textContent = labelText;
         label.style.cssText = 'flex: 1; font-size: 14px;';
 

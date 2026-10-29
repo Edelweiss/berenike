@@ -449,7 +449,7 @@ class Find {
             $titleParts[] = $handle;
         }
         
-        $titleParts[] = sprintf('(#%d)', $this->getId());
+        $titleParts[] = sprintf(' #%d', $this->getId());
         
         $metaParts = [];
         
@@ -470,7 +470,7 @@ class Find {
         
         $result = implode(' ', $titleParts);
         if (!empty($metaParts)) {
-            $result .= ' ' . implode(', ', $metaParts);
+            $result .= ' — ' . implode(', ', $metaParts);
         }
         
         return $result;
