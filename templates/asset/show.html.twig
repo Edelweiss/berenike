@@ -294,26 +294,6 @@
     </div>
   </div>
 
-  {% if asset.imageSpecialists|length > 0 %}
-  <div class="ui-widget" style="margin-top: 1em;">
-    <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
-      <h3 style="margin: 0; font-size: 1.1em;">Specialists</h3>
-    </div>
-
-    <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
-      <ul style="list-style: none; padding: 0; margin: 0;">
-        {% for imageSpecialist in asset.imageSpecialists %}
-          <li style="margin: 0.25em 0;">
-            <a href="{{ path('PapyrillioBerenike_SpecialistShow', {'id': imageSpecialist.specialist.id}) }}">
-              <strong>{{ imageSpecialist.canonicalTitle }}</strong>
-            </a>
-          </li>
-        {% endfor %}
-      </ul>
-    </div>
-  </div>
-  {% endif %}
-
   {% if asset.finds|length > 0 %}
   <div class="ui-widget" style="margin-top: 1em;">
     <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
@@ -326,6 +306,26 @@
           <li style="margin: 0.5em 0;">
             <a href="{{ path('PapyrillioBerenike_FindShow', {'id': find.id}) }}">
               <strong>{{ find.canonicalTitle }}</strong>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if asset.imageSpecialists|length > 0 %}
+  <div class="ui-widget" style="margin-top: 1em;">
+    <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
+      <h3 style="margin: 0; font-size: 1.1em;">Specialists</h3>
+    </div>
+
+    <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
+      <ul style="list-style: none; padding: 0; margin: 0;">
+        {% for imageSpecialist in asset.imageSpecialists %}
+          <li style="margin: 0.25em 0;">
+            <a href="{{ path('PapyrillioBerenike_SpecialistShow', {'id': imageSpecialist.specialist.id}) }}">
+              <strong>{{ imageSpecialist.canonicalTitle }}</strong>
             </a>
           </li>
         {% endfor %}
