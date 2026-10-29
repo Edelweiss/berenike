@@ -36,4 +36,4 @@ Zend Engine v4.4.27, Copyright (c) Zend Technologies
     with Zend OPcache v8.4.27, Copyright (c), by Zend Technologies
 
 ubuntu@aquila:/var/www/berenike$ php bin/console --version
-Symfony 5.4.54 (env: prod, debug: false)
+Symfony v7.4.22 (env: prod, debug: false)
