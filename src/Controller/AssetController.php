@@ -149,9 +149,6 @@ class AssetController extends BerenikeController
         ]);
     }
 
-    /**
-     * Edit an existing asset (metadata only, not the image files)
-     */
     public function edit(int $id, Request $request): Response
     {
         $asset = $this->imageRepository->findOneBy(['id' => $id]);
@@ -161,31 +158,92 @@ class AssetController extends BerenikeController
             return $this->redirectToRoute('PapyrillioBerenike_AssetList');
         }
 
-        try {
-            $form = $this->createForm(AssetType::class, $asset, [
-                'is_edit' => true,
-            ]);
-            $form->handleRequest($request);
-
-            if ($form->isSubmitted() && $form->isValid()) {
-                $this->entityManager->flush();
-
-                $this->addFlash('success', 'Asset updated successfully');
-                return $this->redirectToRoute('PapyrillioBerenike_AssetShow', ['id' => $asset->getId()]);
+        if ($request->isMethod('POST')) {
+            // Update basic fields from request
+            if ($type = $request->request->get('type')) {
+                $asset->setType($type);
             }
+            if ($number = $request->request->get('number')) {
+                $asset->setNumber($number);
+            }
+            if ($heidiconId = $request->request->get('heidiconId')) {
+                $asset->setHeidiconId((int)$heidiconId);
+            }
+            if ($heidiconUuid = $request->request->get('heidiconUuid')) {
+                $asset->setHeidiconUuid($heidiconUuid);
+            }
+            if ($heidiconSystemObjectId = $request->request->get('heidiconSystemObjectId')) {
+                $asset->setHeidiconSystemObjectId((int)$heidiconSystemObjectId);
+            }
+            
+            // Process new finds from JSON
+            $findsData = $request->request->get('findsData');
+            if ($findsData) {
+                try {
+                    $findIds = json_decode($findsData, true);
+                    if (is_array($findIds)) {
+                        // Clear existing finds
+                        $asset->getFinds()->clear();
+                        
+                        // Add new finds
+                        foreach ($findIds as $findId) {
+                            $find = $this->entityManager->find('App\Entity\Find', (int)$findId);
+                            if ($find) {
+                                $asset->addFind($find);
+                            }
+                        }
+                    }
+                } catch (\Exception $e) {
+                    $this->logger->error('Error processing finds: ' . $e->getMessage());
+                }
+            }
+            
+            // Process new image specialists from JSON
+            $newImageSpecialistsJson = $request->request->get('newImageSpecialists');
+            if ($newImageSpecialistsJson) {
+                try {
+                    $newSpecialists = json_decode($newImageSpecialistsJson, true);
+                    if (is_array($newSpecialists)) {
+                        foreach ($newSpecialists as $specialistData) {
+                            $specialistId = $specialistData['specialistId'] ?? null;
+                            $year = $specialistData['year'] ?? null;
+                            $speciality = $specialistData['speciality'] ?? null;
+                            
+                            if ($specialistId) {
+                                $specialist = $this->entityManager->find('App\Entity\Specialist', $specialistId);
+                                if ($specialist) {
+                                    $imageSpecialist = new ImageSpecialist();
+                                    $imageSpecialist->setImage($asset);
+                                    $imageSpecialist->setSpecialist($specialist);
+                                    if ($year) $imageSpecialist->setYear((int)$year);
+                                    if ($speciality) $imageSpecialist->setSpeciality($speciality);
+                                    
+                                    $asset->addImageSpecialist($imageSpecialist);
+                                    $this->entityManager->persist($imageSpecialist);
+                                }
+                            }
+                        }
+                    }
+                } catch (\Exception $e) {
+                    $this->logger->error('Error processing new image specialists: ' . $e->getMessage());
+                }
+            }
+            
+            $this->entityManager->flush();
 
-            return $this->render('asset/edit.html.twig', [
-                'asset' => $asset,
-                'form' => $form->createView(),
-            ]);
-        } catch (\Exception $e) {
-            $this->logger->error('Error in asset edit form: ' . $e->getMessage(), [
-                'exception' => $e,
-                'asset_id' => $id,
-            ]);
-            $this->addFlash('error', 'An error occurred while loading the form: ' . $e->getMessage());
-            return $this->redirectToRoute('PapyrillioBerenike_AssetShow', ['id' => $id]);
+            $this->addFlash('success', 'Asset updated successfully');
+            return $this->redirectToRoute('PapyrillioBerenike_AssetShow', ['id' => $asset->getId()]);
         }
+
+        // GET request - display the form
+        $form = $this->createForm(AssetType::class, $asset, [
+            'is_edit' => true,
+        ]);
+
+        return $this->render('asset/edit.html.twig', [
+            'asset' => $asset,
+            'form' => $form->createView(),
+        ]);
     }
 
     /**
@@ -341,9 +399,9 @@ class AssetController extends BerenikeController
             return $this->json([]);
         }
         
-        // Query builder to find matching finds
+        // Query builder to find matching finds (using minimal select for performance)
         $qb = $this->entityManager->createQueryBuilder();
-        $qb->select('f.id', 'f.inventoryNumber', 'f.object', 'f.objectNo', 'b.number as bucketNumber', 'l.number as locusNumber', 'e.trench', 'e.season', 'e.site')
+        $qb->select('f')
             ->from(Find::class, 'f')
             ->leftJoin('f.bucket', 'b')
             ->leftJoin('b.locus', 'l')
@@ -414,39 +472,44 @@ class AssetController extends BerenikeController
         
         $results = [];
         foreach ($finds as $find) {
-            $label = '';
-            if ($find['site']) {
-                $label = $find['site'];
-                if ($find['season']) {
-                    // Extract year from season like "1995 (Summer)"
-                    if (preg_match('/(\d{4})/', $find['season'], $matches)) {
-                        $label .= substr($matches[1], 2); // Last 2 digits
-                    }
-                }
-                if ($find['trench']) {
-                    $label .= '-' . $find['trench'];
-                }
-                if ($find['locusNumber']) {
-                    $label .= '/' . $find['locusNumber'];
-                }
-                if ($find['bucketNumber']) {
-                    $label .= '/' . $find['bucketNumber'];
-                }
-            } else {
-                $label = $find['inventoryNumber'] ?? 'Find #' . $find['id'];
-            }
-            
-            if ($find['object']) {
-                $label .= ' ' . $find['object'];
-            }
-            if ($find['objectNo']) {
-                $label .= ' (' . $find['objectNo'] . ')';
-            }
-            
             $results[] = [
-                'id' => $find['id'],
-                'label' => $label . ' [#' . $find['id'] . ']',
-                'value' => (string)$find['id'],
+                'id' => $find->getId(),
+                'label' => $find->getCanonicalTitle(),
+                'value' => (string)$find->getId(),
+            ];
+        }
+        
+        return $this->json($results);
+    }
+
+    /**
+     * Search for specialists by name
+     */
+    public function searchSpecialists(Request $request): Response
+    {
+        $query = $request->query->get('q', '');
+        
+        if (strlen($query) < 1) {
+            return $this->json([]);
+        }
+        
+        // Query builder to find matching specialists
+        $qb = $this->entityManager->createQueryBuilder();
+        $qb->select('s.id', 's.name')
+            ->from('App\Entity\Specialist', 's')
+            ->where('s.name LIKE :name')
+            ->setParameter('name', '%' . $query . '%')
+            ->setMaxResults(50)
+            ->orderBy('s.name', 'ASC');
+        
+        $specialists = $qb->getQuery()->getResult();
+        
+        $results = [];
+        foreach ($specialists as $specialist) {
+            $results[] = [
+                'id' => $specialist['id'],
+                'label' => $specialist['name'],
+                'value' => (string)$specialist['id'],
             ];
         }
         

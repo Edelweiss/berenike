@@ -414,4 +414,65 @@ class Find {
         
         return $thumbnailImage;
     }
+
+    /**
+     * Get canonical find title in format:
+     * <SITE><YY>-<TRENCH>/<LOCUS>/<BUCKET> (#<find.id>) <find.object>[, <find.publications>][, TM <find.tm>]
+     */
+    public function getCanonicalTitle(): string
+    {
+        $handle = '';
+
+        // Handle/excavation part: SITE/YY-TRENCH/LOCUS/BUCKET
+        if ($this->getBucket()) {
+            $bucket = $this->getBucket();
+            if ($bucket->getLocus()) {
+                $locus = $bucket->getLocus();
+                if ($locus->getExcavation()) {
+                    $excavation = $locus->getExcavation();
+                    $site = $excavation->getSite() ?: '?';
+                    // Use last 2 digits of year from find instead of season
+                    $yearSuffix = $this->getYear() ? substr((string)$this->getYear(), -2) : '?';
+                    $trench = $excavation->getTrench() ?: '?';
+                    $locusNum = $locus->getNumber() ?: '?';
+                    $bucketNum = $bucket->getNumber() ?: '?';
+                    
+                    $handle = sprintf('%s%s-%s/%s/%s', $site, $yearSuffix, $trench, $locusNum, $bucketNum);
+                }
+            }
+        }
+
+        // Build the title: handle (#id) object, publications, TM tm
+        $titleParts = [];
+        
+        if ($handle) {
+            $titleParts[] = $handle;
+        }
+        
+        $titleParts[] = sprintf('(#%d)', $this->getId());
+        
+        $metaParts = [];
+        
+        // Object number
+        if ($this->getObject()) {
+            $metaParts[] = $this->getObject();
+        }
+        
+        // Publications (optional, with comma separator)
+        if ($this->getPublications()) {
+            $metaParts[] = $this->getPublications();
+        }
+        
+        // TM (optional, with comma separator)
+        if ($this->getTm()) {
+            $metaParts[] = sprintf('TM %d', $this->getTm());
+        }
+        
+        $result = implode(' ', $titleParts);
+        if (!empty($metaParts)) {
+            $result .= ' ' . implode(', ', $metaParts);
+        }
+        
+        return $result;
+    }
 }

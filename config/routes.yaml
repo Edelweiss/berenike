@@ -115,6 +115,11 @@ PapyrillioBerenike_AssetSearchFinds:
     controller: App\Controller\AssetController::searchFinds
     methods: [GET]
 
+PapyrillioBerenike_AssetSearchSpecialists:
+    path:  /asset/search-specialists
+    controller: App\Controller\AssetController::searchSpecialists
+    methods: [GET]
+
 PapyrillioBerenike_BucketList:
     path:  /buckets
     controller: App\Controller\BucketController::list

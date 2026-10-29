@@ -20,9 +20,11 @@
   {{ parent() }}
   <script>
     window.FIND_SEARCH_URL = '{{ path('PapyrillioBerenike_AssetSearchFinds') }}';
+    window.SPECIALIST_SEARCH_URL = '{{ path('PapyrillioBerenike_AssetSearchSpecialists') }}';
   </script>
   <script src="{{ asset('js/image-collection-manager.js') }}"></script>
   <script src="{{ asset('js/find-autocomplete.js') }}"></script>
+  <script src="{{ asset('js/specialist-autocomplete.js') }}"></script>
 {% endblock %}
 
 {% block body %}
@@ -35,90 +37,130 @@
     </div>
   </div>
 
-  {{ form_start(form, {'attr': {'class': 'ui-widget'}}) }}
-  <div class="ui-widget" style="margin-bottom: 1em;">
-    <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
-      <h3 style="margin: 0; font-size: 1.1em;">Basic Information</h3>
-    </div>
-    <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
-      <div style="display: grid; grid-template-columns: 1fr; gap: 1em;">
-        {{ form_row(form.type, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
-        {{ form_row(form.number, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+  <form method="post" class="ui-widget">
+    <div class="ui-widget" style="margin-bottom: 1em;">
+      <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
+        <h3 style="margin: 0; font-size: 1.1em;">Basic Information</h3>
+      </div>
+      <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
+        <div style="display: grid; grid-template-columns: 1fr; gap: 1em;">
+          <div>
+            <label>Type</label>
+            <select name="type" style="width: 100%; padding: 0.4em;">
+              <option value="">Select type</option>
+              <option value="photo" {% if asset.type == 'photo' %}selected{% endif %}>Photo</option>
+              <option value="scan" {% if asset.type == 'scan' %}selected{% endif %}>Scan</option>
+              <option value="drawing" {% if asset.type == 'drawing' %}selected{% endif %}>Drawing</option>
+              <option value="other" {% if asset.type == 'other' %}selected{% endif %}>Other</option>
+            </select>
+          </div>
+          <div>
+            <label>Number</label>
+            <input type="text" name="number" value="{{ asset.number or '' }}" style="width: 100%; padding: 0.4em;">
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="ui-widget" style="margin-bottom: 1em;">
-    <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
-      <h3 style="margin: 0; font-size: 1.1em;">HeidICON Integration (Optional)</h3>
-    </div>
-    <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1em;">
-        {{ form_row(form.heidiconId, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
-        {{ form_row(form.heidiconUuid, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
-        {{ form_row(form.heidiconSystemObjectId, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
+    <div class="ui-widget" style="margin-bottom: 1em;">
+      <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
+        <h3 style="margin: 0; font-size: 1.1em;">HeidICON Integration (Optional)</h3>
+      </div>
+      <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1em;">
+          <div>
+            <label>HeidICON ID</label>
+            <input type="number" name="heidiconId" value="{{ asset.heidiconId or '' }}" style="width: 100%; padding: 0.4em;">
+          </div>
+          <div>
+            <label>HeidICON UUID</label>
+            <input type="text" name="heidiconUuid" value="{{ asset.heidiconUuid or '' }}" style="width: 100%; padding: 0.4em;">
+          </div>
+          <div>
+            <label>HeidICON System Object ID</label>
+            <input type="number" name="heidiconSystemObjectId" value="{{ asset.heidiconSystemObjectId or '' }}" style="width: 100%; padding: 0.4em;">
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="ui-widget" style="margin-bottom: 1em;">
-    <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
-      <h3 style="margin: 0; font-size: 1.1em;">Link to Finds</h3>
-    </div>
-    <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
-      {{ form_row(form.findsSearch, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
-      <!-- Hidden finds select - used by find-autocomplete.js -->
-      <div style="display: none;">
-        {{ form_widget(form.finds) }}
+    <div class="ui-widget" style="margin-bottom: 1em;">
+      <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
+        <h3 style="margin: 0; font-size: 1.1em;">Link to Finds</h3>
       </div>
-      <div id="finds-list" style="margin-top: 1em;"></div>
-    </div>
-  </div>
-
-  <div class="ui-widget" style="margin-bottom: 1em;">
-    <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
-      <h3 style="margin: 0; font-size: 1.1em;">Specialists</h3>
-    </div>
-    <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
-      {% if form.imageSpecialists|length > 0 %}
-      <div id="specialist-collection">
-        {% for imageSpecialist in form.imageSpecialists %}
-          <div class="specialist-item" style="margin-bottom: 1em; padding: 1em; border: 1px solid #ddd; border-radius: 4px;">
-            {{ form_row(imageSpecialist.specialist) }}
-            {{ form_row(imageSpecialist.year) }}
-            {{ form_row(imageSpecialist.speciality) }}
-            <button type="button" class="remove-specialist ui-button ui-widget ui-state-default ui-corner-all" style="margin-top: 0.5em; color: #cc0000;">Remove</button>
+      <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
+        <div style="margin-bottom: 0.5em;">
+          <label for="asset_findsSearch">Search Finds</label>
+          <input type="text" id="asset_findsSearch" name="findsSearch" placeholder="Search by ID, object number, or handle (e.g., BE95-2/44/154)" autocomplete="off" style="width: 100%; padding: 0.4em;">
+        </div>
+        
+        <input type="hidden" id="asset_finds_data" name="findsData" value="" />
+        
+        <!-- Hidden data attributes for existing finds -->
+        {% for find in asset.finds %}
+          <div data-find-id="{{ find.id }}" 
+               data-find-label="{{ find.canonicalTitle }}"
+               style="display: none;">
           </div>
         {% endfor %}
+        
+        <div id="finds-list" style="margin-top: 1em;"></div>
       </div>
-      <p style="font-size: 0.9em; color: #666; margin-top: 0.5em;">
-        Note: To add new specialists, you can manage them separately or submit this form first.
-      </p>
-      {% else %}
-      <p style="font-size: 0.9em; color: #999;">
-        No specialists assigned yet.
-      </p>
-      {% endif %}
     </div>
-  </div>
 
-  <div style="margin: 1em 0;">
-    <button type="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
-      <span class="ui-button-text">Save Changes</span>
-    </button>
-    <a href="{{ path('PapyrillioBerenike_AssetShow', {'id': asset.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
-      <span class="ui-button-text">Cancel</span>
-    </a>
-  </div>
-  {{ form_end(form) }}
+    <div class="ui-widget" style="margin-bottom: 1em;">
+      <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
+        <h3 style="margin: 0; font-size: 1.1em;">Specialists</h3>
+      </div>
+      <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
+        <div style="margin-bottom: 1em; padding: 1em; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;">
+          <div style="margin-bottom: 0.5em;">
+            <label for="asset_specialistSearch">Search Specialists</label>
+            <input type="text" id="asset_specialistSearch" name="specialistSearch" placeholder="Search by specialist name" autocomplete="off" style="width: 100%; padding: 0.4em;">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1em; margin-bottom: 1em;">
+            <div>
+              <label for="asset_specialistYear">Year</label>
+              <input type="number" id="asset_specialistYear" name="specialistYear" placeholder="e.g., 2020" style="width: 100%; padding: 0.4em;">
+            </div>
+            <div>
+              <label for="asset_specialistSpeciality">Speciality</label>
+              <select id="asset_specialistSpeciality" name="specialistSpeciality" style="width: 100%; padding: 0.4em;">
+                <option value="photographer">Photographer</option>
+                <option value="artist">Artist</option>
+              </select>
+            </div>
+            <div style="display: flex; align-items: flex-end;">
+              <button type="button" id="add-specialist-btn" class="ui-button ui-widget ui-state-default ui-corner-all" style="width: 100%; background-color: #28a745; color: white;">
+                Add Specialist
+              </button>
+            </div>
+          </div>
+        </div>
 
-  <script>
-    // Remove specialist entries
-    document.querySelectorAll('.remove-specialist').forEach(function(button) {
-      button.addEventListener('click', function(e) {
-        e.preventDefault();
-        this.closest('.specialist-item').remove();
-      });
-    });
-  </script>
+        <input type="hidden" id="new-image-specialists" name="newImageSpecialists" value="" />
+
+        <!-- Hidden data attributes for existing specialists -->
+        {% for imageSpecialist in asset.imageSpecialists %}
+          <div data-specialist-id="{{ imageSpecialist.specialist.id }}" 
+               data-specialist-name="{{ imageSpecialist.specialist.name }}"
+               {% if imageSpecialist.year %}data-specialist-year="{{ imageSpecialist.year }}"{% endif %}
+               {% if imageSpecialist.speciality %}data-specialist-speciality="{{ imageSpecialist.speciality }}"{% endif %}
+               style="display: none;">
+          </div>
+        {% endfor %}
+
+        <div id="specialists-list" style="margin-top: 1em;"></div>
+      </div>
+    </div>
+
+    <div style="margin: 1em 0;">
+      <button type="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+        <span class="ui-button-text">Save Changes</span>
+      </button>
+      <a href="{{ path('PapyrillioBerenike_AssetShow', {'id': asset.id}) }}" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
+        <span class="ui-button-text">Cancel</span>
+      </a>
+    </div>
+  </form>
 {% endblock %}

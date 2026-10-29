@@ -14,43 +14,41 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    // Find the search input and hidden finds select
+    // Find the search input and container
     const findSearchInput = document.getElementById('asset_findsSearch');
-    const findsSelect = document.getElementById('asset_finds');
+    const findsDataInput = document.getElementById('asset_finds_data');
     const findListContainer = document.getElementById('finds-list');
+    const form = document.querySelector('form');
 
     console.log('[Find Autocomplete] Elements found:', {
         findSearchInput: !!findSearchInput,
-        findsSelect: !!findsSelect,
-        findListContainer: !!findListContainer
+        findsDataInput: !!findsDataInput,
+        findListContainer: !!findListContainer,
+        form: !!form,
     });
 
-    if (!findSearchInput || !findsSelect || !findListContainer) {
+    if (!findSearchInput || !findListContainer || !findsDataInput) {
         console.error('[Find Autocomplete] Missing required elements');
-        console.log('  findSearchInput ID: asset_findsSearch -', findSearchInput ? 'FOUND' : 'NOT FOUND');
-        console.log('  findsSelect ID: asset_finds -', findsSelect ? 'FOUND' : 'NOT FOUND');
-        console.log('  findListContainer ID: finds-list -', findListContainer ? 'FOUND' : 'NOT FOUND');
         return;
     }
 
-    console.log('[Find Autocomplete] Found', findsSelect.options.length, 'find options in select');
-    
     let resultsDropdown = null;
     let selectedFindsMap = new Map(); // Map of find ID to find data
-
-    // Initialize with already selected finds
-    Array.from(findsSelect.selectedOptions).forEach(option => {
-        if (option.value) {
-            const findId = parseInt(option.value);
-            selectedFindsMap.set(findId, {
-                id: findId,
-                label: option.textContent.trim()
-            });
-            console.log('[Find Autocomplete] Pre-selected find:', findId, option.textContent.trim());
-        }
+    
+    // Initialize with existing finds from page (if any)
+    const existingFinds = document.querySelectorAll('[data-find-id]');
+    console.log('[Find Autocomplete] Found', existingFinds.length, 'existing finds');
+    
+    existingFinds.forEach((elem) => {
+        const findId = parseInt(elem.getAttribute('data-find-id'));
+        const label = elem.getAttribute('data-find-label');
+        selectedFindsMap.set(findId, {
+            id: findId,
+            label: label,
+        });
+        console.log('[Find Autocomplete] Pre-loaded find:', findId, label);
     });
     
-    console.log('[Find Autocomplete] Initialized with', selectedFindsMap.size, 'pre-selected finds');
     renderFindsList();
 
     // Input event for autocomplete
@@ -87,6 +85,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Form submit handler - save finds to hidden field
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (selectedFindsMap.size > 0 && findsDataInput) {
+                const findsArray = Array.from(selectedFindsMap.values()).map(f => f.id);
+                console.log('[Find Autocomplete] Saving', findsArray.length, 'finds to form');
+                findsDataInput.value = JSON.stringify(findsArray);
+            }
+        });
+    }
+
     function showResults(results) {
         // Remove old dropdown if exists
         if (resultsDropdown) {
@@ -104,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Create dropdown
         resultsDropdown = document.createElement('div');
         resultsDropdown.className = 'find-autocomplete-results ui-widget-content ui-corner-all';
-        resultsDropdown.style.cssText = 'position: absolute; top: ' + (findSearchInput.offsetTop + findSearchInput.offsetHeight) + 'px; left: ' + findSearchInput.offsetLeft + 'px; width: ' + findSearchInput.offsetWidth + 'px; z-index: 1000; background-color: white; border: 1px solid #ccc;';
+        resultsDropdown.style.cssText = 'position: absolute; top: ' + (findSearchInput.offsetTop + findSearchInput.offsetHeight) + 'px; left: ' + findSearchInput.offsetLeft + 'px; width: ' + findSearchInput.offsetWidth + 'px; z-index: 1000; background-color: white; border: 1px solid #ccc; max-height: 300px; overflow-y: auto;';
 
         results.forEach(find => {
             const div = document.createElement('div');
@@ -142,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add to selected finds
         if (!selectedFindsMap.has(find.id)) {
             selectedFindsMap.set(find.id, find);
-            updateFindsSelect();
+            updateFindsData();
             renderFindsList();
         }
 
@@ -154,21 +163,19 @@ document.addEventListener('DOMContentLoaded', function() {
     function removeFind(findId) {
         console.log('[Find Autocomplete] Removing find:', findId);
         selectedFindsMap.delete(findId);
-        updateFindsSelect();
+        updateFindsData();
         renderFindsList();
     }
 
-    function updateFindsSelect() {
-        // Update the hidden select with selected find IDs
-        console.log('[Find Autocomplete] Updating select with', selectedFindsMap.size, 'finds');
-        Array.from(findsSelect.options).forEach(option => {
-            const optionId = parseInt(option.value);
-            const wasSelected = option.selected;
-            option.selected = selectedFindsMap.has(optionId);
-            if (wasSelected !== option.selected) {
-                console.log('[Find Autocomplete] Option', optionId, ':', wasSelected ? 'deselected' : 'selected');
-            }
-        });
+    function updateFindsData() {
+        // Update the hidden input with selected find IDs as JSON
+        if (selectedFindsMap.size > 0) {
+            const findsArray = Array.from(selectedFindsMap.values()).map(f => f.id);
+            console.log('[Find Autocomplete] Updating data with', findsArray.length, 'finds');
+            findsDataInput.value = JSON.stringify(findsArray);
+        } else {
+            findsDataInput.value = '';
+        }
     }
 
     function renderFindsList() {
