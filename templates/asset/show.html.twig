@@ -325,9 +325,7 @@
         {% for find in asset.finds %}
           <li style="margin: 0.5em 0;">
             <a href="{{ path('PapyrillioBerenike_FindShow', {'id': find.id}) }}">
-              <strong>Find #{{ find.id }}</strong>
-              {% if find.inventoryNumber %} — {{ find.inventoryNumber }}{% endif %}
-              {% if find.object %} — {{ find.object }}{% endif %}
+              <strong>{{ find.canonicalTitle }}</strong>
             </a>
           </li>
         {% endfor %}
