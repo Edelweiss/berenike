@@ -87,12 +87,6 @@ class AssetType extends AbstractType
                 'required' => false,
                 'label' => 'Linked Finds',
                 'attr' => ['size' => 5],
-                'query_builder' => function ($repository) {
-                    return $repository->createQueryBuilder('f')
-                        ->select('f.id', 'f.inventory_number', 'f.object')
-                        ->orderBy('f.id', 'DESC')
-                        ->setMaxResults(500);
-                },
             ])
             ->add('imageSpecialists', CollectionType::class, [
                 'entry_type' => ImageSpecialistType::class,
