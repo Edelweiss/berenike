@@ -71,6 +71,17 @@
       color: #ccc;
       font-size: 0.9em;
     }
+    .image-viewer .viewer-hint {
+      position: absolute;
+      bottom: 0.5em;
+      left: 0.5em;
+      color: #aaa;
+      font-size: 0.85em;
+      background: rgba(0,0,0,0.5);
+      padding: 0.25em 0.5em;
+      border-radius: 3px;
+      z-index: 10;
+    }
     .asset-meta dt { font-weight: bold; display: inline-block; width: 10em; }
     .asset-meta dd { display: inline; margin: 0; }
     .asset-meta dl > div { margin: 0.25em 0; }
@@ -105,6 +116,7 @@
           </div>
           <div class="viewer-stage" id="viewerStage">
             <div class="viewer-loading">Loading...</div>
+            <div class="viewer-hint">💡 Hold Cmd/Ctrl + scroll to zoom</div>
             <img class="viewer-img" id="viewerImg" data-src="{{ urlMedium }}" alt="{{ asset.file }}" style="display: none;">
           </div>
         </div>
@@ -169,12 +181,14 @@
               updateTransform();
             });
 
-            // Mouse wheel zoom
+            // Mouse wheel zoom (requires Cmd/Ctrl)
             stage.addEventListener('wheel', function(e) {
-              e.preventDefault();
-              var delta = e.deltaY > 0 ? 0.9 : 1.1;
-              scale = Math.max(0.1, Math.min(10, scale * delta));
-              updateTransform();
+              if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                var delta = e.deltaY > 0 ? 0.9 : 1.1;
+                scale = Math.max(0.1, Math.min(10, scale * delta));
+                updateTransform();
+              }
             });
 
             // Pan controls
