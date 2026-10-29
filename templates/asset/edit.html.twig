@@ -73,7 +73,8 @@
       <h3 style="margin: 0; font-size: 1.1em;">Specialists</h3>
     </div>
     <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
-      <div id="specialist-collection" data-prototype="{{ form_widget(form.imageSpecialists.vars.prototype)|e('html_attr') }}">
+      {% if form.imageSpecialists|length > 0 %}
+      <div id="specialist-collection">
         {% for imageSpecialist in form.imageSpecialists %}
           <div class="specialist-item" style="margin-bottom: 1em; padding: 1em; border: 1px solid #ddd; border-radius: 4px;">
             {{ form_row(imageSpecialist.specialist) }}
@@ -83,9 +84,14 @@
           </div>
         {% endfor %}
       </div>
-      <button type="button" id="add-specialist" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
-        <span class="ui-button-text">Add Specialist</span>
-      </button>
+      <p style="font-size: 0.9em; color: #666; margin-top: 0.5em;">
+        Note: To add new specialists, you can manage them separately or submit this form first.
+      </p>
+      {% else %}
+      <p style="font-size: 0.9em; color: #999;">
+        No specialists assigned yet.
+      </p>
+      {% endif %}
     </div>
   </div>
 
@@ -100,33 +106,12 @@
   {{ form_end(form) }}
 
   <script>
-    // Collection management for specialists
-    var collectionHolder = document.getElementById('specialist-collection');
-    var addButton = document.getElementById('add-specialist');
-    var index = collectionHolder.children.length;
-
-    addButton.addEventListener('click', function() {
-      var prototype = collectionHolder.dataset.prototype;
-      var newForm = prototype.replace(/__name__/g, index);
-      index++;
-      
-      var wrapper = document.createElement('div');
-      wrapper.className = 'specialist-item';
-      wrapper.style.cssText = 'margin-bottom: 1em; padding: 1em; border: 1px solid #ddd; border-radius: 4px;';
-      wrapper.innerHTML = newForm + '<button type="button" class="remove-specialist ui-button ui-widget ui-state-default ui-corner-all" style="margin-top: 0.5em; color: #cc0000;">Remove</button>';
-      
-      collectionHolder.appendChild(wrapper);
-      attachRemoveListener(wrapper.querySelector('.remove-specialist'));
-    });
-
-    function attachRemoveListener(button) {
-      button.addEventListener('click', function() {
+    // Remove specialist entries
+    document.querySelectorAll('.remove-specialist').forEach(function(button) {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
         this.closest('.specialist-item').remove();
       });
-    }
-
-    document.querySelectorAll('.remove-specialist').forEach(function(button) {
-      attachRemoveListener(button);
     });
   </script>
 {% endblock %}

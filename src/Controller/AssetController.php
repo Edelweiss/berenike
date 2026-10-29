@@ -161,22 +161,31 @@ class AssetController extends BerenikeController
             return $this->redirectToRoute('PapyrillioBerenike_AssetList');
         }
 
-        $form = $this->createForm(AssetType::class, $asset, [
-            'is_edit' => true,
-        ]);
-        $form->handleRequest($request);
+        try {
+            $form = $this->createForm(AssetType::class, $asset, [
+                'is_edit' => true,
+            ]);
+            $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->flush();
+            if ($form->isSubmitted() && $form->isValid()) {
+                $this->entityManager->flush();
 
-            $this->addFlash('success', 'Asset updated successfully');
-            return $this->redirectToRoute('PapyrillioBerenike_AssetShow', ['id' => $asset->getId()]);
+                $this->addFlash('success', 'Asset updated successfully');
+                return $this->redirectToRoute('PapyrillioBerenike_AssetShow', ['id' => $asset->getId()]);
+            }
+
+            return $this->render('asset/edit.html.twig', [
+                'asset' => $asset,
+                'form' => $form->createView(),
+            ]);
+        } catch (\Exception $e) {
+            $this->logger->error('Error in asset edit form: ' . $e->getMessage(), [
+                'exception' => $e,
+                'asset_id' => $id,
+            ]);
+            $this->addFlash('error', 'An error occurred while loading the form: ' . $e->getMessage());
+            return $this->redirectToRoute('PapyrillioBerenike_AssetShow', ['id' => $id]);
         }
-
-        return $this->render('asset/edit.html.twig', [
-            'asset' => $asset,
-            'form' => $form->createView(),
-        ]);
     }
 
     /**

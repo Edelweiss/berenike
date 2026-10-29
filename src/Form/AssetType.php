@@ -90,7 +90,7 @@ class AssetType extends AbstractType
             ])
             ->add('imageSpecialists', CollectionType::class, [
                 'entry_type' => ImageSpecialistType::class,
-                'allow_add' => true,
+                'allow_add' => false,
                 'allow_delete' => true,
                 'by_reference' => false,
                 'label' => 'Specialists',
