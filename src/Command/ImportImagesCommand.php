@@ -8,6 +8,7 @@ use App\Repository\FindRepository;
 use App\Repository\SpecialistRepository;
 use App\Service\ImageService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
@@ -24,11 +25,12 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * 
  * Specification: docs/concept/asset_manager.md
  */
+#[AsCommand(
+    name: 'app:import-images',
+    description: 'Import legacy images into the asset management system'
+)]
 class ImportImagesCommand extends Command
 {
-    protected static $defaultName = 'app:import-images';
-    protected static $defaultDescription = 'Import legacy images into the asset management system';
-
     private EntityManagerInterface $entityManager;
     private FindRepository $findRepository;
     private SpecialistRepository $specialistRepository;

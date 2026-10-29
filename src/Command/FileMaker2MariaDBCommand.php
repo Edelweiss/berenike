@@ -23,17 +23,19 @@
 namespace App\Command;
 
 use Doctrine\DBAL\Connection;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+#[AsCommand(
+    name: 'filemaker:import',
+    description: 'Import FileMaker XML data into a new MariaDB table'
+)]
 class FileMaker2MariaDBCommand extends Command
 {
-    protected static $defaultName = 'filemaker:import';
-    protected static $defaultDescription = 'Import FileMaker XML data into a new MariaDB table';
-    
     private $connection;
 
     public function __construct(Connection $connection)
@@ -50,7 +52,7 @@ class FileMaker2MariaDBCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $xmlFile = $input->getArgument('xml-file');

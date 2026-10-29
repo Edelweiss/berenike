@@ -7,6 +7,7 @@ use App\Entity\ImageSpecialist;
 use App\Repository\FindRepository;
 use App\Repository\SpecialistRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -31,11 +32,12 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * (`heidicon_id`, `heidicon_uuid`, `heidicon_system_object_id`) using the
  * `<objekte>` that owns the image's `eas-id` within the same XML file.
  */
+#[AsCommand(
+    name: 'heidicon:import-csv',
+    description: 'Import heidICON images using a filename→find CSV mapping (workaround for corrupted obj_beschreibung_link URLs)'
+)]
 class HeidIconImportCsvCommand extends Command
 {
-    protected static $defaultName = 'heidicon:import-csv';
-    protected static $defaultDescription = 'Import heidICON images using a filename→find CSV mapping (workaround for corrupted obj_beschreibung_link URLs)';
-
     private const NS = 'https://schema.easydb.de/EASYDB/1.0/objects/';
     private const NS_PREFIX = 'eb';
     private const SPECIALITY_PHOTOGRAPHER = 'photographer';

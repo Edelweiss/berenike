@@ -10,8 +10,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Form\UserEditProfileType;
 use App\Form\UserChangePasswordType;
 use App\Form\UserType;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\User;
@@ -37,7 +35,7 @@ class UserController extends BerenikeController
         $this->passwordHasher = $passwordHasher;
     }
 
-    public function editProfile(Request $request, AuthenticationUtils $authenticationUtils, UserPasswordEncoderInterface $passwordEncoder): Response
+    public function editProfile(Request $request): Response
     {
         //if ($this->getUser()) {
         //     return $this->redirectToRoute('target_path');
@@ -49,7 +47,7 @@ class UserController extends BerenikeController
         //$form->handleRequest($request);
         if($formData = $this->getParameter('user_edit_profile')){
             $pwd = $formData['password'];
-            $checkPass = $passwordEncoder->isPasswordValid($user, $pwd);
+            $checkPass = $this->passwordHasher->isPasswordValid($user, $pwd);
             if($checkPass === true) {
                 $formDummy = $this->createForm(UserEditProfileType::class, new User());
                 $formDummy->handleRequest($request);
@@ -57,9 +55,8 @@ class UserController extends BerenikeController
                     // Save
                     $user->setUsername($formData['username']);
                     $user->setEmail($formData['email']);
-                    $em = $this->getDoctrine()->getManager();
-                    $em->persist($user);
-                    $em->flush();
+                    $this->entityManager->persist($user);
+                    $this->entityManager->flush();
                     $this->addFlash('notice', 'Perfect');
                     $form = $this->createForm(UserEditProfileType::class, $user); // cl: Why do I need to create the form anew to make it reflect the persisted changes of its user object in the template?! Whithout this line, it will reflect the user object’s status before the update.
                 } else {
@@ -80,21 +77,20 @@ class UserController extends BerenikeController
         return $this->render('user/editProfile.html.twig', ['form' => $form->createView()]);
     }
 
-    public function changePassword(Request $request, AuthenticationUtils $authenticationUtils, UserPasswordEncoderInterface $passwordEncoder): Response
+    public function changePassword(Request $request): Response
     {
         $user = $this->getUser();
         $form = $this->createForm(UserChangePasswordType::class, $user);
 
         if($this->getParameter('user_change_password')){
-            if($this->getParameter('password') && $passwordEncoder->isPasswordValid($user, $this->getParameter('password')) === true){
+            if($this->getParameter('password') && $this->passwordHasher->isPasswordValid($user, $this->getParameter('password')) === true){
                 $form->handleRequest($request);
                 if ($form->isSubmitted() && $form->isValid()) {
                     // Save
                     $formData = $this->getParameter('user_change_password');
-                    $user->setPassword($passwordEncoder->encodePassword($user, $formData['password']['first']));
-                    $em = $this->getDoctrine()->getManager();
-                    $em->persist($user);
-                    $em->flush();
+                    $user->setPassword($this->passwordHasher->hashPassword($user, $formData['password']['first']));
+                    $this->entityManager->persist($user);
+                    $this->entityManager->flush();
                     $this->addFlash('notice', 'Perfect');
                 } else {
                     $this->addFlash('error', 'Invalid form');

@@ -7,6 +7,7 @@ use App\Entity\ImageSpecialist;
 use App\Repository\FindRepository;
 use App\Repository\SpecialistRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -21,11 +22,12 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * file) and synchronises image metadata and photographer credits into the
  * berenike database. Specification: docs/concept/heidICON.md.
  */
+#[AsCommand(
+    name: 'heidicon:import',
+    description: 'Import image metadata and photographer credits from heidICON (easydb) XML exports'
+)]
 class HeidIconImportCommand extends Command
 {
-    protected static $defaultName = 'heidicon:import';
-    protected static $defaultDescription = 'Import image metadata and photographer credits from heidICON (easydb) XML exports';
-
     private const NS = 'https://schema.easydb.de/EASYDB/1.0/objects/';
     private const NS_PREFIX = 'eb';
     private const SPECIALITY_PHOTOGRAPHER = 'photographer';

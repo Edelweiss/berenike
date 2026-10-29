@@ -5,9 +5,10 @@ namespace App\Entity;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class User implements UserInterface {
+class User implements UserInterface, PasswordAuthenticatedUserInterface {
     private $id;
     private $username; // visual identifier that represents this user
     private $roles = [];
@@ -26,6 +27,10 @@ class User implements UserInterface {
     }
 
     public function getUsername(): string {
+        return $this->getUserIdentifier();
+    }
+
+    public function getUserIdentifier(): string {
         return (string) $this->username;
     }
 
@@ -99,11 +104,7 @@ class User implements UserInterface {
         return $this;
     }
 
-    public function getSalt() {
-        // not needed when using the "bcrypt" algorithm in security.yaml
-    }
-
-    public function eraseCredentials() {
+    public function eraseCredentials(): void {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
     }
