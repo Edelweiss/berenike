@@ -24,8 +24,10 @@ class ImageSpecialistType extends AbstractType
                 'placeholder' => '-- Select Specialist --',
                 'query_builder' => function ($repository) {
                     return $repository->createQueryBuilder('s')
+                        ->select('s.id', 's.name')
                         ->orderBy('s.name', 'ASC');
                 },
+                'attr' => ['class' => 'form-select'],
             ])
             ->add('speciality', ChoiceType::class, [
                 'required' => false,
