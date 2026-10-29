@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('[Specialist Autocomplete] Initializing...');
     
     const specialistSearchUrl = window.SPECIALIST_SEARCH_URL;
-    console.log('[Specialist Autocomplete] Search URL:', specialistSearchUrl);
     
     if (!specialistSearchUrl) {
         console.error('[Specialist Autocomplete] SPECIALIST_SEARCH_URL not defined');
@@ -23,53 +22,49 @@ document.addEventListener('DOMContentLoaded', function() {
     const newImageSpecialistsField = document.getElementById('new-image-specialists');
     const form = document.querySelector('form');
 
-    console.log('[Specialist Autocomplete] Elements found:', {
-        specialistSearchInput: !!specialistSearchInput,
-        specialistYearInput: !!specialistYearInput,
-        specialistSpecialityInput: !!specialistSpecialityInput,
-        specialistListContainer: !!specialistListContainer,
-        addSpecialistBtn: !!addSpecialistBtn,
-        newImageSpecialistsField: !!newImageSpecialistsField,
-        form: !!form,
-    });
-
     if (!specialistSearchInput || !specialistListContainer || !addSpecialistBtn) {
         console.error('[Specialist Autocomplete] Missing required elements');
         return;
     }
 
     let resultsDropdown = null;
-    let selectedSpecialist = null; // Holds the selected specialist data
-    let newSpecialistsToAdd = []; // Array of new specialists to add
+    let selectedSpecialist = null;
+    let nextId = 0;
+    
+    // Store all specialists with unique internal ID
+    // Structure: Map<internalId, {id, name, year, speciality, isExisting}>
+    const specialistsMap = new Map();
+    const existingSpecialistIds = new Set(); // Track which ones are from DB
 
     // Initialize with existing specialists from the page
-    const existingSpecialists = document.querySelectorAll('[data-specialist-id]');
-    console.log('[Specialist Autocomplete] Found', existingSpecialists.length, 'existing specialists');
+    const existingSpecialistElements = document.querySelectorAll('[data-specialist-id]');
+    console.log('[Specialist Autocomplete] Found', existingSpecialistElements.length, 'existing specialists');
     
-    const existingSpecialistMap = new Map();
-    existingSpecialists.forEach((elem) => {
+    existingSpecialistElements.forEach((elem) => {
         const specialistId = parseInt(elem.getAttribute('data-specialist-id'));
         const year = elem.getAttribute('data-specialist-year') || '';
         const speciality = elem.getAttribute('data-specialist-speciality') || '';
         const name = elem.getAttribute('data-specialist-name');
         
-        const key = specialistId + '_' + year + '_' + speciality;
-        existingSpecialistMap.set(key, {
+        const internalId = 'existing_' + nextId;
+        nextId++;
+        
+        specialistsMap.set(internalId, {
             id: specialistId,
             name: name,
             year: year,
             speciality: speciality,
-            isNew: false,
+            isExisting: true,
         });
-        console.log('[Specialist Autocomplete] Pre-loaded existing specialist:', name);
+        existingSpecialistIds.add(internalId);
+        console.log('[Specialist Autocomplete] Loaded existing specialist:', internalId, name);
     });
     
-    renderSpecialistsList(existingSpecialistMap);
+    renderSpecialistsList();
 
     // Input event for autocomplete
     specialistSearchInput.addEventListener('input', function(e) {
         const query = this.value.trim();
-        console.log('[Specialist Autocomplete] Query input:', query);
         
         if (query.length < 1) {
             closeResults();
@@ -77,13 +72,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const url = specialistSearchUrl + '?q=' + encodeURIComponent(query);
-        console.log('[Specialist Autocomplete] Fetching:', url);
         
         fetch(url)
-            .then(response => {
-                console.log('[Specialist Autocomplete] Response status:', response.status);
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
                 console.log('[Specialist Autocomplete] Got', data.length, 'results');
                 showResults(data);
@@ -93,20 +84,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     });
 
-    // Prevent form submission on Enter
-    specialistSearchInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-        }
-    });
-
-    // Add specialist button click
+    // Add specialist button
     addSpecialistBtn.addEventListener('click', function(e) {
         e.preventDefault();
         
         if (!selectedSpecialist) {
-            console.log('[Specialist Autocomplete] No specialist selected');
-            alert('Please select a specialist first');
+            alert('Please select a specialist from the list');
             return;
         }
         
@@ -114,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const speciality = specialistSpecialityInput ? specialistSpecialityInput.value.trim() : 'photographer';
         
         console.log('[Specialist Autocomplete] Adding specialist:', selectedSpecialist.id, year, speciality);
-        addSpecialist(selectedSpecialist, year, speciality, existingSpecialistMap);
+        addSpecialist(selectedSpecialist, year, speciality);
         
         // Clear inputs
         specialistSearchInput.value = '';
@@ -124,13 +107,10 @@ document.addEventListener('DOMContentLoaded', function() {
         closeResults();
     });
 
-    // Form submit handler - save new specialists to hidden field
+    // Form submit handler
     if (form) {
         form.addEventListener('submit', function(e) {
-            if (newSpecialistsToAdd.length > 0 && newImageSpecialistsField) {
-                console.log('[Specialist Autocomplete] Saving', newSpecialistsToAdd.length, 'new specialists to form');
-                newImageSpecialistsField.value = JSON.stringify(newSpecialistsToAdd);
-            }
+            updateNewSpecialistsField();
         });
     }
 
@@ -142,7 +122,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (results.length === 0) {
             specialistSearchInput.classList.add('error');
-            console.log('[Specialist Autocomplete] No results');
             return;
         }
 
@@ -191,74 +170,110 @@ document.addEventListener('DOMContentLoaded', function() {
         closeResults();
     }
 
-    function addSpecialist(specialist, year, speciality, existingMap) {
-        const key = specialist.id + '_' + year + '_' + speciality;
+    function addSpecialist(specialist, year, speciality) {
+        // Check if already exists
+        let exists = false;
+        specialistsMap.forEach((spec) => {
+            if (spec.id == specialist.id && spec.year === year && spec.speciality === speciality) {
+                exists = true;
+            }
+        });
         
-        if (existingMap.has(key) || newSpecialistsToAdd.some(s => s.specialistId == specialist.id && s.year === year && s.speciality === speciality)) {
-            console.log('[Specialist Autocomplete] Specialist already added');
+        if (exists) {
             alert('This specialist with this year/speciality is already linked');
             return;
         }
         
-        // Add to new specialists array
-        newSpecialistsToAdd.push({
-            specialistId: specialist.id,
-            year: year || null,
-            speciality: speciality || null,
+        const internalId = 'new_' + nextId;
+        nextId++;
+        
+        specialistsMap.set(internalId, {
+            id: specialist.id,
+            name: specialist.label,
+            year: year || '',
+            speciality: speciality || 'photographer',
+            isExisting: false,
         });
         
-        console.log('[Specialist Autocomplete] Added specialist to array, total:', newSpecialistsToAdd.length);
-        renderSpecialistsList(existingMap);
-    }
-
-    function removeSpecialist(specialistId, year, speciality) {
-        console.log('[Specialist Autocomplete] Removing specialist:', specialistId, year, speciality);
-        
-        newSpecialistsToAdd = newSpecialistsToAdd.filter(s => !(s.specialistId == specialistId && s.year === year && s.speciality === speciality));
-        console.log('[Specialist Autocomplete] Removed, remaining:', newSpecialistsToAdd.length);
-        
+        console.log('[Specialist Autocomplete] Added specialist with internalId:', internalId);
         renderSpecialistsList();
+        updateNewSpecialistsField();
     }
 
-    function renderSpecialistsList(existingMap = null) {
-        // Clear and rebuild specialists list
-        specialistListContainer.innerHTML = '';
-
-        // Render existing specialists
-        if (existingMap) {
-            existingMap.forEach((specialist) => {
-                renderSpecialistItem(specialist, false);
-            });
+    function removeSpecialist(internalId) {
+        console.log('[Specialist Autocomplete] Removing specialist with internalId:', internalId);
+        
+        if (!specialistsMap.has(internalId)) {
+            console.error('[Specialist Autocomplete] Specialist not found:', internalId);
+            return;
         }
         
-        // Render new specialists
-        newSpecialistsToAdd.forEach(specialist => {
-            // Fetch specialist name from cache or display ID
-            const specialistName = 'Specialist #' + specialist.specialistId;
-            renderSpecialistItem({
-                id: specialist.specialistId,
-                name: specialistName,
-                year: specialist.year || '',
-                speciality: specialist.speciality || '',
-            }, true);
-        });
+        const specialist = specialistsMap.get(internalId);
+        if (specialist.isExisting) {
+            // For existing specialists, we'll send full data to backend for deletion
+            // Store deletion info in a separate field
+            const deletionField = document.getElementById('deleted-specialists-json');
+            if (deletionField) {
+                const deletedList = JSON.parse(deletionField.value || '[]');
+                deletedList.push({
+                    id: specialist.id,
+                    year: specialist.year,
+                    speciality: specialist.speciality,
+                });
+                deletionField.value = JSON.stringify(deletedList);
+                console.log('[Specialist Autocomplete] Marked for deletion');
+            }
+        }
+        
+        specialistsMap.delete(internalId);
+        console.log('[Specialist Autocomplete] Removed. Remaining:', specialistsMap.size);
+        
+        renderSpecialistsList();
+        updateNewSpecialistsField();
+    }
 
-        if ((existingMap ? existingMap.size : 0) + newSpecialistsToAdd.length === 0) {
+    function updateNewSpecialistsField() {
+        // Collect only new specialists (not existing)
+        const newSpecialists = [];
+        specialistsMap.forEach((specialist, internalId) => {
+            if (!specialist.isExisting) {
+                newSpecialists.push({
+                    specialistId: specialist.id,
+                    year: specialist.year || null,
+                    speciality: specialist.speciality || 'photographer',
+                });
+            }
+        });
+        
+        if (newImageSpecialistsField) {
+            newImageSpecialistsField.value = JSON.stringify(newSpecialists);
+            console.log('[Specialist Autocomplete] Updated new specialists field with', newSpecialists.length, 'items');
+        }
+    }
+
+    function renderSpecialistsList() {
+        specialistListContainer.innerHTML = '';
+
+        if (specialistsMap.size === 0) {
             const emptyMsg = document.createElement('p');
             emptyMsg.textContent = 'No specialists linked yet.';
             emptyMsg.style.cssText = 'font-size: 0.9em; color: #999;';
             specialistListContainer.appendChild(emptyMsg);
+            return;
         }
+        
+        console.log('[Specialist Autocomplete] Rendering', specialistsMap.size, 'specialists');
+        
+        specialistsMap.forEach((specialist, internalId) => {
+            renderSpecialistItem(specialist, internalId);
+        });
     }
 
-    function renderSpecialistItem(specialist, isNew) {
+    function renderSpecialistItem(specialist, internalId) {
         const item = document.createElement('div');
-        item.className = 'specialist-item' + (isNew ? ' specialist-item-new' : '');
-        item.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 8px; background-color: ' + (isNew ? '#e7f3ff' : '#f9f9f9') + '; border-left: 3px solid ' + (isNew ? '#007bff' : '#ccc') + ';';
-        item.setAttribute('data-specialist-id', specialist.id);
-        item.setAttribute('data-specialist-name', specialist.name);
-        if (specialist.year) item.setAttribute('data-specialist-year', specialist.year);
-        if (specialist.speciality) item.setAttribute('data-specialist-speciality', specialist.speciality);
+        item.className = 'specialist-item' + (specialist.isExisting ? '' : ' specialist-item-new');
+        item.id = 'specialist-item-' + internalId;
+        item.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 8px; background-color: ' + (specialist.isExisting ? '#f9f9f9' : '#e7f3ff') + '; border-left: 3px solid ' + (specialist.isExisting ? '#ccc' : '#007bff') + ';';
 
         const label = document.createElement('span');
         label.className = 'specialist-item-label';
@@ -270,7 +285,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                    specialist.speciality;
             labelText += ' - ' + specialityLabel;
         }
-        if (isNew) labelText += ' (NEW)';
+        if (!specialist.isExisting) labelText += ' (NEW)';
         label.textContent = labelText;
         label.style.cssText = 'flex: 1; font-size: 14px;';
 
@@ -282,7 +297,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         removeBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            removeSpecialist(specialist.id, specialist.year, specialist.speciality);
+            console.log('[Specialist Autocomplete] Remove button clicked for internalId:', internalId);
+            removeSpecialist(internalId);
         });
 
         removeBtn.addEventListener('mouseover', function() {

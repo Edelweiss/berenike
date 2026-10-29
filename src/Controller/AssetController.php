@@ -229,6 +229,32 @@ class AssetController extends BerenikeController
                 }
             }
             
+            // Process deleted image specialists from JSON
+            $deletedImageSpecialistsJson = $request->request->get('deletedImageSpecialists');
+            if ($deletedImageSpecialistsJson) {
+                try {
+                    $deletedSpecs = json_decode($deletedImageSpecialistsJson, true);
+                    if (is_array($deletedSpecs)) {
+                        foreach ($asset->getImageSpecialists() as $imageSpecialist) {
+                            foreach ($deletedSpecs as $delSpec) {
+                                $delId = $delSpec['id'] ?? null;
+                                $delYear = $delSpec['year'] ?? '';
+                                $delSpeciality = $delSpec['speciality'] ?? '';
+                                
+                                if ($imageSpecialist->getSpecialist()->getId() == $delId &&
+                                    ($imageSpecialist->getYear() ?? '') == $delYear &&
+                                    ($imageSpecialist->getSpeciality() ?? '') == $delSpeciality) {
+                                    $asset->removeImageSpecialist($imageSpecialist);
+                                    $this->entityManager->remove($imageSpecialist);
+                                }
+                            }
+                        }
+                    }
+                } catch (\Exception $e) {
+                    $this->logger->error('Error processing deleted image specialists: ' . $e->getMessage());
+                }
+            }
+            
             $this->entityManager->flush();
 
             $this->addFlash('success', 'Asset updated successfully');

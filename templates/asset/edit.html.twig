@@ -10,8 +10,36 @@
   <style>
     .ui-widget label {
       font-weight: bold;
-      display: inline-block;
-      width: 12em;
+      display: block;
+      margin-bottom: 0.5em;
+      color: #333;
+      font-size: 0.95em;
+    }
+
+    .asset-form-field {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .asset-form-field input,
+    .asset-form-field select {
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: 0.6em 0.5em;
+      font-size: 0.95em;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .asset-form-field input:focus,
+    .asset-form-field select:focus {
+      outline: none;
+      border-color: #4285f4;
+      box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+    }
+
+    .asset-form-field input::placeholder {
+      color: #999;
     }
   </style>
 {% endblock %}
@@ -28,25 +56,16 @@
 {% endblock %}
 
 {% block body %}
-  <div class="ui-widget" style="margin-bottom: 1em;">
-    <div class="ui-widget-content ui-corner-all" style="padding: 1em; background-color: #fffacd;">
-      <p style="margin: 0;">
-        <strong>Note:</strong> You can only edit metadata. The image files cannot be changed.
-        Asset Key: <code>{{ asset.assetKey }}</code>
-      </p>
-    </div>
-  </div>
-
   <form method="post" class="ui-widget">
     <div class="ui-widget" style="margin-bottom: 1em;">
       <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
         <h3 style="margin: 0; font-size: 1.1em;">Basic Information</h3>
       </div>
       <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
-        <div style="display: grid; grid-template-columns: 1fr; gap: 1em;">
-          <div>
+        <div style="display: grid; grid-template-columns: 1fr; gap: 1.5em;">
+          <div class="asset-form-field">
             <label>Type</label>
-            <select name="type" style="width: 100%; padding: 0.4em;">
+            <select name="type">
               <option value="">Select type</option>
               <option value="photo" {% if asset.type == 'photo' %}selected{% endif %}>Photo</option>
               <option value="scan" {% if asset.type == 'scan' %}selected{% endif %}>Scan</option>
@@ -54,9 +73,37 @@
               <option value="other" {% if asset.type == 'other' %}selected{% endif %}>Other</option>
             </select>
           </div>
-          <div>
+          <div class="asset-form-field">
             <label>Number</label>
-            <input type="text" name="number" value="{{ asset.number or '' }}" style="width: 100%; padding: 0.4em;">
+            <input type="text" name="number" value="{{ asset.number ?: '' }}">
+          </div>
+        </div>
+
+        <div style="margin-top: 1.5em; padding-top: 1em; border-top: 1px solid #ddd;">
+          <h4 style="margin: 0 0 1em 0; color: #666;">Immutable Information</h4>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1em; font-size: 0.95em;">
+            <div>
+              <label style="font-weight: bold; display: block; margin-bottom: 0.3em; color: #333;">ID</label>
+              <div style="padding: 0.4em; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 3px;">{{ asset.id }}</div>
+            </div>
+            <div>
+              <label style="font-weight: bold; display: block; margin-bottom: 0.3em; color: #333;">Asset Key</label>
+              <div style="padding: 0.4em; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 3px; font-family: monospace;">{{ asset.assetKey ?: 'N/A' }}</div>
+            </div>
+            <div>
+              <label style="font-weight: bold; display: block; margin-bottom: 0.3em; color: #333;">Asset Shard</label>
+              <div style="padding: 0.4em; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 3px;">{{ asset.assetShard ?: 'N/A' }}</div>
+            </div>
+            <div>
+              <label style="font-weight: bold; display: block; margin-bottom: 0.3em; color: #333;">File</label>
+              <div style="padding: 0.4em; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 3px; font-family: monospace; word-break: break-all; font-size: 0.9em;">{{ asset.file ?: 'N/A' }}</div>
+            </div>
+            <div>
+              <label style="font-weight: bold; display: block; margin-bottom: 0.3em; color: #333;">Dimensions</label>
+              <div style="padding: 0.4em; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 3px;">
+                {{ asset.size ?: 'N/A' }}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -67,18 +114,18 @@
         <h3 style="margin: 0; font-size: 1.1em;">HeidICON Integration (Optional)</h3>
       </div>
       <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1em;">
-          <div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5em;">
+          <div class="asset-form-field">
             <label>HeidICON ID</label>
-            <input type="number" name="heidiconId" value="{{ asset.heidiconId or '' }}" style="width: 100%; padding: 0.4em;">
+            <input type="text" name="heidiconId" value="{{ asset.heidiconId ?: '' }}">
           </div>
-          <div>
+          <div class="asset-form-field">
             <label>HeidICON UUID</label>
-            <input type="text" name="heidiconUuid" value="{{ asset.heidiconUuid or '' }}" style="width: 100%; padding: 0.4em;">
+            <input type="text" name="heidiconUuid" value="{{ asset.heidiconUuid ?: '' }}">
           </div>
-          <div>
+          <div class="asset-form-field">
             <label>HeidICON System Object ID</label>
-            <input type="number" name="heidiconSystemObjectId" value="{{ asset.heidiconSystemObjectId or '' }}" style="width: 100%; padding: 0.4em;">
+            <input type="text" name="heidiconSystemObjectId" value="{{ asset.heidiconSystemObjectId ?: '' }}">
           </div>
         </div>
       </div>
@@ -90,8 +137,10 @@
       </div>
       <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
         <div style="margin-bottom: 0.5em;">
-          <label for="asset_findsSearch">Search Finds</label>
-          <input type="text" id="asset_findsSearch" name="findsSearch" placeholder="Search by ID, object number, or handle (e.g., BE95-2/44/154)" autocomplete="off" style="width: 100%; padding: 0.4em;">
+          <div class="asset-form-field">
+            <label for="asset_findsSearch">Search Finds</label>
+            <input type="text" id="asset_findsSearch" name="findsSearch" placeholder="Search by ID, object number, or handle (e.g., BE95-2/44/154)" autocomplete="off">
+          </div>
         </div>
         
         <input type="hidden" id="asset_finds_data" name="findsData" value="" />
@@ -114,18 +163,20 @@
       </div>
       <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
         <div style="margin-bottom: 1em; padding: 1em; background-color: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;">
-          <div style="margin-bottom: 0.5em;">
-            <label for="asset_specialistSearch">Search Specialists</label>
-            <input type="text" id="asset_specialistSearch" name="specialistSearch" placeholder="Search by specialist name" autocomplete="off" style="width: 100%; padding: 0.4em;">
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1em; margin-bottom: 1em;">
-            <div>
-              <label for="asset_specialistYear">Year</label>
-              <input type="number" id="asset_specialistYear" name="specialistYear" placeholder="e.g., 2020" style="width: 100%; padding: 0.4em;">
+          <div style="margin-bottom: 1em;">
+            <div class="asset-form-field">
+              <label for="asset_specialistSearch">Search Specialists</label>
+              <input type="text" id="asset_specialistSearch" name="specialistSearch" placeholder="Search by specialist name" autocomplete="off">
             </div>
-            <div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5em; margin-bottom: 1em;">
+            <div class="asset-form-field">
+              <label for="asset_specialistYear">Year</label>
+              <input type="number" id="asset_specialistYear" name="specialistYear" placeholder="e.g., 2020">
+            </div>
+            <div class="asset-form-field">
               <label for="asset_specialistSpeciality">Speciality</label>
-              <select id="asset_specialistSpeciality" name="specialistSpeciality" style="width: 100%; padding: 0.4em;">
+              <select id="asset_specialistSpeciality" name="specialistSpeciality">
                 <option value="photographer">Photographer</option>
                 <option value="artist">Artist</option>
               </select>
@@ -139,6 +190,7 @@
         </div>
 
         <input type="hidden" id="new-image-specialists" name="newImageSpecialists" value="" />
+        <input type="hidden" id="deleted-specialists-json" name="deletedImageSpecialists" value="" />
 
         <!-- Hidden data attributes for existing specialists -->
         {% for imageSpecialist in asset.imageSpecialists %}
