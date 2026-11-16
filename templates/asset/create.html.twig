@@ -15,11 +15,6 @@
   </style>
 {% endblock %}
 
-{% block javascripts %}
-  {{ parent() }}
-  <script src="{{ asset('js/image-collection-manager.js') }}"></script>
-{% endblock %}
-
 {% block body %}
   {# Display flash messages #}
   {% for type, messages in app.flashes %}
@@ -75,39 +70,6 @@
     </div>
   </div>
 
-  <div class="ui-widget" style="margin-bottom: 1em;">
-    <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
-      <h3 style="margin: 0; font-size: 1.1em;">Link to Finds</h3>
-    </div>
-    <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
-      {{ form_row(form.finds, {'attr': {'class': 'ui-widget ui-widget-content ui-corner-all'}}) }}
-      <p style="margin-top: 0.5em; font-size: 0.9em; color: #666;">
-        Hold Ctrl (Cmd on Mac) to select multiple finds
-      </p>
-    </div>
-  </div>
-
-  <div class="ui-widget" style="margin-bottom: 1em;">
-    <div class="ui-widget-header ui-corner-top" style="padding: 0.3em;">
-      <h3 style="margin: 0; font-size: 1.1em;">Specialists</h3>
-    </div>
-    <div class="ui-widget-content ui-corner-bottom" style="padding: 1em;">
-      <div id="specialist-collection" data-prototype="{{ form_widget(form.imageSpecialists.vars.prototype)|e('html_attr') }}">
-        {% for imageSpecialist in form.imageSpecialists %}
-          <div class="specialist-item" style="margin-bottom: 1em; padding: 1em; border: 1px solid #ddd; border-radius: 4px;">
-            {{ form_row(imageSpecialist.specialist) }}
-            {{ form_row(imageSpecialist.year) }}
-            {{ form_row(imageSpecialist.speciality) }}
-            <button type="button" class="remove-specialist ui-button ui-widget ui-state-default ui-corner-all" style="margin-top: 0.5em; color: #cc0000;">Remove</button>
-          </div>
-        {% endfor %}
-      </div>
-      <button type="button" id="add-specialist" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
-        <span class="ui-button-text">Add Specialist</span>
-      </button>
-    </div>
-  </div>
-
   <div style="margin: 1em 0;">
     <button type="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">
       <span class="ui-button-text">Upload Asset</span>
@@ -122,35 +84,4 @@
     {{ form_rest(form) }}
   </div>
   {{ form_end(form, {'render_rest': false}) }}
-
-  <script>
-    // Collection management for specialists
-    var collectionHolder = document.getElementById('specialist-collection');
-    var addButton = document.getElementById('add-specialist');
-    var index = collectionHolder.children.length;
-
-    addButton.addEventListener('click', function() {
-      var prototype = collectionHolder.dataset.prototype;
-      var newForm = prototype.replace(/__name__/g, index);
-      index++;
-      
-      var wrapper = document.createElement('div');
-      wrapper.className = 'specialist-item';
-      wrapper.style.cssText = 'margin-bottom: 1em; padding: 1em; border: 1px solid #ddd; border-radius: 4px;';
-      wrapper.innerHTML = newForm + '<button type="button" class="remove-specialist ui-button ui-widget ui-state-default ui-corner-all" style="margin-top: 0.5em; color: #cc0000;">Remove</button>';
-      
-      collectionHolder.appendChild(wrapper);
-      attachRemoveListener(wrapper.querySelector('.remove-specialist'));
-    });
-
-    function attachRemoveListener(button) {
-      button.addEventListener('click', function() {
-        this.closest('.specialist-item').remove();
-      });
-    }
-
-    document.querySelectorAll('.remove-specialist').forEach(function(button) {
-      attachRemoveListener(button);
-    });
-  </script>
 {% endblock %}
